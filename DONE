@@ -1,0 +1,18 @@
+Le système de login utilisateur est opérationnel : création de compte, login, modification de profil. J'ai simplifié un peu le formulaire pour résoudre des bugs (il n'y a pas de champ Provincia si on n'est pas en Argentine). Les profils sont dynamiques, on peut en rajouter. Mais...
+
+... sur mon local j'ai testé avec une adresse à nous (automata@agroevisol.ai) et ça fonctionne. Je ne l'ai pas installé sur le snicc.ecoclimasol.com. De ce fait il n'y a aucun moyen de tester (sauf pour Josue, le code s'affiche dans les logs : docker-compose logs django). Techniquement il faut juste renseigner quelques paramètres dans le .env docker (j'ai repris la config agroevisol sur mon local).
+
+... les profils sont uniquement décoratifs. A quoi sont-ils censés servir au final ?
+
+Ajouté les Terminos & condiciones, ainsi que Acerca et Contacto. Ajouté un attribut pour protéger ces posts racines codés dans le html (la suppression est désactivée dans le dashboard).
+
+A venir :
+
+mettre à jour en consultant les modifs de Josue
+
+continuer à charger le contenu à partir de leurs docs
+
+publier une release pour lundi
+
+Selon le planning, demain je ne travaille pas... je veux bien décaler mais la semaine prochaine ça va être également tendu de toute façon. En tout cas lundi je peux fournir la release + dump db + fichiers media à temps pour qu'ils l'installent.
+

@@ -1,0 +1,12 @@
+{
+      "titulo" : "Superficie bajo planes",
+            "valores3" : ["Planes de manejo y conservación", 0, 0, 0, 0, 0, 0, 722, 12159, 175838],
+            "valores2" : ["Planes de conservación", 346068, 779905, 1180681, 1325726, 1354543, 1198204, 1105082, 1313811, 1456135],
+            "valores1" : ["Planes de manejo", 366200, 384159, 1181855, 1299840, 1399810, 1221759, 1679917, 1879559, 1908737],
+            "anio" : ["x", 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],     
+      "descripcion" : ["Esta superficie corresponde a la de los planes que, según su horizonte de planificación (años de duración), se encuentran vigentes, independientemente de si los mismos reciben financiación cada año de ejecución.",
+      "<br><br>Para el caso de planes de conservación, se contabilizaron aquellos planes cuya superficie fuera menor a 150.000 hectáreas, mientras que, para los planes de manejo, se consideraron todos aquellos planes cuya superficie fuera menor a 30.000 hectáreas, bajo la suposición de aquellos planes que superan dichas superficies no suponen intervenciones directas sobre una superficie determinada de bosque sino que suelen estar destinados a mejorar o fortalecer la gestión de paisajes o regiones más extensos. Asimismo, se contabiliza la totalidad de la superficie boscosa afectada al plan y no el área de intervención anual."],
+      "min" : 0,
+      "max" : 3600000,
+      "unidad" : "Hectáreas"
+}

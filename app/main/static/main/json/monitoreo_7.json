@@ -1,0 +1,11 @@
+{
+      "titulo" : "Capacidad instalada de todas las plantas renovables no convencionales conectadas a la red",
+      "valores5" : ["Biogás", 16.6, 16.6, 21.515, 22.715, 43.675, 54.575],
+      "valores4" : ["Biomasa", 110.2, 110.2, 112.2, 126.2, 128.8, 184.8],
+      "valores3" : ["PAH", 531.94, 531.94, 540.14, 541.64, 541.64, 553.28],
+      "valores2" : ["Solar", 8.2, 8.2, 8.2, 190.63, 439.23, 758.96],
+      "valores1" : ["Eólica", 187.35, 187.35, 226.65, 750.25, 1788.1, 2706.32],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las plantas eólicas, solares, a biomasa y a biogás, y pequeños aprovechamientos hidroeléctricos (PAH) de potencia menor a 50 MW conectados a la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "MW"
+}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load snicc_i18n %}
+{% block content %}
+<h1>Search results</h1>
+{% if error %}{{error}}
+{% else %}
+    <ul>{% for p in postlist %}<li><a href="{% url 'main:post' p.category.id p.slug %}">{% translate p lang %}</a></li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}

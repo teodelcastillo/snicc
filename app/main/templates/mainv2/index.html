@@ -1,0 +1,158 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block sniclogo %}
+<a class="container-logo container snic-home-logo" href="{% url 'mainv2:landing' %}">
+    <img src="{% static 'main/images/logo_snic.svg'%}" class="logo-snic" alt="">
+</a>
+{% endblock %}
+{% block content %}
+
+                <!-- Home page -->
+                <div class="home-content">
+
+                    <div class="section-banner-home container">
+                        <div class="circle-home"></div>
+                        <div class="banner-home-text">
+                            <div class="snic-homepage">SNIC</div>
+                            <h1>{% ts 'Sistema Nacional de Información Climática' lang %}</h1>
+                            <h2>{% ts 'Información sobre la política climática nacional que responde a la Ley 27.520/19.' lang %}</h2>
+                            <p>{% ts 'Gestionado por la Subsecretaría de Ambiente, integra datos de emisiones de Gases de Efecto Invernadero (GEi) en su portal INGEI e información de Riesgos Climáticos SIMARCC y el monitoreo y evaluación de las medidas reflejadas en el Plan Nacional de Adaptación y Mitigación junto a los avances de los planes de Respuesta de las Jurisdicciones.' lang %}</p>
+                        </div>
+                        <div class="banner-home-images">
+                            <div class="column-image">
+                                <img src="{% static 'main/images/home/cambio-climatico.jpg' %}" alt="">
+                            </div>
+                            <div class="rows-images">
+                                <img src="{% static 'main/images/home/cambio-climatico-2.jpg' %}" alt="">
+                                <img class="horizontal-img" src="{% static 'main/images/home/cambio-climatico-3.jpg' %}" alt="">
+                            </div>
+                        </div>
+                        <div class="small-circle"></div>
+                    </div>
+
+                    <!-- Si no conectado -->
+                    {% if request.user.is_anonymous %}
+                    <div class="section-info-perso section d-block">
+                        <div class="row">
+                            <h3>{% ts 'Accedé a información personalizada' lang %}</h3>
+                        </div>
+                        <div class="row">
+                            <a href="{% url 'user:register' %}" class="col-md-4 col-info">
+                                <img src="{% static 'main/images/home/icono-registro.png' %}" alt="">
+                                <b>{% ts 'Regístrate de manera sencilla' lang %}</b>
+                                <p class="p-black">{% ts 'Crea tu cuenta rápidamente y comienza a explorar.' lang %}</p>
+                            </a>
+                            <a href="{% url 'user:register' %}" class="col-md-4 col-info">
+                                <img src="{% static 'main/images/home/icono-perfil.png' %}" alt="">
+                                <b>{% ts 'Elige tu perfil' lang %}</b>
+                                <p class="p-black">{% ts 'Accede a contenido diseñado según tus necesidades específicas.' lang %}</p>
+                            </a>
+                            <a href="{% url 'user:register' %}" class="col-md-4 col-info">
+                                <img src="{% static 'main/images/home/icono-actualizaciones.png' %}" alt="">
+                                <b>{% ts 'Recibe actualizaciones' lang %}</b>
+                                <p class="p-black">{% ts 'Mantente al día con novedades y eventos sobre el cambio climático.' lang %}</p>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="section-buscar section">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="row"><h3>{% ts '¿Que estás buscando?' lang %}</h3></div>
+                                <div class="row">
+                                    <form class="main-form search-form" role="search" action="{% url 'mainv2:search' %}" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8">
+                                        <div class="input-group">
+                                            <input class="form-control border-end-0 border rounded-pill" type="text" value="" id="pattern" name="pattern">
+                                            <span class="input-group-append">
+                                                <button class="btn btn-outline-secondary bg-white border-start-0 border rounded-pill ms-n3" type="button">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-cards section">
+                        <div class="row">
+                            <h3>{% ts 'Novedades' lang %}</h3>
+                        </div>
+                        <div class="row row-cols-1 row-cols-md-3">
+                            {% for n in news %}{% with content=n|translate:lang %}
+                            <div class="col">
+                                <a class="card" href="{% url 'mainv2:post' n.slug %}"><!-- Remarque: ajouter target="_blank" si lien externe-->
+                                    <img src="{{n.image.url}}" class="card-img-top" alt="{{content.title}}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            {{content.title}}
+                                        </h5>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endwith %}{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="section-cards section">
+                        <div class="row">
+                            <h3>{% ts 'Recursos' lang %}</h3>
+                        </div>
+                        <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+
+                            <div class="col">
+                                <a class="card" href="https://simarcc.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{% static 'main/images/cards/simarcc.svg' %}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">SIMARCC</h6>
+                                        <p>{% ts 'Ofrece mapas detallados que muestran los riesgos climáticos en diferentes regiones del país, como inundaciones, sequías, granizo, vientos intensos, incendios y heladas.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="https://inventariogei.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{% static 'main/images/cards/ingei.svg' %}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">INGEI</h6>
+                                        <p>{% ts 'El Inventario Nacional de Gases de Efecto Invernadero permite identificar aquellos sectores del país con mayor potencial de reducción de emisiones a través de la implementación de Medidas de Mitigación.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="{% url 'mainv2:staticpage' 'mye.html' %}">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{% static 'main/images/cards/mye.svg' %}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">Módulo de Monitoreo y Evaluación</h6>
+                                        <p>{% ts 'Información sobre el monitoreo de los procesos y resultados de adaptación y mitigación en el marco del PNAyMCC.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="https://ciam.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{% static 'main/images/cards/medio-ambiente.svg' %}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">CIAM</h6>
+                                        <p>{% ts 'Plataforma que agrupa datos, estadísticas, informes de monitoreo, mapas, infografías y otros recursos relacionados con el medio ambiente.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    {% include 'mainv2/subscription.html' %}
+                </div>
+                    
+                <!-- end home page -->
+{% endblock %}

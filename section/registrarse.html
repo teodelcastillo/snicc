@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="robots" content="noindex">
+
+    <link rel="shortcut icon" href="main/images/favicon.ico" type="image/vnd.microsoft.icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" type="text/css" href="main/css/icono-arg.css">
+
+    <link rel="stylesheet" type="text/css" href="main/css/snic.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+</head>
+<body>
+    <header><!-- Si conectado class="logged"-->
+        <nav class="navbar navbar-top p-0">
+            <div class="container-fluid g-0">
+                <div class="navbar-header">
+                    <div class="dropdown" id="buttonPerfilAccesibilidad">
+                        <button class="btn-perfil-acces" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <img src="main/images/icono-accesibilidad.svg" alt="Perfil y Accesibilidad">
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="content-profile-acces">
+                                <ul>
+                                    <li><h6 class="dropdown-header">Idioma</h6></li>
+                                    <li class="position-relative">
+                                        <a class="dropdown-item active dropdown-select select-language" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <div class="icono-menu lengua"></div><span id="idioma_snic">Español</span><i class="bi bi-check"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-lg-start" id="idioma_dropdown">
+                                            <li><div class="dropdown-item" href="#" data-idioma="Español">Español</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Mapuche">Mapuche</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Guaraní">Guaraní</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Mbya guaraníes">Mbya guaraníes (mbya)</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Wichí">Wichí</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Quechua">Quechua</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Toba">Toba (qom)</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Gününa-küne">Gününa-küne</div><i class="bi bi-check"></i></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <hr class="dropdown-divider">
+                                <ul id="accesibility_buttons">
+                                    <li><h6 class="dropdown-header">Accesibilidad</h6></li>
+                                    <li><a class="dropdown-item" id="grayscale"><div class="icono-menu escala-grises"></div>Escala de grises<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="cursorbig"><div class="icono-menu tamano-cursor"></div>Tamaño de cursor<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="dislexia"><div class="icono-menu tipografia"></div>Tipografia (dislexia)<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="contrast"><div class="icono-menu contraste-color"></div>Contraste de color<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="highlight"><div class="icono-menu resaltar-enlaces"></div>Resaltar enlaces<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="screenmask"><div class="icono-menu mascara-lectura"></div>Máscara de lectura<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="readguide"><div class="icono-menu guia-lectura"></div>Guía de lectura<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="audio"><div class="icono-menu lector-pantalla"></div>Lector de pantalla<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" href="#"><div class="icono-menu mapa-del-sitio"></div>Mapa del sitio<i class="bi bi-check"></i></a></li>
+                                </ul>
+                            </div>
+                            <div class="content-reset-acces"><div class="btn btn-azul btn-small disabled" id="reset_accessibility">Restablecer configuración</div></div>
+                        </div>
+                    </div>
+
+                    <a class="navbar-brand" href="index.html" id="navbar-brand">
+                        <img src="main/images/logo_argentina-azul.svg" alt="Argentina.gob.ar" height="50" width="254">
+                    </a>
+                </div>
+                <div class="navbar-header navbar-right">
+                    <div class="login-text">
+
+                        <!--no conectado-->
+                        <a class="btn btn-login" href="inicia-sesion.html">
+                            <span>Ingresar</span>
+                        </a>
+
+                        <!--conectado
+                        <a class="btn btn-login" href="mi-perfil.html">
+                            <img src="main/images/iconos/user-white.svg" alt="">
+                        </a>-->
+
+                    </div>
+                    <button onclick="jQuery('.navbar.navbar-top').addClass('state-search');" class="btn btn-buscar-mobile btn-login visible-xs" aria-labelledby="edit-keys"><img class="search-white" src="main/images/iconos/search-white.svg" alt=""><img src="main/images/iconos/search.svg" alt=""><span class="sr-only">Buscar</span></button>
+                    <button onclick="jQuery('.navbar.navbar-top').removeClass('state-search');" class="btn btn-buscar-close-mobile visible-xs"> <i class="fa fa-times"><span class="sr-only">Cerrar el buscador</span></i></button>
+                    <form class="main-form search-form" role="search" action="buscar.html" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                        <div class="input-group">
+                            <input placeholder="Buscá en el sitio" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                            <span class="input-group-btn">
+                            <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                                <img src="main/images/iconos/search.svg" alt=""></i><span class="sr-only">Buscar en el sitio</span>
+                            </button>
+                        </span></div>
+                        </div>
+                    </form>
+
+                    <!--admin-->
+                        <!--<div class="staff-buttons">
+                            <a href="#admin" class="btn btn-texto btn-login">
+                                <i class="bi bi-file-earmark-richtext"></i>
+                                <span>Gestión de contenido</span>
+                            </a>
+                            
+                            <a href="#admin" class="btn btn-texto btn-login">
+                                <i class="bi bi-gear-fill"></i>
+                                <span>Admin</span>
+                            </a>
+                        </div>-->
+                    <!--end admin-->
+
+                    <div class="login-buttons">
+
+                        <!--no conectado-->
+                            <a class="btn btn-login" href="inicia-sesion.html">
+                                <span>Inicia sesión</span>
+                            </a>
+
+                        <!-- conectado
+                            <a class="btn btn-login" href="mi-perfil.html">
+                                <img src="main/images/iconos/user.svg" alt="">
+                                <span>Federico Lagreze</span>
+                            </a>-->
+
+
+                        
+                    </div>
+                    <div class="sidebar-mobile">
+                        <div class="toggle toggle-sidebar">
+                            <a href="#" class="burger js-menu-toggle" data-toggle="collapse" data-target="#main-navbar">
+                                <span></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="side-inner">
+            
+                <div class="sidebar-content">
+                    <div class="snic-title">
+                        <a class="navbar-brand-sidebar" href="index.html">
+                            <img src="main/images/logo_snic.svg" class="logo-snic" alt="">
+                        </a>
+                    </div>
+                    <!--<a class="nav-link {% if cat_id == c.id %} active{% endif %}" aria-current="page" href="http://localhost:8080/posts/mye">
+                        <img src="main/images/mye/mye.svg" alt="">
+                        <span>Módulo de Monitoreo y Evaluación</span>
+                    </a>-->
+                    <a href="sobre-snic.html" class="nav-link active" aria-current="page" >
+                        <img src="main/images/sections/sobre-snic.svg" alt="">
+                        <span>Sobre SNIC</span>
+                    </a>
+                    <a href="gestion-climatica.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/gestion-climatica.svg" alt="">
+                        <span>Gestión climática</span>
+                    </a>
+                    <a href="recursos.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/recursos.svg" alt="">
+                        <span>Recursos</span>
+                    </a>
+                    <a href="normativas.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/normativas.svg" alt="">
+                        <span>Normativas</span>
+                    </a>
+                    <a href="biblioteca.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/biblioteca.svg" alt="">
+                        <span>Biblioteca</span>
+                    </a>
+                    <a href="novedades.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/novedades.svg" alt="">
+                        <span>Novedades</span>
+                    </a>
+                    <a href="enlaces-de-interes.html" class="nav-link" aria-current="page" >
+                        <img src="main/images/sections/enlaces.svg" alt="">
+                        <span>Enlaces de interés</span>
+                    </a>
+
+                    <!-- Si conectado
+                    <a href="#enlace-perfil" class="nav-link nav-profile" aria-current="page" >
+                        <img src="main/images/perfiles/gestor-publico-locales_gold.svg" alt="">
+                        <span>Información para Gestores Públicos Locales</span>
+                    </a>
+                    <form action="{% url 'logout' %}" method="POST" class="form-logout">
+                        {% csrf_token %}
+                        <a href="{% url 'login' %}" class="nav-link" aria-current="page">
+                            <img src="main/images/iconos/logout.svg" alt="">
+                            <span>Cerrar sesión</span>
+                        </a>
+                    </form>-->
+                    
+                </div>
+            
+            </div>
+        </aside>
+
+        <!-- main-content -->
+        <div class="main-content "><!--{% block staff-class %}{% endblock %}-->
+
+            <!-- Si home page class="snic-home-logo"
+            <div class="container-logo container snic-home-logo"> 
+                <img src="main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div> -->
+            <!--post pages
+            <div class="container-logo offset-md-1">
+                <img src="main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div>-->
+            <!--others pages-->
+            <div class="container-logo snic-tools-logo">
+                <img src="main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div>
+
+            <div class="container-fluid g-0">
+            <!-- content -->
+
+                <!-- Login page -->
+                <div class="account-content">
+                    
+                    <div class="post-row-mobile row">
+                        <div class="offset-2 col-lg-8 col-xl-8 col-account">
+
+                            <p class="register-steps">PASO 1 / 3</p>
+
+                            <h1 class="post-title">Ingresá tus datos</h1>
+
+                            <div class="register-content">
+                                <!-- Ajouter la class invalid si invalide, sinon ajouter valid, après submit , ex: class="form-login valid"-->
+                                <form name="formLogin" class="form-login" action="inicia-sesion.html">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="name" placeholder="Nombre" aria-label="Nombre" required>
+                                                <label for="name">Nombre</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="lastname" placeholder="Apellido" aria-label="Apellido" required>
+                                                <label for="lastname">Apellido</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <!-- Par defaut selectionné Argentine -->
+                                                <select class="form-select form-black" id="country" aria-label="País" onchange="this.classList.add('form-black')" required>
+                                                    <option>País</option>
+                                                    <option value="AF">Afganistán</option>
+                                                    <option value="AL">Albania</option>
+                                                    <option value="DE">Alemania</option>
+                                                    <option value="AD">Andorra</option>
+                                                    <option value="AO">Angola</option>
+                                                    <option value="AI">Anguilla</option>
+                                                    <option value="AQ">Antártida</option>
+                                                    <option value="AG">Antigua y Barbuda</option>
+                                                    <option value="AN">Antillas Holandesas</option>
+                                                    <option value="SA">Arabia Saudí</option>
+                                                    <option value="DZ">Argelia</option>
+                                                    <option value="AR" selected>Argentina</option>
+                                                    <option value="AM">Armenia</option>
+                                                    <option value="AW">Aruba</option>
+                                                    <option value="AU">Australia</option>
+                                                    <option value="AT">Austria</option>
+                                                    <option value="AZ">Azerbaiyán</option>
+                                                    <option value="BS">Bahamas</option>
+                                                    <option value="BH">Bahrein</option>
+                                                    <option value="BD">Bangladesh</option>
+                                                    <option value="BB">Barbados</option>
+                                                    <option value="BE">Bélgica</option>
+                                                    <option value="BZ">Belice</option>
+                                                    <option value="BJ">Benin</option>
+                                                    <option value="BM">Bermudas</option>
+                                                    <option value="BY">Bielorrusia</option>
+                                                    <option value="MM">Birmania</option>
+                                                    <option value="BO">Bolivia</option>
+                                                    <option value="BA">Bosnia y Herzegovina</option>
+                                                    <option value="BW">Botswana</option>
+                                                    <option value="BR">Brasil</option>
+                                                    <option value="BN">Brunei</option>
+                                                    <option value="BG">Bulgaria</option>
+                                                    <option value="BF">Burkina Faso</option>
+                                                    <option value="BI">Burundi</option>
+                                                    <option value="BT">Bután</option>
+                                                    <option value="CV">Cabo Verde</option>
+                                                    <option value="KH">Camboya</option>
+                                                    <option value="CM">Camerún</option>
+                                                    <option value="CA">Canadá</option>
+                                                    <option value="TD">Chad</option>
+                                                    <option value="CL">Chile</option>
+                                                    <option value="CN">China</option>
+                                                    <option value="CY">Chipre</option>
+                                                    <option value="VA">Ciudad del Vaticano (Santa Sede)</option>
+                                                    <option value="CO">Colombia</option>
+                                                    <option value="KM">Comores</option>
+                                                    <option value="CG">Congo</option>
+                                                    <option value="CD">Congo, República Democrática del</option>
+                                                    <option value="KR">Corea</option>
+                                                    <option value="KP">Corea del Norte</option>
+                                                    <option value="CI">Costa de Marfíl</option>
+                                                    <option value="CR">Costa Rica</option>
+                                                    <option value="HR">Croacia (Hrvatska)</option>
+                                                    <option value="CU">Cuba</option>
+                                                    <option value="DK">Dinamarca</option>
+                                                    <option value="DJ">Djibouti</option>
+                                                    <option value="DM">Dominica</option>
+                                                    <option value="EC">Ecuador</option>
+                                                    <option value="EG">Egipto</option>
+                                                    <option value="SV">El Salvador</option>
+                                                    <option value="AE">Emiratos Árabes Unidos</option>
+                                                    <option value="ER">Eritrea</option>
+                                                    <option value="SI">Eslovenia</option>
+                                                    <option value="ES">España</option>
+                                                    <option value="US">Estados Unidos</option>
+                                                    <option value="EE">Estonia</option>
+                                                    <option value="ET">Etiopía</option>
+                                                    <option value="FJ">Fiji</option>
+                                                    <option value="PH">Filipinas</option>
+                                                    <option value="FI">Finlandia</option>
+                                                    <option value="FR">Francia</option>
+                                                    <option value="GA">Gabón</option>
+                                                    <option value="GM">Gambia</option>
+                                                    <option value="GE">Georgia</option>
+                                                    <option value="GH">Ghana</option>
+                                                    <option value="GI">Gibraltar</option>
+                                                    <option value="GD">Granada</option>
+                                                    <option value="GR">Grecia</option>
+                                                    <option value="GL">Groenlandia</option>
+                                                    <option value="GP">Guadalupe</option>
+                                                    <option value="GU">Guam</option>
+                                                    <option value="GT">Guatemala</option>
+                                                    <option value="GY">Guayana</option>
+                                                    <option value="GF">Guayana Francesa</option>
+                                                    <option value="GN">Guinea</option>
+                                                    <option value="GQ">Guinea Ecuatorial</option>
+                                                    <option value="GW">Guinea-Bissau</option>
+                                                    <option value="HT">Haití</option>
+                                                    <option value="HN">Honduras</option>
+                                                    <option value="HU">Hungría</option>
+                                                    <option value="IN">India</option>
+                                                    <option value="ID">Indonesia</option>
+                                                    <option value="IQ">Irak</option>
+                                                    <option value="IR">Irán</option>
+                                                    <option value="IE">Irlanda</option>
+                                                    <option value="BV">Isla Bouvet</option>
+                                                    <option value="CX">Isla de Christmas</option>
+                                                    <option value="IS">Islandia</option>
+                                                    <option value="KY">Islas Caimán</option>
+                                                    <option value="CK">Islas Cook</option>
+                                                    <option value="CC">Islas de Cocos o Keeling</option>
+                                                    <option value="FO">Islas Faroe</option>
+                                                    <option value="HM">Islas Heard y McDonald</option>
+                                                    <option value="FK">Islas Malvinas</option>
+                                                    <option value="MP">Islas Marianas del Norte</option>
+                                                    <option value="MH">Islas Marshall</option>
+                                                    <option value="UM">Islas menores de Estados Unidos</option>
+                                                    <option value="PW">Islas Palau</option>
+                                                    <option value="SB">Islas Salomón</option>
+                                                    <option value="SJ">Islas Svalbard y Jan Mayen</option>
+                                                    <option value="TK">Islas Tokelau</option>
+                                                    <option value="TC">Islas Turks y Caicos</option>
+                                                    <option value="VI">Islas Vírgenes (EEUU)</option>
+                                                    <option value="VG">Islas Vírgenes (Reino Unido)</option>
+                                                    <option value="WF">Islas Wallis y Futuna</option>
+                                                    <option value="IL">Israel</option>
+                                                    <option value="IT">Italia</option>
+                                                    <option value="JM">Jamaica</option>
+                                                    <option value="JP">Japón</option>
+                                                    <option value="JO">Jordania</option>
+                                                    <option value="KZ">Kazajistán</option>
+                                                    <option value="KE">Kenia</option>
+                                                    <option value="KG">Kirguizistán</option>
+                                                    <option value="KI">Kiribati</option>
+                                                    <option value="KW">Kuwait</option>
+                                                    <option value="LA">Laos</option>
+                                                    <option value="LS">Lesotho</option>
+                                                    <option value="LV">Letonia</option>
+                                                    <option value="LB">Líbano</option>
+                                                    <option value="LR">Liberia</option>
+                                                    <option value="LY">Libia</option>
+                                                    <option value="LI">Liechtenstein</option>
+                                                    <option value="LT">Lituania</option>
+                                                    <option value="LU">Luxemburgo</option>
+                                                    <option value="MK">Macedonia del Norte</option>
+                                                    <option value="MG">Madagascar</option>
+                                                    <option value="MY">Malasia</option>
+                                                    <option value="MW">Malawi</option>
+                                                    <option value="MV">Maldivas</option>
+                                                    <option value="ML">Malí</option>
+                                                    <option value="MT">Malta</option>
+                                                    <option value="MA">Marruecos</option>
+                                                    <option value="MQ">Martinica</option>
+                                                    <option value="MU">Mauricio</option>
+                                                    <option value="MR">Mauritania</option>
+                                                    <option value="YT">Mayotte</option>
+                                                    <option value="MX">México</option>
+                                                    <option value="FM">Micronesia</option>
+                                                    <option value="MD">Moldavia</option>
+                                                    <option value="MC">Mónaco</option>
+                                                    <option value="MN">Mongolia</option>
+                                                    <option value="MS">Montserrat</option>
+                                                    <option value="MZ">Mozambique</option>
+                                                    <option value="NA">Namibia</option>
+                                                    <option value="NR">Nauru</option>
+                                                    <option value="NP">Nepal</option>
+                                                    <option value="NI">Nicaragua</option>
+                                                    <option value="NE">Níger</option>
+                                                    <option value="NG">Nigeria</option>
+                                                    <option value="NU">Niue</option>
+                                                    <option value="NF">Norfolk</option>
+                                                    <option value="NO">Noruega</option>
+                                                    <option value="NC">Nueva Caledonia</option>
+                                                    <option value="NZ">Nueva Zelanda</option>
+                                                    <option value="OM">Omán</option>
+                                                    <option value="NL">Países Bajos</option>
+                                                    <option value="PA">Panamá</option>
+                                                    <option value="PG">Papúa Nueva Guinea</option>
+                                                    <option value="PK">Paquistán</option>
+                                                    <option value="PY">Paraguay</option>
+                                                    <option value="PE">Perú</option>
+                                                    <option value="PN">Pitcairn</option>
+                                                    <option value="PF">Polinesia Francesa</option>
+                                                    <option value="PL">Polonia</option>
+                                                    <option value="PT">Portugal</option>
+                                                    <option value="PR">Puerto Rico</option>
+                                                    <option value="QA">Qatar</option>
+                                                    <option value="UK">Reino Unido</option>
+                                                    <option value="CF">República Centroafricana</option>
+                                                    <option value="CZ">República Checa</option>
+                                                    <option value="ZA">República de Sudáfrica</option>
+                                                    <option value="DO">República Dominicana</option>
+                                                    <option value="SK">República Eslovaca</option>
+                                                    <option value="RE">Reunión</option>
+                                                    <option value="RW">Ruanda</option>
+                                                    <option value="RO">Rumania</option>
+                                                    <option value="RU">Rusia</option>
+                                                    <option value="EH">Sahara Occidental</option>
+                                                    <option value="KN">Saint Kitts y Nevis</option>
+                                                    <option value="WS">Samoa</option>
+                                                    <option value="AS">Samoa Americana</option>
+                                                    <option value="SM">San Marino</option>
+                                                    <option value="VC">San Vicente y Granadinas</option>
+                                                    <option value="SH">Santa Helena</option>
+                                                    <option value="LC">Santa Lucía</option>
+                                                    <option value="ST">Santo Tomé y Príncipe</option>
+                                                    <option value="SN">Senegal</option>
+                                                    <option value="SC">Seychelles</option>
+                                                    <option value="SL">Sierra Leona</option>
+                                                    <option value="SG">Singapur</option>
+                                                    <option value="SY">Siria</option>
+                                                    <option value="SO">Somalia</option>
+                                                    <option value="LK">Sri Lanka</option>
+                                                    <option value="PM">St Pierre y Miquelon</option>
+                                                    <option value="SZ">Suazilandia</option>
+                                                    <option value="SD">Sudán</option>
+                                                    <option value="SE">Suecia</option>
+                                                    <option value="CH">Suiza</option>
+                                                    <option value="SR">Surinam</option>
+                                                    <option value="TH">Tailandia</option>
+                                                    <option value="TW">Taiwán</option>
+                                                    <option value="TZ">Tanzania</option>
+                                                    <option value="TJ">Tayikistán</option>
+                                                    <option value="TF">Territorios franceses del Sur</option>
+                                                    <option value="TP">Timor Oriental</option>
+                                                    <option value="TG">Togo</option>
+                                                    <option value="TO">Tonga</option>
+                                                    <option value="TT">Trinidad y Tobago</option>
+                                                    <option value="TN">Túnez</option>
+                                                    <option value="TM">Turkmenistán</option>
+                                                    <option value="TR">Turquía</option>
+                                                    <option value="TV">Tuvalu</option>
+                                                    <option value="UA">Ucrania</option>
+                                                    <option value="UG">Uganda</option>
+                                                    <option value="UY">Uruguay</option>
+                                                    <option value="UZ">Uzbekistán</option>
+                                                    <option value="VU">Vanuatu</option>
+                                                    <option value="VE">Venezuela</option>
+                                                    <option value="VN">Vietnam</option>
+                                                    <option value="YE">Yemen</option>
+                                                    <option value="YU">Yugoslavia</option>
+                                                    <option value="ZM">Zambia</option>
+                                                    <option value="ZW">Zimbabue</option>
+                                                </select>
+                                                <label for="country">País</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating floating-enabled" id="form_provence_select">
+                                                <select class="form-select" id="provence_select" aria-label="País" onchange="this.classList.add('form-black')" name="provenceSelect" required>
+                                                    <option value="">Seleccionar la provincia</option>
+                                                    <option value="1">Ciudad Autónoma de Buenos Aires</option>
+                                                    <option value="2">Neuquén</option>
+                                                    <option value="3">San Luis</option>
+                                                    <option value="4">Santa Fe</option>
+                                                    <option value="5">La Rioja</option>
+                                                    <option value="6">Catamarca</option>
+                                                    <option value="7">Tucumán</option>
+                                                    <option value="8">Chaco</option>
+                                                    <option value="9">Formosa</option>
+                                                    <option value="10">Santa Cruz</option>
+                                                    <option value="11">Chubut</option>
+                                                    <option value="12">Mendoza</option>
+                                                    <option value="13">Entre Ríos</option>
+                                                    <option value="14">San Juan</option>
+                                                    <option value="15">Jujuy</option>
+                                                    <option value="16">Santiago del Estero</option>
+                                                    <option value="17">Río Negro</option>
+                                                    <option value="18">Corrientes</option>
+                                                    <option value="19">Misiones</option>
+                                                    <option value="20">Salta</option>
+                                                    <option value="21">Córdoba</option>
+                                                    <option value="22">Buenos Aires</option>
+                                                    <option value="23">La Pampa</option>
+                                                    <option value="24">Tierra del Fuego, Antártida e Islas del Atlántico Sur</option>
+                                                </select>
+                                                <label for="provence_select">Provincia</label>
+                                            </div>
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="provence" placeholder="Provincia" aria-label="Provincia" name="provence" required>
+                                                <label for="provence">Provincia</label>
+                                            </div>
+                                                <!-- Javascript onchange country and validate value one of two-->
+                                                <script type="text/javascript">
+                                                    var countrySelect = document.getElementById('country');
+                                                    countrySelect.onchange = (event) => {
+                                                        if(event.target.value != 'AR' ) {
+                                                            document.getElementById('form_provence_select').classList.remove('floating-enabled');
+                                                            document.getElementById('form_provence_select').classList.add('floating-disabled');
+                                                        } else {
+                                                            document.getElementById('form_provence_select').classList.remove('floating-disabled');
+                                                            document.getElementById('form_provence_select').classList.add('floating-enabled');
+                                                        }
+                                                        document.getElementById('provence_select').selectedIndex = 0;
+                                                        document.getElementById('provence').value = "";
+                                                    }
+                                                    document.addEventListener('DOMContentLoaded', function() {
+                                                        const inputs = Array.from(
+                                                            document.querySelectorAll('input[name=provenceSelect], input[name=provence]')
+                                                        );
+
+                                                        const inputListener = e => {
+                                                            inputs
+                                                            .filter(i => i !== e.target)
+                                                            .forEach(i => (i.required = !e.target.value.length));
+                                                        };
+
+                                                        inputs.forEach(i => i.addEventListener('input', inputListener));
+                                                    });
+                                                </script>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="city" placeholder="Ciudad" aria-label="Ciudad" required>
+                                                <label for="city">Ciudad</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="gender" aria-label="Género" onchange="this.classList.add('form-black')" required>
+                                                    <option>Género</option>
+                                                    <option value="Varon">Varon</option>
+                                                    <option value="Mujer">Mujer</option>
+                                                    <option value="No">Prefiero no decirlo</option>
+                                                    <option value="Otro">Otro</option>
+                                                </select>
+                                                <label for="gender">Género</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="email" class="form-control" id="email" placeholder="E-mail" aria-label="email" required>
+                                                <label for="country">E-mail</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="tel" class="form-control" id="phone" placeholder="Teléfono" name="phone" required>
+                                                <div id="phoneHelp" class="form-text">Código de área + número</div>
+                                                <label for="phone">Teléfono</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="terms_subscription" required>
+                                                <label class="form-check-label" for="terms_subscription">
+                                                    Acepto los <a href="" target="_blank">Términos y condiciones</a> y autorizo el uso de mis datos de acuerdo a la Declaración de privacidad.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="news_subscription">
+                                                <label class="form-check-label" for="news_subscription">
+                                                    Deseo suscribirme a recibir novedades referidas al Sistema de Información Climatico
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button id="omit" type="reset" class="btn btn-login-white" onclick="location.href='index.html'">Omitir</button>
+                                    <button id="send" type="submit" class="btn btn-login">Aceptar</button>
+                                </form>
+
+
+                            </div>
+
+                        </div>
+                        
+                    </div>
+  
+
+                </div>
+                    
+                <!-- end post page -->
+
+                <footer class="main-footer">
+                    <div class="container">
+                        <div class="row">
+
+                            <div class="col-md-3 col-sm-12 col-footer col-footer-brand">
+                                <img src="main/images/logo_snic_azul.svg" class="logo-snic" alt="">
+                                <p><a href="#"><img src="main/images/logo_argentina-azul.svg" alt="Argentina.gob.ar"></a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Gestión climática</a></p>
+                                <p><a href="#">Recursos</a></p>
+                                <p><a href="#">Normativas</a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Biblioteca</a></p>
+                                <p><a href="#">Formación y capacitaciones</a></p>
+                                <p><a href="#">Enlaces de interés</a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Acerca de este sitio</a></p>
+                                <p><a href="#">Terminos y condiciones</a></p>
+                                <p><a href="#">Contacto</a></p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="container-fluid border-top-amarillo">
+                        <div class="row sub-footer"><div class="container"></div></div>
+                    </div>
+                </footer>
+
+
+            <!-- end content -->
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Javascript de chaque page -->
+    <!-- {% block javascript %}{% endblock%} -->
+    <!-- End Javascript de chaque page-->
+
+    <!-- Javascript general -->
+    <script src="main/js/snic.js"></script>
+    <script src="main/js/accessibility.js"></script>
+    <!-- End Javascript general-->
+
+</body>
+</html>

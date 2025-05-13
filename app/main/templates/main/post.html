@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-coverflow">
+    {% for p in loop_4_times %}
+        <input id="carousel-item-{{p}}" type="radio" name="carousel-dots" {% if 1 == p %}checked{% endif %} {% if forloop.last %} class="last-item"{% endif %}>
+    {% endfor %}
+
+    <div class="header-estaseccion-coverflow">
+        <div class="dropdown estaseccion-button">
+            <button class="dropdown-toggle dropdown-select-section" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              En esta sección
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                {% for dropd in loop_4_times %}
+                    <li><label for="carousel-item-{{dropd}}">{{content.title}} Item {{dropd}}</label></li>
+                {% endfor %}
+            </ul>
+          </div>
+        <nav class="carousel">
+            {% for dots in loop_4_times %}
+                <label for="carousel-item-{{dots}}">ir a {{dots}}</label>
+            {% endfor %}
+        </nav>
+    </div>
+
+    <div class="content-coverflow-viewport">
+        <div class="content-coverflow-viewbox">
+            <div class="content-coverflow-body">
+                {% for c in loop_4_times %}
+                    <div class="coverflow-item" data-item="carousel-item-{{c}}">
+                        <div class="coverflow-item-inner">
+                            <label class="coverflow-item-item__trigger" for="carousel-item-{{c}}"></label>
+                            <div class="coverflow-item-content">
+                                <div class="coverflow-item-overflow">
+                                    <h1 class="title">{{content.title}} Item {{c}}</h1>
+                                    {{content.html|safe}}
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

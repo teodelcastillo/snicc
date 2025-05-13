@@ -1,0 +1,178 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+<!-- Library page -->
+<div class="library-search-content">
+    
+    <div class="post-row-mobile row">
+        <h1 class="post-title post-title-blue">{% ts 'Biblioteca SNIC' lang %}</h1>
+        <div class="col-md-3 col-categories">
+
+            <form class="main-form search-form" role="search" action="." method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                <div class="input-group">
+                    <input placeholder="{% ts 'Buscá por autor, título...' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                    <span class="input-group-btn">
+                    <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                        <img src="{% static 'main/images/iconos/search.svg'%}" alt=""></i><span class="sr-only">{% ts 'Buscá por autor, título...' lang %}</span>
+                    </button>
+                </span></div>
+                </div>
+            </form>
+            <div class="cat-content">
+                <h5>{% ts 'Categorias' lang %}</h5>
+                {% for k,v in total.items %}{% if v %}
+                {% if k in catfilter %}<a href="{{ request.path }}{% querystring filter=None %}" class="active">
+                {% else %}<a href="{{ request.path }}{% querystring filter=k %}">{%endif%}
+                    <span>{% ts k.capitalize lang %}</span> 
+                    <span class="badge text-bg-secondary">{{v}}</span>
+                </a>
+                {% endif %}{% endfor %}            
+            </div>
+            <div class="dropdown dropdown-categories">
+                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% ts 'Categorias' lang %}
+                </button>
+                <ul class="dropdown-menu">
+                    {% for k,v in total.items %}{% if v %}<li>
+                    {% if k in catfilter %}<a href="{{ request.path }}{% querystring filter=None %}" class="active">
+                    {% else %}<a href="{{ request.path }}{% querystring filter=k %}">{%endif%}
+                        <span>{% ts k.capitalize lang %}</span> 
+                        <span class="badge text-bg-secondary">{{v}}</span>
+                    </a></li>
+                    {% endif %}{% endfor %}
+                </ul>
+            </div>
+
+            <div class="cat-content">
+                <h5>{% ts 'Tipo de archivo' lang %}</h5>
+                {% for f, v in formats.items %}{% if v %}
+                {% if format == f %}<a href="{{ request.path }}{% querystring format=None %}" class="active">
+                {% else %}<a href="{{ request.path }}{% querystring format=f %}">{%endif%}
+                    <span>{% ts f lang %}</span> 
+                    <span class="badge text-bg-secondary">{{v}}</span>
+                    </a>
+                {% endif %}{% endfor %}
+            </div>
+
+            <div class="cat-content">
+                <h5>{% ts 'Autores' lang %}</h5>
+                {% for a in authors %}
+                {% if author == a %}<a href="{{ request.path }}{% querystring author=None %}" class="active">
+                {% else %}<a href="{{ request.path }}{% querystring author=a.id %}">{%endif%}
+                    <span>{{a}}</span> 
+                    <span class="badge text-bg-secondary">{{a.nbb}}</span>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="dropdown dropdown-categories">
+                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% ts 'Autores' lang %}
+                </button>
+                <ul class="dropdown-menu">
+                    {% for a in authors %}<li>
+                        {% if author == a %}<a href="{{ request.path }}{% querystring author=None %}" class="active">
+                        {% else %}<a href="{{ request.path }}{% querystring author=a.id %}">{%endif%}
+                            <span>{{a}}</span> 
+                            <span class="badge text-bg-secondary">{{a.nbb}}</span>
+                        </a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+
+        </div>
+
+        <div class="col-md-8 col-post">
+
+            <div class="dropdown dropdown-order">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% ts 'Ordenar por' lang %}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ request.path }}{% querystring order="title" %}">{% ts 'Título' lang %}</a></li>
+                    <li><a class="dropdown-item" href="{{ request.path }}{% querystring order="author" %}">{% ts 'Autor' lang %}</a></li>
+                    <li><a class="dropdown-item" href="{{ request.path }}{% querystring order="date" %}">{% ts 'Reciente' lang %}</a></li>
+                </ul>
+            </div>
+            
+            {% if pattern or author or catfilter or bookcat or format %}
+            <div class="filtros-categorias">
+                <p>{% ts 'Filtrado por' lang %}</p>
+                <div class="content-filtros">
+                    {% for cat in catfilter %}<a href="{{ request.path }}{% querystring filter=None %}">
+                        <span>{% ts 'Categoría' lang %} : {% ts cat.capitalize lang %}</span><i class="bi bi-x"></i></a>{% endfor %}
+                    {% if bookcat %}<a href="{{ request.path }}{% querystring bookcat=None %}">
+                        <span>{% ts 'Categoría' lang %} : {% ts bookcat lang %}</span><i class="bi bi-x"></i></a>{% endif %}    
+                    {% if format %}<a href="{{ request.path }}{% querystring format=None %}">
+                        <span>{% ts 'Tipo de archivo' lang %} : {% ts format lang %}</span><i class="bi bi-x"></i></a>{% endif %}    
+                    {% if pattern %}<a href="{{ request.path }}{% querystring pattern=None %}">
+                        <span>{% ts 'Palabra clave' lang %} : {{pattern}}</span><i class="bi bi-x"></i></a>{% endif %}
+                    {% if author %}<a href="{{ request.path }}{% querystring author=None %}">
+                        <span>{% ts 'Autor' lang %} : {{author}}</span><i class="bi bi-x"></i></a>{% endif %}
+
+                    {% comment %} <a href="#"><span>Adaptación</span><i class="bi bi-x"></i></a>
+                    <a href="#"><span>Mitigación</span><i class="bi bi-x"></i></a> {% endcomment %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="library-content links-content">
+                {% for b in books %}{% with content=b|translate:lang %}
+                    <div class="row-link">
+                        {% if b.image %}
+                        <img src="{{b.image.url}}" alt="">
+                        {% else %}
+                        <img src="{% static 'main/images/library/image.png' %}" alt="">
+                        {% endif %}
+                        <div class="link-content-right">
+                            <a href="{{b.url|default:"#"}}" target="_blank">
+                                <h2>{{content.title}}</h2>
+                            </a> 
+                            {% if b.authors.exists %}{% with authors=b.authors.all %}
+                            <span>
+                                {% if authors.count > 1 %}{% ts 'Autores' lang %}{% else %}{% ts 'Autor' lang %}{% endif %} :
+                                {% for auth in authors %}{% if forloop.counter0 > 0 %}, {% endif %}
+                                <a class="author" href="{% querystring author=auth.id %}">{{auth}}</a>
+                                {% endfor %}
+                            </span>
+                            {% endwith %}{% endif %}
+                            <p>{{content.description}}</p>
+                        </div>
+                    </div>                
+                {% endwith %}{% endfor %}
+            </div>
+
+            <div class="pagination-content">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if books.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
+                        </li>
+                        {% endif %}
+
+                        {%for p in books.paginator.get_elided_page_range %}
+                        <li class="page-item {% if p == books.number %}disabled active{% endif %}">
+                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if books.has_next %}
+                          <li class="page-item">
+                            <a class="page-link" href="{% querystring page=books.paginator.num_pages %}"></a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+
+        </div>
+        
+    </div>
+
+    
+</div>
+    
+<!-- end post page -->
+{% endblock %}

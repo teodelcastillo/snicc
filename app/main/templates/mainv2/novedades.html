@@ -1,0 +1,91 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+                <!-- News page -->
+                <div class="link-new-norm-content">
+                    
+                    <div class="post-row-mobile row">
+                        <h1 class="post-title">{% ts 'Novedades' lang %}</h1>
+                        <div class="col-md-3 col-categories">
+                            <div class="cat-content">
+                                <h5>{% ts 'Categorias' lang %}</h5>
+                                {% for k,v in total.items %}{% if v %}
+                                {% if k in catfilter %}<a href="{{ request.path }}{% querystring filter=None %}" class="active">
+                                {% else %}<a href="{{ request.path }}{% querystring filter=k %}">{%endif%}
+                                    <span>{% ts k.capitalize lang %}</span> 
+                                    <span class="badge text-bg-secondary">{{v}}</span>
+                                </a>
+                                {% endif %}{% endfor %}  
+                            </div>
+                            <div class="dropdown dropdown-categories">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% ts 'Categorias' lang %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% for k,v in total.items %}{% if v %}<li>
+                                    {% if k in catfilter %}<a href="{{ request.path }}{% querystring filter=None %}" class="active">
+                                    {% else %}<a href="{{ request.path }}{% querystring filter=k %}">{%endif%}
+                                        <span>{% ts k.capitalize lang %}</span> 
+                                        <span class="badge text-bg-secondary">{{v}}</span>
+                                    </a></li>
+                                    {% endif %}{% endfor %}  
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8 col-post">
+
+                            <div class="news-content section-cards">
+                                <div class="row row-cols-1 row-cols-md-2">
+                                    {% for n in news %}{% with content=n|translate:lang %}
+                                    <div class="col">
+                                        <a class="card" href="{% url 'mainv2:post' n.slug %}">
+                                            <img src="{{n.image.url}}" class="card-img-top" alt="{{content.title}}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    {{content.title}}
+                                                </h5>
+                                            </div>
+                                        </a>
+                                    </div>                                
+                                    {% endwith %}{% endfor %}
+
+
+                                </div>
+
+                            </div>
+
+                            <div class="pagination-content">
+                                <nav aria-label="...">
+                                    <ul class="pagination">
+                                        {% if news.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
+                                        </li>
+                                        {% endif %}
+                
+                                        {%for p in news.paginator.get_elided_page_range %}
+                                        <li class="page-item {% if p == news.number %}disabled active{% endif %}">
+                                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+                                        </li>
+                                        {% endfor %}
+                
+                                        {% if news.has_next %}
+                                          <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=news.paginator.num_pages %}"></a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+                    
+                    {% include 'mainv2/subscription.html' %}
+                </div>
+                    
+                <!-- end post page -->
+{% endblock %}

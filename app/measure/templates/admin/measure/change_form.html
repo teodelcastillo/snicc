@@ -1,0 +1,5 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{% block object-tools-items %}
+<li><a href="{% url 'dashboard:measure_edit' original.id %}" style="background-color:#E7BA61;color:black">Editar detalles de medida</a></li>    
+{% endblock %}

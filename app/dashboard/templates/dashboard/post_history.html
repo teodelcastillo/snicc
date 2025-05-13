@@ -1,0 +1,23 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block content %}
+<div class="content-edition container">
+    <div class="container">
+    <div class="content-edition-title">
+        <h2>Historial de versiones</h1>
+    </div>
+    <table class="history-table table">
+    <tr><th>Modificado</th><th>Modificado por</th></tr>
+    {% for h in history %}
+        <tr>
+            <td>{{h.date}}</td>
+            <td>{{h.user}}</td>
+            {% if forloop.first %}<td></td><td></td>{% else %}
+            <td><a href="{% url 'dashboard:diff' h.id %}"><span class="material-symbols-outlined" title="diff">difference</span></a></td>
+            <td><a href="{% url 'dashboard:restore' h.id %}"><span class="material-symbols-outlined" title="restore">restore_page</span></a></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+</div>
+</div>
+{% endblock %}

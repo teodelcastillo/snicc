@@ -1,0 +1,156 @@
+{% extends 'mainv2/base.html' %}
+{% load static snicc_i18n %}
+{% block sniclogo %}
+<a class="container-logo offset-md-1" href="{% url 'mainv2:landing' %}">
+    <img src="{% static 'main/images/logo_snic.svg'%}" class="logo-snic" alt="">
+</a>
+{% endblock %}
+{% block content %}
+<div class="post-content">
+    <div class="col-md-1 social-share">
+        {% include 'mainv2/social.html' %}
+    </div>
+    <div class="post-row-mobile row">
+        <div class="offset-md-1 col-md-10 {% if toc %}col-xl-7 {% endif %}col-post"><!-- Ajouter la clase "col-xl-7" si il y a un tableau des matières (liens d'ancrage)-->
+        {% with content=post|translate:lang %}
+            <div class="breadcrumbs-content">
+                <ol class="breadcrumb" role="list" aria-label="Migas de pan" >
+                    <li><a href="{% url 'mainv2:landing' %}">{% ts 'Home' lang %}</a></li>
+                    {% for p in post.parents %}{% with pcontent=p|translate:lang %}
+                    <li><a href="{% url 'mainv2:post' p.slug %}">{{pcontent.title|truncatechars:20}}</a></li>
+                    {% endwith %}{% endfor %}
+                    <li class="active" aria-current="page">
+                    {{content.title|truncatechars:20}}
+                    </li>
+                </ol>
+                {% if request.user.access %}
+                    {% if lang.code == 'es' %}
+                    <a href="{% url 'dashboard:edit' post.id %}" class="btn btn-texto btn-login">Editar esta publicación</a>
+                    {% else %}
+                    <a href="{% url 'dashboard:translation' post.id lang.code %}" class="btn btn-texto btn-login">Editar esta traducción</a>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+
+            <div class="col-md-1 social-share-mobile">
+                {% include 'mainv2/social.html' %}
+            </div>
+
+            <div class="post">
+                <h1 id="posttop" class="post-title">{{content.title}}</h1>
+
+                <!-- S'il y a un tableau des matières (liens d'ancrage) -->
+                {% if toc %}
+                <div class="dropdown dropdown-table-contents">
+                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% ts 'Tabla de contenidos' lang %}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for k in toc %}
+                        <li><a class="dropdown-item" href="#{{k.id}}">{{k.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                <!-- End tableau des matières-->
+
+                <div class="post-text">
+                    {{html|safe}}
+                        <div class="section-cards section">
+                            <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+                                {% for child in post.ordered_children %}{% if child.is_published %}{% with ccontent=child|translate:lang %}                                
+                                <div class="col">
+                                    <a class="card" href="{% url 'mainv2:post' child.slug %}">
+                                        <div class="card-body">
+                                            <div class="circle-recursos">
+                                                <img src="{{child.image.url}}" alt="">
+                                            </div>
+                                            <h6 class="card-title">{{ccontent.title}}</h6>
+                                            <p>{{ccontent.short|default:''}}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endwith %}{% endif %}{% endfor %}       
+
+                                {% if post.books.exists %}
+                                <div class="dropdown w-100">
+                                    <button class="btn btn-azul-claro btn-small dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {% ts 'Documentación complementaria' lang %}
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                                      <li><a class="dropdown-item" href="{{book.book.url|default:'#'}}" target="_blank">{{content.title}}</a></li>
+                                        {% endwith %}{% endfor %}
+                                    </ul>
+                                </div>    
+                                {% endif %}
+        
+                                {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                                <div class="col">
+                                    {% if link.view %}
+                                        <a class="card" href="{% if link.viewargs %}{% url link.view link.viewargs %}
+                                        {% else %}{% url link.view %}{% endif %}">
+                                    {% else %}
+                                        <a class="card" href="{{ link.url }}">
+                                    {% endif %}
+                                        <div class="card-body">
+                                            <div class="circle-recursos">
+                                                <img src="{{link.image.url}}" alt="">
+                                            </div>
+                                            <h6 class="card-title">{{ccontent.title}}</h6>
+                                            <p>{{ccontent.description|default:''}}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endwith %}{% endfor %}                    
+                            </div>
+                        </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <!-- S'il y a un tableau des matières (liens d'ancrage) -->
+        {% if toc %}  
+        <div class="col-xl-3">
+
+            <div class="col-right-post">
+                
+                <div class="table-contents-post">
+                    <h5>{% ts 'Tabla de contenidos' lang %}</h5>
+                    <ul class="table-contents-list">
+                        <li><a href="#posttop">{{content.title}}</a></li>
+                        {% for k in toc %}
+                        <li><a href="#{{k.id}}">{{k.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {% if post.is_news %}
+                <div class="subscription-right">
+                    <h5>{% ts 'Recibí novedades' lang %}</h5>
+                    <p>{% ts 'Suscribite y recibí las últimas novedades sobre cambio climático en tu correo.' lang %}</p>
+                    <form class="newsletter-form" role="search" action="subscription.html" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="E-mail">
+                            <button class="input-group-text" type="submit">
+                                <img src="{% static 'main/images/iconos/send.svg' %}" alt="Enviar">
+                            </button>
+                            </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endif %}
+        <!-- End tableau des matières-->
+    {% endwith %}
+    </div>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,150 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+<!-- Login page -->
+<div class="account-content">
+    
+    <div class="post-row-mobile row">
+        <div class="offset-2 col-lg-8 col-xl-8 col-account">
+
+            <p class="register-steps">{% ts 'PASO' lang %} 1 / 3</p>
+
+            <h1 class="post-title">{% ts 'Ingresá tus datos' lang %}</h1>
+
+            <div class="register-content">
+                {% for k, error in form.errors.items %}
+                <div class="is-invalid mb-4"></div>
+                <div class="invalid-feedback"><b>{{k}}:</b> {{error}}</div>
+                {% endfor %}
+
+                <!-- Ajouter la class invalid si invalide, sinon ajouter valid, après submit , ex: class="form-login valid"-->
+                <form name="formLogin" class="form-login" action="." method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Nombre" value="{{form.name.value|default:''}}" aria-label="Nombre" required>
+                                <label for="name">{% ts 'Nombre' lang %}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Apellido" value="{{form.lastname.value|default:''}}" aria-label="Apellido" required>
+                                <label for="lastname">{% ts 'Apellido' lang %}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <!-- Par defaut selectionné Argentine -->
+                                <select class="form-select form-black" id="country" name="country" aria-label="País" onchange="this.classList.add('form-black')" required>
+                                    <option>{% ts 'País' lang %}</option>
+                                    {% for c in countries %}
+                                    <option value="{{c}}" {% if c == 'Argentina' %}selected{% endif %}>{{c}}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="country">{% ts 'País' lang %}</label>
+                            </div>
+                        </div>    
+                        <div class="col-md-6">
+                            <div class="form-floating floating-enabled" id="form_provence_select">
+                                <select class="form-select" id="provence_select" aria-label="Provincia" 
+                                    name="province" onchange="this.classList.add('form-black')" required>
+                                    <option value="">{% ts 'Seleccionar la provincia' lang %}</option>
+                                    {% for province in provinces %}
+                                    <option value="{{province.gid}}">{{province.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="provence_select">{% ts 'Provincia' lang %}</label>
+                            </div>
+                                <script type="text/javascript">
+                                    var countrySelect = document.getElementById('country');
+                                    countrySelect.onchange = (event) => {
+                                        if(event.target.value != 'Argentina' ) {
+                                            document.getElementById('provence_select').removeAttribute('required');                                        
+                                            document.getElementById('form_provence_select').classList.remove('floating-enabled');
+                                            document.getElementById('form_provence_select').classList.add('floating-disabled');
+                                        } else {
+                                            document.getElementById('form_provence_select').classList.remove('floating-disabled');
+                                            document.getElementById('form_provence_select').classList.add('floating-enabled');
+                                            document.getElementById('provence_select').addAttribute('required');                                        
+                                        }
+                                    }
+                                </script>
+                        </div>    
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="city" name="city" placeholder="Ciudad" aria-label="Ciudad" required>
+                                <label for="city">Ciudad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="gender" aria-label="Género" name="gender" onchange="this.classList.add('form-black')" required>
+                                    <option>Género</option>
+                                    <option value="Varon">Varon</option>
+                                    <option value="Mujer">Mujer</option>
+                                    <option value="No">Prefiero no decirlo</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                                <label for="gender">Género</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="E-mail" aria-label="email" required>
+                                <label for="country">{% ts 'E-mail' lang %}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Teléfono" name="phone" required>
+                                <div id="phoneHelp" class="form-text">Código de área + número</div>
+                                <label for="phone">Teléfono</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms_subscription" required>
+                                <label class="form-check-label" for="terms_subscription">
+                                    {% ts 'Acepto los' lang %} 
+                                    <a href="{% url 'mainv2:post' 'terminos-y-condiciones' %}" target="_blank">{% ts 'Términos y condiciones' lang %}</a> 
+                                    {% ts 'y autorizo el uso de mis datos de acuerdo a la Declaración de privacidad' lang %}.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="news_subscription">
+                                <label class="form-check-label" for="news_subscription">
+                                    {% ts 'Deseo suscribirme a recibir novedades referidas al Sistema de Información Climatico' lang %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="omit" type="reset" class="btn btn-login-white" onclick="location.href='{% url 'mainv2:landing' %}'">{% ts 'Omitir' lang %}</button>
+                    <button id="send" type="submit" class="btn btn-login">{% ts 'Aceptar' lang %}</button>
+                </form>
+
+
+            </div>
+
+        </div>
+        
+    </div>
+
+
+</div>
+    
+<!-- end post page -->
+{% endblock %}

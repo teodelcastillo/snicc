@@ -1,0 +1,28 @@
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/snicc.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/editor.css' %}">
+    <style>
+        body{
+            font-size:x-small;
+        }
+    </style>
+</head>
+<body>
+    <img src="{% static 'main/images/logo_argentina-azul.svg' %}" alt="Argentina.gob.ar" style="width:200px">
+<h2>{{instance}}</h2>
+<table>
+<tr>
+<th>Estado de implementación</th>
+<td>{{instance.status}}</td>
+</tr>
+
+{% for key, value in fields %}    
+<tr><th>{{key}}</th><td>{{value}}</td></tr>
+{% empty %}<tr><th></th><td>No data found.</td></tr>
+{% endfor %}
+</table>
+
+</body></html>

@@ -1,0 +1,82 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+                <!-- Links page -->
+                <div class="link-new-norm-content">
+                    
+                    <div class="post-row-mobile row">
+                        <h1 class="post-title">{% ts 'Enlaces de interés' lang %}</h1>
+                        
+                        <div class="col-md-3 col-categories">
+                            <div class="cat-content">
+                                <h5>{% ts 'Categorias' lang %}</h5>
+                                {% for k,v in total.items %}{% if v %}
+                                {% if catfilter == k %}<a href="." class="active">
+                                {% else %}<a href="?filter={{k}}">{%endif%}
+                                    <span>{% ts k.capitalize lang %}</span> 
+                                    <span class="badge text-bg-secondary">{{v}}</span>
+                                </a>
+                                {% endif %}{% endfor %}
+                            </div>
+                            <div class="dropdown dropdown-categories">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% ts 'Categorias' lang %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% for k,v in total.items %}{% if v %}<li>
+                                    {% if catfilter == k %}<a href="." class="active">
+                                    {% else %}<a href="?filter={{k}}">{%endif%}
+                                        <span>{% ts k.capitalize lang %}</span> 
+                                        <span class="badge text-bg-secondary">{{v}}</span>
+                                    </a></li>
+                                    {% endif %}{% endfor %}    
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8 col-post">
+
+                            <div class="links-content">
+                                {% for item in qset %}{% with content=item|translate:lang %}
+                                <div class="row-link">
+                                    <h2>{{content.name}}</h2>
+                                    <p>{{content.description}}</p>
+                                    <a href="{{item.url}}" target="_blank" class="btn btn-azul-claro">{% ts 'Ir al sitio' lang %}</a>
+                                </div>
+                                {% endwith %}{% endfor %}
+                            </div>
+
+                            <div class="pagination-content">
+                                <nav aria-label="...">
+                                    <ul class="pagination">
+                                        {% if qset.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
+                                        </li>
+                                        {% endif %}
+                
+                                        {%for p in qset.paginator.get_elided_page_range %}
+                                        <li class="page-item {% if p == qset.number %}disabled active{% endif %}">
+                                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+                                        </li>
+                                        {% endfor %}
+                
+                                        {% if qset.has_next %}
+                                          <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=qset.paginator.num_pages %}"></a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+                    {% include 'mainv2/subscription.html' %}
+                </div>
+                    
+                <!-- end post page -->
+
+{% endblock %}

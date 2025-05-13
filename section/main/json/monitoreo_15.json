@@ -1,0 +1,9 @@
+{
+      "titulo" : "Generación de todos los PAH conectados a la red ",
+      "valores" : ["Generación de electricidad", 1706814, 1938042, 1814546, 1528340, 1546155, 1339316],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todos los pequeños aprovechamientos hidroeléctricos (PAH) de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).","<br><br>En el periodo 2017 a 2020 la generación se vio afectada por sequías."],
+      "min" : 1355000,
+      "max" : 1950000,
+      "unidad" : "MWh"
+}
