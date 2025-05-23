@@ -1,0 +1,4 @@
+1- Pedir snapshot del entorno productivo para poder hacer un restore en caso de que algo salga mal.
+2- Copiar los siguientes archivos /opt/snicc/app/db.sqlite3 y la carpeta /opt/snicc/app/media (sqlite3 es la base de datos y media son las imagenes).
+3- Revisar que cuando se copia media dentro del contenedor de docker este se copie con los permisos necesarios y 755).
+4- se hace pase por git si es que un proveedor envio archivos, si solo es pase a produccion de cosas realizadas dentro de la plataforma de test solo hay que migrar la carpeta media y el archivo sqlite3
