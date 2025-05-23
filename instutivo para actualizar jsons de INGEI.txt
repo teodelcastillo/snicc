@@ -1,0 +1,1 @@
+ejecutar el archivo actualizar_jsons.sh
