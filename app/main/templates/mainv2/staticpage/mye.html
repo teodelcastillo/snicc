@@ -53,12 +53,14 @@
             <h1 id="mye-title">Módulo de Monitoreo y Evaluación<i class="bi bi-info-circle" data-bs-toggle="offcanvas" data-bs-target="#drawerRightInfo" aria-controls="drawerRightInfo"></i></h1>
         </div>
         <div class="mye-buttons float-end me-2">
-            <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
-                <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar documentos"><span>Descargar documentos</span></button>
+            <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas disponibles del Plan Nacional de Adaptación y Mitigación al cambio climático">
+                <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar todas las medidas"><span>Descargar todas las medidas</span></button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="/measure/export.csv">Descargar en lista (CSV)</a></li>
                     <li><div class="dropdown-item" id="download_pdf">Descargar en fichas (PDF)</div></li>
+                    <!-- this button is not working properly -->
                     <li><div class="dropdown-item" onclick="openDetailPopup([], true)">Descargar detalle (PDF)</div></li>
+                    
                 </ul>
             </div>
             <a href="/editor/measure/"><img src="{% static 'main/images/mye/admin.svg' %}" alt="Admin MyE"><span>Admin MyE</span></a>
@@ -115,6 +117,10 @@
                                             </select>
                                         </div>
                                         <div class="content-graphs">
+                                            <div class="remove-filter filter-lineas d-none" onclick="quitarFiltro('lineas')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Quitar filtros">
+                                                <i class="bi bi-filter"></i>
+                                                <i class="bi bi-x"></i>
+                                            </div>
                                             <div id="chart_lineas_enfoques"></div>     
                                         </div>
                                       </div>
@@ -126,6 +132,10 @@
                                             <div class="c3-title-space">Pilares de la acción climática en Argentina</div>
                                         </div>
                                         <div class="content-graphs">
+                                            <div class="remove-filter filter-pilares d-none" onclick="quitarFiltro('pilares')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Quitar filtros">
+                                                <i class="bi bi-filter"></i>
+                                                <i class="bi bi-x"></i>
+                                            </div>
                                             <div id="chart_pilares"></div>
                                         </div>
                                       </div>
@@ -137,6 +147,10 @@
                                             <div class="c3-title-space">Estado de implementación</div>
                                         </div>
                                         <div class="content-graphs">
+                                            <div class="remove-filter filter-status d-none" onclick="quitarFiltro('status')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Quitar filtros">
+                                                <i class="bi bi-filter"></i>
+                                                <i class="bi bi-x"></i>
+                                            </div>
                                             <div id="chart_semaforo"></div>
                                         </div>
                                       </div>
@@ -169,6 +183,10 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="remove-filter filter-pilares d-none" onclick="quitarFiltro('pilares')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Quitar filtros">
+                                        <i class="bi bi-filter"></i>
+                                        <i class="bi bi-x"></i>
+                                    </div>
                                 </div>
                                 <div class="legend-right">
                                     <div class="c3-title">
@@ -179,6 +197,10 @@
                                                 <i id="show_1" class="bi bi-eye show-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar todos" onclick="toogleGroups(1, 'show', this)"></i>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="remove-filter filter-status d-none" onclick="quitarFiltro('status')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Quitar filtros">
+                                        <i class="bi bi-filter"></i>
+                                        <i class="bi bi-x"></i>
                                     </div>
                                 </div>
                             </div>
@@ -220,8 +242,8 @@
                             <div class="content-details row">
 
                                 <div id="content_status_graph" class="content-details-status col-3">
-                                    <div class="no-select" id="title_status">Gráfico del estado de implementacion de las medidas de las líneas de acción <span>(<div id="filter_status_text">0</div> seleccionadas)</span></div>
-                                    <div class="links-content-status btn-group" role="group" aria-label="">
+                                    <div class="no-select" id="title_status">Gráfico del estado de implementacion de las medidas por línea de acción<span>(<div id="filter_status_text">0</div> seleccionadas)</span></div>
+                                    <div class="links-content-status btn-group" role="group" aria-label="" id="detalle_selecteds_actions">
                                         <div class="btn btn-primary btn-dpd-action" onclick="openDetailPopup(actionsSelecteds.length == 1 ? encodeURI(JSON.stringify(actionsSelecteds[0])):actionsSelecteds)">
                                             <i class="bi bi-file-earmark"></i>
                                             Detalles
@@ -456,20 +478,20 @@
                 var perdidas = "Pérdidas y daños";
             </script>
             <div class="form-group">
-                <!--<label>Pilares de la acción climática en Argentina</label>-->
+                <label id="label_pilares" class="d-none">Pilares de la acción climática en Argentina</label>
                 <select id="select_pilares" class="selectpicker selectpickers" multiple title="Pilares de la acción climática" data-header="<div class='btn-group btn-group-sm btn-group-pilares' role='group' aria-label='pilares button group'><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(adaptacion)'>Adaptación</button><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(mitigacion)'>Mitigación</button><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(perdidas)'>Pérdidas y daños</button></div>" data-size="7" data-container="#drawerFilters" data-actions-box="true">
                     <option>Adaptación</option>
                     <option>Mitigación</option>
                     <option>Pérdidas y daños</option>
                     <option>Adaptación y Mitigación</option>
                     <option>Adaptación y Pérdidas y daños</option>
-                    <option>Mitigación y Pérdidas y daños</option><!--disabled-->
+                    <option disabled class="d-none">Mitigación y Pérdidas y daños</option><!--disabled-->
                     <option>Adaptación, Mitigación y Pérdidas y daños</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <!--<label>Estado de implementación</label>-->
+                <label id="label_estado" class="d-none">Estado de implementación</label>
                 <select id="select_estado" class="selectpicker selectpickers" multiple title="Estado de implementación" data-size="7" data-container="#drawerFilters" data-actions-box="true">
                     <option>En implementación avanzada</option>
                     <option>En implementación inicial</option>
@@ -479,7 +501,7 @@
             </div>   
 
             <div class="form-group">
-                <!--<label>Año de cumplimiento</label>-->
+                <label id="label_ano_cumplimiento" class="d-none">Año de cumplimiento</label>
                 <select id="select_ano_cumplimiento" class="selectpicker selectpickers" multiple title="Año de cumplimiento" data-container="#drawerFilters" data-size="7" data-actions-box="true">
                     {% comment %} <option>2000</option>
                     <option>2012</option>
@@ -518,7 +540,7 @@
 <script src="{% static 'main/js/chart.js' %}" charset="utf-8"></script>
 <script src="{% static 'main/js/c3.min.js' %}"></script>
 
-<script src="{% static 'main/js/jquery.printelement.js' %}"></script>
+<script src="{% static 'main/js/printThis.js' %}"></script>
 
 <script src="{% static 'main/js/ingei.js' %}"></script>
 <script src="{% static 'main/js/c3-rounded-corner.js' %}"></script>

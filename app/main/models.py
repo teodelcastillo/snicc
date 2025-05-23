@@ -98,7 +98,19 @@ class Tag(Named):
         verbose_name = 'etiqueta'
         verbose_name_plural = 'etiquetas'
 
-# post categories
+# Post categories.
+# There are actually two systems. The first (Category) is used for filtering and visualization. 
+# The second, CategoryExtended, is the actual category system used by objects (Post, Book...) below.
+#
+# To add a new category :
+# - add its name to Category
+# - add lines to CategoryExtended with the following syntax :
+#     <code> = <actual category>, <admin visible text>
+# where
+# - <code> is not relevant (no space, just characters)
+# - <admin visible text> is just the text shown to admins, no problem here
+# - <actual category> is a list of Category separated by ", " (watch the space !!)
+# Add a line for every possible combination.
 
 class Category(models.TextChoices):
     adaptacion = 'Adaptación'

@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1"/>
     <meta name="robots" content="noindex">
 
     <link rel="shortcut icon" href="{% static 'main/images/favicon.ico'%}" type="image/vnd.microsoft.icon">
@@ -246,7 +246,7 @@
         
                             <div class="col-md-3 col-sm-12 col-footer">
                                 <p><a href="{% url 'mainv2:library-front'%}">{% ts 'Biblioteca' lang %}</a></p>
-                                <p><a href="#">{% ts 'Formación y capacitaciones' lang %}</a></p>
+                                {% comment %} <p><a href="#">{% ts 'Formación y capacitaciones' lang %}</a></p> {% endcomment %}
                                 <p><a href="{% url 'mainv2:enlaces' %}">{% ts 'Enlaces de interés' lang %}</a></p>
                             </div>
         

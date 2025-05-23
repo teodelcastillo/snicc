@@ -2529,7 +2529,7 @@ body.readguide .separator {
 }
 @media (max-width: 1280px) {
     .container-logo:not(.snic-home-logo) {
-        display: block;
+        display: inline-block;
     }
     .btn.btn-texto {
         font-size: 0.85rem;
@@ -2624,7 +2624,7 @@ body.readguide .separator {
 
 @media (max-width: 1024px) {
     .container-logo.container.snic-home-logo {
-        display: block;
+        display: inline-block;
         max-width: 80%;
         padding: 0 1rem;
     }
