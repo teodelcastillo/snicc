@@ -305,7 +305,7 @@ class Book(models.Model, VersionedNoDate):
     year = models.IntegerField(default=2025)
     category = models.CharField(choices=CategoryExtended, max_length=50, default=CategoryExtended.ampyd)
     date = models.DateTimeField(auto_now=True)
-    url = models.URLField(null=True, blank=True)
+    url = models.URLField(null=True, blank=True,,max_length=300)
     # title = models.CharField(max_length=100)
     # description = models.TextField(null=True)
     authors = models.ManyToManyField(Author, blank=True)
@@ -318,7 +318,7 @@ class Book(models.Model, VersionedNoDate):
 
 class BookVersion(LanguageVersion):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='versions')
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     class Meta:
         unique_together = ('lang', 'book')
@@ -345,7 +345,7 @@ class InternalLink(models.Model, VersionedNoDate):
     # not an UrlField
     view = models.CharField(max_length=50, null=True, blank=True, help_text='Exactly one of this or "url" must be set.')
     viewargs = models.CharField(max_length=50, null=True, blank=True)
-    url = models.URLField(null=True, blank=True, help_text='Exactly one of this or "view" must be set.')
+    url = models.URLField(null=True, blank=True, help_text='Exactly one of this or "view" must be set.',,max_length=300)
 
     def __str__(self):
         if self.view:
