@@ -201,7 +201,7 @@ class Post(models.Model, Versioned):
 
 class PostVersion(LanguageVersion):
     """Language and date version of the Post."""
-    title = models.CharField(max_length=100, verbose_name='título')
+    title = models.CharField(max_length=200, verbose_name='título')
     body = models.TextField(verbose_name='texto', blank=True, null=True) 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='versions')
     date = models.DateTimeField(auto_now=True)
@@ -353,8 +353,8 @@ class InternalLink(models.Model, VersionedNoDate):
         return f'{self.parent} -> {self.url}'
 
 class InternalLinkVersion(LanguageVersion):
-    link = models.ForeignKey(InternalLink, on_delete=models.CASCADE, related_name='versions')
-    title = models.CharField(max_length=100, verbose_name='titulo')    
+    link = models.ForeignKey(InternalLink, on_delete=models.CASCADE, related_name='versions',max_length=300)
+    title = models.CharField(max_length=200, verbose_name='titulo')    
     description = models.TextField(null=True, blank=True, verbose_name='texto de la tarjeta', help_text='Descripción breve, 500 caracteres como máximo')
     class Meta:
         unique_together = ('lang', 'link')
