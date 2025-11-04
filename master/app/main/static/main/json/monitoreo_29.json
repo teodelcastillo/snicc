@@ -1,0 +1,9 @@
+{
+      "titulo" : "Participación en la generación de electricidad respecto a la demanda eléctrica total",
+      "valores" : ["Participación de la generación de electricidad", 36.1402582334863, 34.0418753986684, 35.12628574896, 36.1900897692224, 38.9261104624769, 38.6357083665784],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Participación de la generación de todas las centrales \"no fósiles\" (hidroeléctricas, nucleares y renovables no convencionales) con respecto a la generación total de la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "%",
+      "min" : 7.5,
+      "cantDecimales": 1
+}

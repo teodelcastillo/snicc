@@ -1,0 +1,9 @@
+{
+      "titulo" : "Capacidad instalada de todas las plantas de energía eólica conectadas a la red",
+      "valores" : ["Capacidad instalada", 187.4, 187.4, 226.7, 750.3, 1788.1, 2706.32],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las plantas eólicas de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "max":3000,
+      "min" : 152,
+      "unidad" : "MW"
+}

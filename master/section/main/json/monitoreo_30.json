@@ -1,0 +1,19 @@
+{
+      "titulo" : "Participación en la generación de electricidad respecto a la demanda eléctrica total",
+      "valores1" : ["Participación de la generación “no fósil”", 36.1402582334863],
+      "valores2" : ["Participación de la generación “no fósil”", 34.0418753986684],
+      "valores3" : ["Participación de la generación “no fósil”", 35.12628574896],
+      "valores4" : ["Participación de la generación “no fósil”", 36.1900897692224],
+      "valores5" : ["Participación de la generación “no fósil”", 38.9261104624769],
+      "valores6" : ["Participación de la generación “no fósil”", 38.6357083665784],
+      "resto1" : ["Participación del resto de la generación", 63.8597417665137],
+      "resto2" : ["Participación del resto de la generación", 65.9581246013316],
+      "resto3" : ["Participación del resto de la generación", 64.87371425104],
+      "resto4" : ["Participación del resto de la generación", 63.8099102307776],
+      "resto5" : ["Participación del resto de la generación", 61.0738895375231],
+      "resto6" : ["Participación del resto de la generación", 61.3642916334216],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Participación de la generación de todas las centrales \"no fósiles\" (hidroeléctricas, nucleares y renovables no convencionales) con respecto a la generación total de la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "%",
+      "cantDecimales": 2
+}

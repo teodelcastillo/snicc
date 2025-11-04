@@ -1,0 +1,10 @@
+{
+      "titulo" : "Generación de electricidad de fuentes no fósiles conectadas a la red",
+      "valores4" : ["Distribuida", 0, 0, 0, 0, 0.851, 3.145],
+      "valores3" : ["Renovable no convencional", 2593022.524, 2749802.733, 2753422.64, 3446208.99, 7863459.038, 12816385.894],
+      "valores2" : ["Nuclear", 6518524.68, 7677292.34, 5716227.87, 6452917.82, 7927077.46, 10010880.10],
+      "valores1" : ["Hidroeléctrica", 39750982.48, 36073998.07, 39465329.43, 39855672.54, 35285802.509, 29010773.516],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las centrales \"no fósiles\" (hidroeléctricas, nucleares y renovables no convencionales) conectadas a la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "MWh"
+}

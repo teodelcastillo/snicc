@@ -1,0 +1,52 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block head %}{{form.media}}{{ block.super }}{% endblock%}
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+
+        <h1>Editar versión {{lang.name}} para "{{post}}"</h1>
+        </div>
+{{form.errors.as_ul}}
+
+{% if pv %}
+<div><i>editado por última vez el {{pv.date}} por {{pv.user}} 
+    (<a href="{% url 'dashboard:history' post.id pv.lang.code %}">historia</a>)</i></div>
+{% endif %}
+
+<form action='.' method='POST'>
+{% csrf_token %}{{form.user}}{{form.post}}{{form.lang}}
+<table class="split">
+    <tr><td></td>        
+        <td>
+        {% if post.content.body %}
+            {{form.check_diff}} 
+            <label for="{{ form.check_diff.id_for_label }}">{{form.check_diff.label}}</label>
+        {% endif %}
+        <input type='submit' value='save'></td>
+    </tr>
+    <tr>
+        <th>Español</th>
+        <th>{{lang.name}}</th>
+    </tr>
+    <tr>
+        <th>{{post.content.title}}</th>
+        <th>{{form.title}}</th>
+    </tr>
+    {% if post.is_resource and post.content.short %}
+    <tr>
+        <th>{{post.content.short}}</th>
+        <th>{{form.short}}</th>
+    </tr>
+    {% endif %}
+    {% if post.content.body %}
+    <tr>
+        <td>{{post.content.body|linebreaks}}</td>
+        <td>{{form.body}}</td>
+    </tr>
+    {% endif %}
+</table>
+</form>
+
+</div></div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{
+      "titulo" : "Generación de todas las plantas de energía eólica conectadas a la red",
+      "valores" : ["Generación de electricidad", 592951, 546770, 615818, 1412743,4962933,9407679],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las plantas eólicas de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "min" : 390000,
+      "unidad" : "MWh"
+}

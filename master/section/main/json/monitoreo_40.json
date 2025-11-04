@@ -1,0 +1,8 @@
+{
+      "titulo" : "Cantidad de pasajeros (Buenos Aires – Mar del Plata)",
+      "valores" : ["Cantidad de pasajeros transportados", 200940, 10303, 132480, 314527, 425067, 237773],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Cantidad de pasajeros transportados en el ferrocarril Buenos Aires – Mar del Plata.","<br><br>El cambio en la tendencia observada en el año 2020 responde a los efectos de la pandemia de COVID-19.", "<br><br>En el año 2016 el servicio sufrió una parada por daños en la infraestructura debido a inundaciones.","<br><br>Fuente: Comisión Nacional de Regulación del Transporte (CNRT)."],
+      "unidad" : "Pasajeros",
+      "cantDecimales": 1
+}

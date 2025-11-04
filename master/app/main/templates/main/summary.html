@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% load snicc_i18n %}
+{% block content %}
+<ul>
+{% for p in posts %}<li><a href='{{p.slug}}'>{% translate p lang %}</a></li>{% endfor %}
+</ul>
+{% endblock %}

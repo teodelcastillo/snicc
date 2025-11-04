@@ -1,0 +1,8 @@
+{
+      "titulo" : "Volumen de bioetanol vendido",
+      "valores" : ["Ventas de bioetanol", 803640, 910891, 1076875, 1063868, 1063418, 764329],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Ventas de bioetanol para corte.","<br><br>Fuente: Secretaría de Energía.", "<br><br>En 2018, disminuyó levemente el consumo interno de bioetanol.<br>Los datos del 2020 son provisorios y podrían estar afectados por el impacto de la pandemia (COVID-19)."],
+      "min" : 591500,
+      "unidad" : " m³"
+}

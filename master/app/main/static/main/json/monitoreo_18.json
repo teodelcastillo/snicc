@@ -1,0 +1,10 @@
+{
+      "titulo" : "Capacidad instalada de todas las plantas de energía proveniente de biomasa conectadas a la red",
+      "valores" : ["Capacidad instalada", 110.2, 110.2, 112.2, 126.2, 128.8, 184.8],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las plantas a biomasa de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "min" : 105.9,
+      "max" : 190,
+      "unidad" : "MW",
+      "cantDecimales": 1
+}

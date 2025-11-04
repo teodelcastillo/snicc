@@ -1,0 +1,8 @@
+{
+      "titulo" : "Consumo de aerokerosene por mil pasajeros",
+      "valores" : ["Consumo de aerokerosene ", 59.09, 66.91, 54.24, 51.61, 47.78, 64.61],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Consumo de aerokerosene por mil pasajeros en aviones de cabotaje (m³/mil pasajeros).", "<br><br>Fuente: Administración Nacional de Aviación Civil (ANAC) y Secretaría de Energía. ", "<br><br>El Plan Nacional de Adaptación y Mitigación al Cambio Climático define una meta para este indicador como parte de la medida MS-12:<i>'Al 2030, se implementan y establecen sistema de monitoreo, verificación y reporte del 100% de las medidas establecidas previstas en el Plan de Acción para la Reducción de Emisiones de la Aviación Argentina'"],
+      "unidad" : "m³/mil pasajeros",
+      "cantDecimales": 2
+}

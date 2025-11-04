@@ -1,0 +1,39 @@
+{% extends 'dashboard/dashbase.html' %}
+
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+        <h2>{{instance}}</h2>
+        <a href="{% url 'dashboard:measure_edit' instance.id %}" class="btn btn-amarillo">editar</a>
+        {% if request.user.is_staff %}<a href="{% url 'admin:measure_measure_change' instance.id %}" class="btn btn-amarillo">admin</a>{% endif %}
+        <a href="{% url 'dashboard:measure_list' %}" class="btn btn-amarillo">volver a la lista</a>
+        </div>
+
+
+<p>Los artículos <span style="color:gray">en gris</span> no se publican.</p>
+
+<table>
+    <tr><th></th><td>This measure is {% if instance.is_active %}active.
+        {% else %}not active.
+            {% if request.user.is_staff %}
+            <form action='.' method='POST'>
+                {% csrf_token %}
+                <input type="submit" value="activate">
+            </form>{% endif %}
+        {% endif %}</td></tr>
+    <tr>
+        <th>Estado de implementación</th>
+        <td>{{instance.status}}</td>
+    </tr>
+
+    {% for key, value in instance.fields.items %}    
+    <tr {% if key in inactive %}style="color:gray;font-property:italic;"{% endif %}
+    ><th style="width:30%">{{key}}</th><td style="width:70%">{{value}}</td></tr>
+    {% empty %}<tr><th></th><td>No data found.</td></tr>
+    {% endfor %}
+</table>
+
+</div></div>
+
+{% endblock %}

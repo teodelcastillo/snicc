@@ -1,0 +1,45 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block header %}
+<style>
+.line {
+    border: 5px solid white;
+    background-color: var(--amarillo);
+    text-align: center;
+}
+
+.action {
+    border: 5px solid white;
+    background-color: #eed29b;
+    text-align: center;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+
+        <h2>Medidas</h2>
+        </div>
+<table>
+    {% for line in lines %}
+    <tr><td class="line" rowspan="{{line.measure_count}}">{{line}}</td>
+        {% for action in line.action_set.all %}
+        {% if not forloop.first %}<tr>{% endif %}
+        <td class="action" rowspan="{{action.measure_set.count}}">{{action}}</td>
+            {% for measure in action.measure_set.all %}
+            {% if not forloop.first %}<tr>{% endif %}
+            <td class="measure">
+                <a href="{% url 'dashboard:measure_preview' measure.id %}">{{measure.name}}</a>
+            </td></tr>
+            {% endfor %}  
+        {% endfor %}  
+    {% endfor %}
+    {% comment %} {% for measure in measures %}
+    <tr><td>
+        <a href="{% url 'dashboard:measure_edit' measure.id %}">{{measure.name}}</a>
+    </td></tr>
+    {% endfor %} {% endcomment %}
+</table>
+</div></div>
+{% endblock %}

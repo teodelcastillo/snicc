@@ -1,0 +1,9 @@
+{
+      "titulo" : "Corte de bioetanol en nafta",
+      "valores" : ["Corte de bioetanol", 9.4380987291415, 10.5542486889955, 11.6017933896805, 11.3936363918422, 11.5949988256097, 11.407730372779],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Corte de bioetanol en nafta, calculado dividiendo las ventas de bioetanol para corte por las ventas de nafta cortada.","<br><br>Fuente: Secretaría de Energía.", "<br><br>En 2018, disminuyó levemente el consumo interno de bioetanol.<br>Los datos del 2020 son provisorios.<br><br>Meta PNAyMCC al 2030: Se logra abastecer el 20% de la oferta de nafta y gasoil para transporte con biocombustibles."],
+      "min" : 7.82,
+      "unidad" : "%",
+      "cantDecimales": 1
+}

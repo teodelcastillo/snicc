@@ -1,0 +1,119 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}        
+
+<!-- Search page -->
+<div class="library-search-content">
+    
+    <div class="post-row-mobile row">
+        <h1 class="post-title post-title-blue">{% ts 'Resultados' lang %}<p>{{count}} {% ts 'coincidencias para' lang %} “{{pattern}}”</p></h1>
+        <div class="col-md-3 col-categories">
+
+            <form class="main-form search-form" role="search" action="{% url 'mainv2:search' %}" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                <div class="input-group">
+                    <input placeholder="{% ts 'Buscá en el sitio' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                    <span class="input-group-btn">
+                    <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                        <img src="{% static 'main/images/iconos/search.svg'%}" alt=""></i><span class="sr-only">Buscá en el sitio</span>
+                    </button>
+                </span></div>
+                </div>
+            </form>
+            <div class="cat-content">
+                <h5>{% ts 'Categorias' lang %}</h5>
+                {% for k,v in total.items %}{% if v %}
+                {% if postfilter == k %}<a href="?pattern={{pattern}}" class="active">
+                {% else %}<a href="{% querystring filter=k%}">{%endif%}
+                    <span>{% ts k.capitalize lang %}</span> 
+                    <span class="badge text-bg-secondary">{{v}}</span>
+                </a>
+                {% endif %}{% endfor %}
+            </div>
+            <div class="dropdown dropdown-categories">
+                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Categorias
+                </button>
+                <ul class="dropdown-menu">
+                    {% for k,v in total.items %}{% if v %}<li>
+                    {% if postfilter == k %}<a href="?pattern={{pattern}}" class="active">
+                    {% else %}<a href="{% querystring filter=k%}">{%endif%}
+                        <span>{% ts k.capitalize lang %}</span> 
+                        <span class="badge text-bg-secondary">{{v}}</span>
+                    </a></li>
+                    {% endif %}{% endfor %}
+                </ul>
+            </div>                          
+
+        </div>
+
+        <div class="col-md-8 col-post">
+
+            <div class="search-content">
+
+                <div class="section-cards row row-cols-1">
+
+                    {% if count == 0 %}
+                    <div class="col not-found-search">
+                        <img src="{% static 'main/images/iconos/search-not-found.svg'%}" alt="No se encontraron resultados">
+                        <p>{% ts 'No se encontraron resultados' lang %}</p>
+                    </div>
+                    {% endif %}
+                    {% for p in posts %}{% with content=p|translate:lang %}
+                    <div class="col">
+                        <div class="card card-link" onclick="window.location = `{% url 'mainv2:post' p.slug %}`">
+                            <div class="card-body">
+                                <h5>{{content.title}}</h5>
+                                {% with chtml=content.html %}                                                
+                                <p class="card-text">{% if chtml %}{{chtml|striptags|truncatechars:200}}{% endif %}</p>
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}{% endfor %}
+                </div>
+
+            </div>
+
+            {% if count %}
+            <div class="pagination-content">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if posts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
+                        </li>
+                        {% endif %}
+
+                        {%for p in posts.paginator.get_elided_page_range %}
+                        <li class="page-item {% if p == posts.number %}disabled active{% endif %}">
+                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if posts.has_next %}
+                            <li class="page-item">
+                            <a class="page-link" href="{% querystring page=posts.paginator.num_pages %}"></a>
+                        </li>
+                        {% endif %}
+                                        {% comment %} <li class="page-item">
+                            <a class="page-link" href="#">+</a>
+                            </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">></a>
+                        </li> {% endcomment %}
+
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+    </div>
+
+    {% include 'mainv2/subscription.html' %}
+</div>
+    
+<!-- end post page -->
+
+{% endblock %}

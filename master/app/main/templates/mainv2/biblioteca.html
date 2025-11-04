@@ -1,0 +1,150 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+                <!-- Library page -->
+                <div class="library-search-content">
+                    
+                    <div class="post-row-mobile row">
+                        <h1 class="post-title post-title-blue">{% ts 'Biblioteca SNIC' lang %}</h1>
+                        <div class="col-md-3 col-categories">
+
+                            <div class="cat-content">
+                                <h5>{% ts 'Categorias' lang %}</h5>
+                                {% for k,v in total.items %}{% if v %}
+                                {% if catfilter == k %}<a href="." class="active">
+                                {% else %}<a href="list/?filter={{k}}">{%endif%}
+                                    <span>{% ts k.capitalize lang %}</span> 
+                                    <span class="badge text-bg-secondary">{{v}}</span>
+                                </a>
+                                {% endif %}{% endfor %}
+                            </div>
+                            <div class="dropdown dropdown-categories">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% ts 'Categorias' lang %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% for k,v in total.items %}{% if v %}<li>
+                                    {% if catfilter == k %}<a href="." class="active">
+                                    {% else %}<a href="list/?filter={{k}}">{%endif%}
+                                        <span>{% ts k.capitalize lang %}</span> 
+                                        <span class="badge text-bg-secondary">{{v}}</span>
+                                    </a></li>
+                                    {% endif %}{% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <div class="cat-content">
+                                <h5>{% ts 'Autores' lang %}</h5>
+                                {% for a in authors %}
+                                <a href="list/?author={{a.id}}">
+                                    <span>{{a}}</span> 
+                                    <span class="badge text-bg-secondary">{{a.nbb}}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="dropdown dropdown-categories">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% ts 'Autores' lang %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% for a in authors %}<li>
+                                    <a href="list/?author={{a.id}}">
+                                        <span>{{a}}</span> 
+                                        <span class="badge text-bg-secondary">{{a.nbb}}</span>
+                                    </a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8 col-post">
+
+                            <form class="main-form search-form" role="search" action="{% url 'mainv2:library' %}" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                                <div class="input-group">
+                                    <input placeholder="{% ts 'Buscá por autor, título...' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                                    <span class="input-group-btn">
+                                    <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                                        <img src="main/images/iconos/search.svg" alt=""></i><span class="sr-only">{% ts 'Buscá por autor, título...' lang %}</span>
+                                    </button>
+                                </span></div>
+                                </div>
+                            </form>
+
+                            <div class="library-content">
+
+                                <div class="section-cards">
+                                    <div class="row">
+                                        <h4 class="post-title">{% ts 'Accesos directos' lang %}</h4>
+                                    </div>
+                                    <div class="row row-cols-1 row-cols-md-3">
+                                        <div class="col">
+                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=capacitaciones">
+                                                <div class="card-img-top shortcut-img capacitaciones"></div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">
+                                                        {% ts 'Capacitaciones' lang %}
+                                                    </h5>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=comunidad">
+                                                <div class="card-img-top shortcut-img comunidad"></div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">
+                                                        {% ts 'Comunidad educativa' lang %}
+                                                    </h5>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col">
+                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=ciudadania">
+                                                <div class="card-img-top shortcut-img ciudadania"></div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">
+                                                        {% ts 'Ciudadanía' lang %}
+                                                    </h5>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="section-cards section-nueva-biblioteca">
+                                    <div class="row">
+                                        <h4 class="post-title">{% ts 'Agregados recientemente' lang %}</h4>
+                                    </div>
+                                    <div class="row row-cols-1 row-cols-md-4">
+                                        {% for b in books %}{% with content=b|translate:lang %}
+                                        <div class="col">
+                                            <a class="card" href="{{b.url|default:"#"}}" target="_blank">
+                                                {% if b.image %}
+                                                <img src="{{b.image.url}}" class="card-img-top" alt="">
+                                                {% else %}
+                                                <img src="{% static 'main/images/library/image.png' %}" class="card-img-top" alt="">
+                                                {% endif %}
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        {{content.title}}
+                                                    </h6>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        {% endwith %}{% endfor %}
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+                        </div>
+                        
+                    </div>
+
+                    
+                </div>
+                    
+                <!-- end post page -->
+{% endblock %}

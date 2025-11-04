@@ -1,0 +1,12 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+    <h1>{{pv.post}} (diferencias entre versiones)</h1>
+    <h3>Diferencias entre la version del "{{pv.date}}" y actual</h3>
+    <div><a href="{% url 'dashboard:history' pv.post.id pv.lang.code %}">Regresar al historial de versiones</a></div>
+
+    {{diff|safe}}
+    </div>
+</div>
+{% endblock %}

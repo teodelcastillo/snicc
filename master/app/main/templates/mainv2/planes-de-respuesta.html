@@ -1,0 +1,296 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block sniclogo %}
+<a class="container-logo offset-md-1" href="{% url 'mainv2:landing' %}">
+    <img src="{% static 'main/images/logo_snic.svg'%}" class="logo-snic" alt="">
+</a>
+{% endblock %}
+{% block content %}
+
+<!-- Gestion climatica page -->
+<div class="post-content">
+    <div class="col-md-1 social-share">
+        {% include 'mainv2/social.html' %}
+    </div>
+
+    <div class="post-row-mobile row">
+        
+        <div class="offset-md-1 col-md-10 col-post">
+
+            <div class="breadcrumbs-content">
+                <ol class="breadcrumb" role="list" aria-label="Migas de pan" >
+                    <li><a href="{% url 'mainv2:landing' %}">{% ts 'Home' lang %}</a></li>
+                    {% for p in parent.parents %}{% with pcontent=p|translate:lang %}
+                    <li><a href="{% url 'mainv2:post' p.slug %}">{{pcontent.title|truncatechars:20}}</a></li>
+                    {% endwith %}{% endfor %}
+                    {% with pcontent=parent|translate:lang %}
+                    <li><a href="{% url 'mainv2:post' parent.slug %}">{{pcontent.title|truncatechars:20}}</a></li>
+                    {% endwith %}
+                    <li class="active" aria-current="page">
+                    {% ts 'Planes de respuesta' lang %}
+                    </li>
+                </ol>
+            </div>
+
+            <div class="col-md-1 social-share-mobile">
+                {% include 'mainv2/social.html' %}
+            </div>
+
+            <div class="post">
+                <h1 class="post-title post-title-planes">{% ts 'Planes de respuesta' lang %}</h1>
+                <p>{% ts 'Las 23 provincias y la Ciudad Autónoma de Buenos Aires deben elaborar sus Planes de Respuesta climáticos de acuerdo a los contenidos establecidos por la Ley 27.520.' lang %}</p>
+                <div class="col-planes">
+                    <div class="planes-resp-content">
+
+                        <div class="planes-content-map">
+                            <div id="mapa_planes">
+                                <div class="btn-relocate" onclick="relocateArgentina()"><img src="{% static 'main/images/iconos/position.svg'%}" alt=""></div>
+                                <div class="islas-img" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="islas-tooltip" data-bs-title="Tierra del Fuego, Antártida e Islas del Atlántico Sur" ><img id="image_islas" src="{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-1.png'%}" alt="Islas del Atlantico Sur"></div>
+                            </div>
+                        </div>
+                        <script src="{% static 'main/json/argentina.js' %}"></script>
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+                        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+                        <script type="text/javascript">
+                            var referenciasMapa = {
+                                "1": "#969696",
+                                "2": "#262C51",
+                                "3": "#975DBA",
+                                "4": "#4CD964",
+                                "5": "#067F1B",
+                            }
+                            var valProvincias = {{status|safe}};
+                            var textosProvincias = {{texts|safe}};
+
+                            const map = L.map('mapa_planes').setView([-52, -54.5], 4);
+                            
+                            const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 10,
+                                minZoom: 4,
+                                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                            }).addTo(map);                                    
+                            
+                            function relocateArgentina() {
+                                map.setView([-52, -54.5], 4);
+                            }
+                            map.dragging.disable();
+                            map.scrollWheelZoom.disable();
+                            map.doubleClickZoom.disable();
+
+                            var islas = argentina.features.filter(prov => {
+                                return prov.properties.gid === 24
+                            });
+                            const imgIslas = document.getElementById("image_islas")
+                            imgIslas.src="{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-'%}"+valProvincias[24]+".png";
+                            imgIslas.onclick = function() { showCardProvince(islas[0].properties); };
+
+                            var caba = argentina.features.filter(prov => {
+                                return prov.properties.gid === 1
+                            });
+
+                            var cabaImage = L.icon({
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+valProvincias[1]+'.png',
+                                iconSize:     [108, 73],
+                                iconAnchor:   [18, 22], 
+                                popupAnchor:  [-18, 45]
+                            });
+
+                            var cabaImageHover = L.icon({
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+valProvincias[1]+'-hover.png',
+                                iconSize:     [108, 73],
+                                iconAnchor:   [18, 22], 
+                                popupAnchor:  [-18, 45]
+                            });
+
+                            L.marker([-40.8, -45.2], {icon: cabaImage}).addTo(map).on('mousemove', function(e) {
+                                if(!this.getElement().classList.contains('active')) {
+                                    this.getElement().classList.add('hover');
+                                    this.openTooltip(e.latlng);
+                                    this.setIcon(cabaImageHover);
+                                } else {
+                                    this.getElement().classList.remove('hover');
+                                    this.closeTooltip();
+                                    this.setIcon(cabaImage);
+                                }
+                            }).on('mouseout', function(e) {
+                                this.getElement().classList.remove('hover');
+                                this.closeTooltip();
+                                this.setIcon(cabaImage);
+                            }).on('click', function(e) {
+                                this.closeTooltip();
+                                if(document.querySelector('.leaflet-interactive.active')) {
+                                    const activeClass = document.querySelector('.leaflet-interactive.active');
+                                    activeClass.classList.remove('active');
+                                }
+                                this.getElement().classList.remove('hover');
+                                this.getElement().classList.add('active');
+                                showCardProvince(caba[0].properties);
+                            }).on('popupclose', function(e) {
+                                if(document.querySelector('.leaflet-interactive.active')) {
+                                    const activeClass = document.querySelector('.leaflet-interactive.active');
+                                    activeClass.classList.remove('active');
+                                }
+                            }).bindTooltip(caba[0].properties.nombre_provincia, {direction: 'left', interactive: false, className: 'caba-tooltip'}).bindPopup(caba[0].properties.nombre_provincia);
+                            
+                            function onEachFeature(feature, layer) {
+                                layer.bindTooltip(feature.properties.nombre_provincia, {direction: 'top', interactive: false,});
+                                /*if(provinciaSeleccionada != "" && provinciaSeleccionada == feature.properties.nombre_provincia) {
+                                    layer.setStyle({className: 'shapes active'});
+                                }*/
+                                layer.bindPopup(feature.properties.nombre_provincia);
+                                layer.on('mousemove', function(e) {
+                                    if(!this.getElement().classList.contains('active')) {
+                                        this.getElement().classList.add('hover');
+                                        layer.openTooltip(e.latlng);
+                                    } else {
+                                        this.getElement().classList.remove('hover');
+                                        layer.closeTooltip();
+                                    }
+                                });
+                                layer.on('mouseout', function(e) {
+                                    this.getElement().classList.remove('hover');
+                                    layer.closeTooltip();
+                                });
+                                layer.on('click', async function (e) {
+                                    layer.closeTooltip();
+                                    if(document.querySelector('.leaflet-interactive.active')) {
+                                        const activeClass = document.querySelector('.leaflet-interactive.active');
+                                        activeClass.classList.remove('active');
+                                    }
+                                    this.getElement().classList.remove('hover');
+                                    this.getElement().classList.add('active');
+                                    showCardProvince(feature.properties);
+                                });
+                                layer.on('popupclose', function(e) {
+                                    if(document.querySelector('.leaflet-interactive.active')) {
+                                        const activeClass = document.querySelector('.leaflet-interactive.active');
+                                        activeClass.classList.remove('active');
+                                    }
+                                });
+                            }
+                            function showCardProvince(featureProps){
+                                document.getElementById('title_province').innerHTML = featureProps.nombre_provincia;
+                                var contentTextHtml = '';
+                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].authority.title}</h5>`;
+                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].authority.text}</p>`;
+                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].plan.title}</h5>`;
+                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].plan.text}</p>`;
+                                if (textosProvincias[featureProps.gid].url){
+                                contentTextHtml +=   `<p><a href="${textosProvincias[featureProps.gid].url}" target="_blank" class="btn btn-azul-claro btn-small">Descarga el plan</a></p>`;
+                                }
+                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].regulations.title}</h5>`;
+                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].regulations.text}</p>`;
+                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].contact.title}</h5>`;
+                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].contact.text}</p>`;
+
+                                /*
+                                contentTextHtml +=   `<ul>`;
+                                textosProvincias[featureProps.gid].contact.text.forEach(function (contactLi) {
+                                    contentTextHtml +=   `<li>{% ts '${contactLi}</li>`;
+                                });
+                                contentTextHtml +=   `</ul>`;
+                                */
+                                document.getElementById('text-province').innerHTML= contentTextHtml;
+                                document.getElementById('empty_province').classList.remove('show');
+                                relocateArgentina();
+                            }
+                            
+                            
+                            function styleFunction(feature){
+                                return {
+                                    fillColor: referenciasMapa[valProvincias[feature.properties.gid]],
+                                    weight: feature.properties.gid == 24 ? 0.5 : feature.properties.gid == 1 ? 0.1 : 1,
+                                    color: "#FFFFFF",
+                                    stroke: "#FFFFFF",
+                                    fillOpacity: 1
+                                };
+                            }
+                            
+                            const argentinaLayer = L.geoJSON(argentina, {style: styleFunction, onEachFeature: onEachFeature}).addTo(map);     
+                        </script>
+
+                        <div class="content-planes">
+                            <div class="planes-province">
+                                <div id="empty_province" class="show">
+                                    <p>{% ts 'Seleccioná la provincia' lang %}<br> {% ts 'para ver su ficha' lang %}</p>
+                                </div>
+                                <div id="province_content">
+                                    <h2 id="title_province"></h2>
+                                    <div id="text-province"></div>
+                                    {% comment %} <div class="d-flex">
+                                        <div class="dropdown">
+                                            <button class="btn btn-azul-claro btn-small dropdown-toggle my-4" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Documentación complementaria
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                            <li>{% ts '<a class="dropdown-item" href="#">Documento 1</a></li>
+                                            <li>{% ts '<a class="dropdown-item" href="#">Documento 2</a></li>
+                                            <li>{% ts '<a class="dropdown-item" href="#">Documento 3</a></li>
+                                            </ul>
+                                        </div>
+                                    </div> {% endcomment %}
+                                </div>
+                                
+                            </div>
+                            <div class="planes-reference">
+                                <h5>Referencias del mapa</h5>
+                                <p><span style="background-color: #969696;"></span>No presentado</p>
+                                <p><span style="background-color: #262C51;"></span>En proceso de preconvalidación (análisis ANA-SsA)</p>
+                                <p><span style="background-color: #975DBA;"></span>En proceso de preconvalidación (análisis MAP-GNCC)</p>
+                                <p><span style="background-color: #4CD964;"></span>En proceso de preconvalidación </p>
+                                <p><span style="background-color: #067F1B;"></span>Convalidado</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="dropdown">
+                        <button class="btn btn-azul-claro btn-small dropdown-toggle my-4" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% ts 'Documentación complementaria' lang %}
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" 
+                            href="https://ciam.ambiente.gob.ar/images/uploaded/recursos/573/Resolucion%20N%C2%BA%20539-%20Ratifica%20elementos%20tecnicos%20minimos-%20Plan%20Respuesta%20al%20CC.pdf" target="_blank">
+                            Resolución COFEMA N° 539/2023 - Ratifica Elementos Técnicos Mínimos para los Plan Respuesta al Cambio Climático de la Ley N° 27.520
+                            </a></li>
+                        <li><a class="dropdown-item" 
+                            href="https://ciam.ambiente.gob.ar/images/uploaded/recursos/401/Lineamientos%20para%20la%20elaboraci%C3%B2n%20de%20planes%20de%20respuesta%20al%20cambio%20clim%C3%A1tico.pdf" target="_blank">
+                            Lineamientos para la elaboración de planes de respuesta al cambio climático: Componente de adaptación
+                        </a></li>
+                        <li><a class="dropdown-item" 
+                            href="https://ciam.ambiente.gob.ar/images/uploaded/recursos/403/Lineamientos%20para%20la%20transversalizaci%C3%B3n%20de%20la%20adaptaci%C3%B3n%20basada%20en%20ecosistemas%20en%20los%20planes%20de%20respuesta.pdf" target="_blank">
+                            Lineamientos para incorporar el enfoque Adaptación basada en Ecosistemas en Planes de Respuesta al Cambio Climático
+                        </a></li>
+                        <li><a class="dropdown-item" 
+                            href="https://ciam.ambiente.gob.ar/images/uploaded/recursos/400/Lineamientos%20para%20incorporar%20el%20enfoque%20de%20Adaptaci%C3%B3n%20basada%20en%20Comunidades%20en%20Planes%20de%20Respuesta%20al%20Cambio%20Clim%C3%A1tico.pdf" target="_blank">
+                            Lineamientos para incorporar el enfoque Adaptación basada en Comunidades en Planes de Respuesta al Cambio Climático
+                        </a></li>
+                    </ul>
+                    </div>
+                </div>
+                
+
+                <p>{% ts 'El artículo 20 de la Ley n.° 27520 junto al Decreto Reglamentario n.° 1030/2020 indican que las provincias y la Ciudad Autónoma de Buenos Aires deben realizar los Planes de Respuestas Jurisdiccionales a través de un proceso participativo que deben ser aprobados por la Autoridad de Aplicación Local de la Ley n° 27.520 de cada jurisdicción. Los planes deben ser actualizarlos, al menos, cada 5 años y deben incluir:' lang %}
+                    <ol type="a">
+                    <li>{% ts 'La línea de base y el patrón de emisiones de gases de efecto invernadero;' lang %}
+                    </li><li>{% ts 'El diagnóstico y análisis de impactos, vulnerabilidad y capacidad de adaptación considerando los escenarios actuales y futuros del cambio climático;' lang %}
+                    </li><li>{% ts 'Una meta cuantitativa de emisiones de gases de efecto invernadero vinculada con los esfuerzos necesarios en materia de mitigación y una meta cualitativa y/o cuantitativa vinculada a los esfuerzos necesarios en materia de adaptación;' lang %}
+                    </li><li>{% ts 'Las medidas de mitigación y adaptación necesarias para lograr el cumplimiento de las metas de mitigación y adaptación, incluyendo para cada medida una hoja de ruta en la cual se analice información disponible sobre barreras y necesidades, avances en el diseño de instrumentos para la implementación, financiamiento e indicadores de progreso y monitoreo;' lang %}
+                    </li><li>{% ts 'El proceso o esquema de actualización regular del plan de respuesta al cambio climático y su sistema de monitoreo e indicadores; y ' lang %}
+                    </li><li>{% ts 'Un esquema de gobernanza y participación de los diversos sectores en la definición e implementación de las medidas de mitigación y adaptación al cambio climático.' lang %}
+                    </ol>
+                    <b>{% ts 'En el Mapa podes visualizar los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.' lang %}</p>
+                </p>                    
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+    
+<!-- end post page -->
+{% endblock %}

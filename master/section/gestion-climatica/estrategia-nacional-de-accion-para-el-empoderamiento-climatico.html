@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="robots" content="noindex">
+
+    <link rel="shortcut icon" href="../main/images/favicon.ico" type="image/vnd.microsoft.icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" type="text/css" href="../main/css/icono-arg.css">
+
+    <link rel="stylesheet" type="text/css" href="../main/css/snic.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+</head>
+<body>
+    <header><!-- Si conectado class="logged"-->
+        <nav class="navbar navbar-top p-0">
+            <div class="container-fluid g-0">
+                <div class="navbar-header">
+                    <div class="dropdown" id="buttonPerfilAccesibilidad">
+                        <button class="btn-perfil-acces" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <img src="../main/images/icono-accesibilidad.svg" alt="Perfil y Accesibilidad">
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="content-profile-acces">
+                                <ul>
+                                    <li><h6 class="dropdown-header">Idioma</h6></li>
+                                    <li class="position-relative">
+                                        <a class="dropdown-item active dropdown-select select-language" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <div class="icono-menu lengua"></div><span id="idioma_snic">Español</span><i class="bi bi-check"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-lg-start" id="idioma_dropdown">
+                                            <li><div class="dropdown-item" href="#" data-idioma="Español">Español</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Mapuche">Mapuche</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Guaraní">Guaraní</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Mbya guaraníes">Mbya guaraníes (mbya)</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Wichí">Wichí</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Quechua">Quechua</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Toba">Toba (qom)</div><i class="bi bi-check"></i></li>
+                                            <li><div class="dropdown-item" href="#" data-idioma="Gününa-küne">Gününa-küne</div><i class="bi bi-check"></i></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <hr class="dropdown-divider">
+                                <ul id="accesibility_buttons">
+                                    <li><h6 class="dropdown-header">Accesibilidad</h6></li>
+                                    <li><a class="dropdown-item" id="grayscale"><div class="icono-menu escala-grises"></div>Escala de grises<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="cursorbig"><div class="icono-menu tamano-cursor"></div>Tamaño de cursor<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="dislexia"><div class="icono-menu tipografia"></div>Tipografia (dislexia)<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="contrast"><div class="icono-menu contraste-color"></div>Contraste de color<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="highlight"><div class="icono-menu resaltar-enlaces"></div>Resaltar enlaces<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="screenmask"><div class="icono-menu mascara-lectura"></div>Máscara de lectura<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="readguide"><div class="icono-menu guia-lectura"></div>Guía de lectura<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" id="audio"><div class="icono-menu lector-pantalla"></div>Lector de pantalla<i class="bi bi-check"></i></a></li>
+                                    <li><a class="dropdown-item" href="#"><div class="icono-menu mapa-del-sitio"></div>Mapa del sitio<i class="bi bi-check"></i></a></li>
+                                </ul>
+                            </div>
+                            <div class="content-reset-acces"><div class="btn btn-azul btn-small disabled" id="reset_accessibility">Restablecer configuración</div></div>
+                        </div>
+                    </div>
+
+                    <a class="navbar-brand" href="../index.html" id="navbar-brand">
+                        <img src="../main/images/logo_argentina-azul.svg" alt="Argentina.gob.ar" height="50" width="254">
+                    </a>
+                </div>
+                <div class="navbar-header navbar-right">
+                    <div class="login-text">
+
+                        <!--no conectado-->
+                        <a class="btn btn-login" href="../inicia-sesion.html">
+                            <span>Ingresar</span>
+                        </a>
+
+                        <!--conectado
+                        <a class="btn btn-login" href="mi-perfil.html">
+                            <img src="../main/images/iconos/user-white.svg" alt="">
+                        </a>-->
+
+                    </div>
+                    <button onclick="jQuery('.navbar.navbar-top').addClass('state-search');" class="btn btn-buscar-mobile btn-login visible-xs" aria-labelledby="edit-keys"><img class="search-white" src="../main/images/iconos/search-white.svg" alt=""><img src="../main/images/iconos/search.svg" alt=""><span class="sr-only">Buscar</span></button>
+                    <button onclick="jQuery('.navbar.navbar-top').removeClass('state-search');" class="btn btn-buscar-close-mobile visible-xs"> <i class="fa fa-times"><span class="sr-only">Cerrar el buscador</span></i></button>
+                    <form class="main-form search-form" role="search" action="buscar.html" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                        <div class="input-group">
+                            <input placeholder="Buscá en el sitio" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                            <span class="input-group-btn">
+                            <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                                <img src="../main/images/iconos/search.svg" alt=""></i><span class="sr-only">Buscar en el sitio</span>
+                            </button>
+                        </span></div>
+                        </div>
+                    </form>
+
+                    <!--admin-->
+                        <!--<div class="staff-buttons">
+                            <a href="#admin" class="btn btn-texto btn-login">
+                                <i class="bi bi-file-earmark-richtext"></i>
+                                <span>Gestión de contenido</span>
+                            </a>
+                            
+                            <a href="#admin" class="btn btn-texto btn-login">
+                                <i class="bi bi-gear-fill"></i>
+                                <span>Admin</span>
+                            </a>
+                        </div>-->
+                    <!--end admin-->
+
+                    <div class="login-buttons">
+
+                        <!--no conectado-->
+                            <a class="btn btn-login" href="../inicia-sesion.html">
+                                <span>Inicia sesión</span>
+                            </a>
+
+                        <!-- conectado
+                            <a class="btn btn-login" href="mi-perfil.html">
+                                <img src="../main/images/iconos/user.svg" alt="">
+                                <span>Federico Lagreze</span>
+                            </a>-->
+
+
+                        
+                    </div>
+                    <div class="sidebar-mobile">
+                        <div class="toggle toggle-sidebar">
+                            <a href="#" class="burger js-menu-toggle" data-toggle="collapse" data-target="#main-navbar">
+                                <span></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="side-inner">
+            
+                <div class="sidebar-content">
+                    <div class="snic-title">
+                        <a class="navbar-brand-sidebar" href="../index.html">
+                            <img src="../main/images/logo_snic.svg" class="logo-snic" alt="">
+                        </a>
+                    </div>
+                    <!--<a class="nav-link {% if cat_id == c.id %} active{% endif %}" aria-current="page" href="http://localhost:8080/posts/mye">
+                        <img src="../main/images/mye/mye.svg" alt="">
+                        <span>Módulo de Monitoreo y Evaluación</span>
+                    </a>-->
+                    <a href="../sobre-snic.html" class="nav-link active" aria-current="page" >
+                        <img src="../main/images/sections/sobre-snic.svg" alt="">
+                        <span>Sobre SNIC</span>
+                    </a>
+                    <a href="../gestion-climatica.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/gestion-climatica.svg" alt="">
+                        <span>Gestión climática</span>
+                    </a>
+                    <a href="../recursos.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/recursos.svg" alt="">
+                        <span>Recursos</span>
+                    </a>
+                    <a href="../normativas.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/normativas.svg" alt="">
+                        <span>Normativas</span>
+                    </a>
+                    <a href="../biblioteca.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/biblioteca.svg" alt="">
+                        <span>Biblioteca</span>
+                    </a>
+                    <a href="../novedades.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/novedades.svg" alt="">
+                        <span>Novedades</span>
+                    </a>
+                    <a href="../enlaces-de-interes.html" class="nav-link" aria-current="page" >
+                        <img src="../main/images/sections/enlaces.svg" alt="">
+                        <span>Enlaces de interés</span>
+                    </a>
+
+                    <!-- Si conectado
+                    <a href="#enlace-perfil" class="nav-link nav-profile" aria-current="page" >
+                        <img src="../main/images/perfiles/gestor-publico-locales_gold.svg" alt="">
+                        <span>Información para Gestores Públicos Locales</span>
+                    </a>
+                    <form action="{% url 'logout' %}" method="POST" class="form-logout">
+                        {% csrf_token %}
+                        <a href="{% url 'login' %}" class="nav-link" aria-current="page">
+                            <img src="../main/images/iconos/logout.svg" alt="">
+                            <span>Cerrar sesión</span>
+                        </a>
+                    </form>-->
+                    
+                </div>
+            
+            </div>
+        </aside>
+
+        <!-- main-content -->
+        <div class="main-content "><!--{% block staff-class %}{% endblock %}-->
+
+            <!-- Si home page class="snic-home-logo"
+            <div class="container-logo container snic-home-logo"> 
+                <img src="../main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div> -->
+            <!--post pages-->
+            <div class="container-logo offset-md-1">
+                <img src="../main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div>
+            <!--others pages
+            <div class="container-logo snic-tools-logo">
+                <img src="../main/images/logo_snic.svg" class="logo-snic" alt="">
+            </div>-->
+
+            <div class="container-fluid g-0">
+            <!-- content -->
+
+                <!-- Gestion climatica page -->
+                <div class="post-content">
+                    <div class="col-md-1 social-share">
+                        <ul class="list-inline">
+                            <li>
+                                <a href="#" target="_blank" rel="noopener noreferrer">
+                                    <span class="sr-only">Compartir en Facebook</span>
+                                    <i class="icono-arg-facebook-f-" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" target="_blank" rel="noopener noreferrer">
+                                    <span class="sr-only">Compartir en Twitter</span>
+                                    <i class="icono-arg-twitter-pajaro" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" target="_blank" rel="noopener noreferrer">
+                                    <span class="sr-only">Compartir en Linkedin</span>
+                                    <i class="icono-arg-linkedin-in" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" target="_blank" rel="noopener noreferrer">
+                                    <span class="sr-only">Compartir en Whatsapp</span>
+                                    <i class="icono-arg-whatsapp-telefono" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" target="_blank" rel="noopener noreferrer">
+                                    <span class="sr-only">Compartir en Telegram</span>
+                                    <i class="icono-arg-telegram-avion" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="post-row-mobile row">
+                        <div class="offset-md-1 col-md-10 col-post">
+
+                            <div class="breadcrumbs-content">
+                                <ol class="breadcrumb" role="list" aria-label="Migas de pan" >
+                                    <li><a href="../index.html">Home</a></li>
+                                    <li><a href="../gestion-climatica.html">Gestión climática</a></li>
+                                    <li><a href="que-esta-haciendo-el-estado-nacional.html">¿Qué está haciendo el estado nacional?</a></li>
+                                    <li><a href="marco-nacional.html">Marco Nacional</a></li>
+                                    <li><a href="sectores-en-la-accion-climatica.html">Sectores en la acción climática</a></li>
+                                    <li class="active" aria-current="page">Estrategia Nacional de Acción para el empoderamiento climático</li>
+                                </ol>
+                            </div>
+
+                            <div class="col-md-1 social-share-mobile">
+                                <ul class="list-inline">
+                                    <li>
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            <span class="sr-only">Compartir en Facebook</span>
+                                            <i class="icono-arg-facebook-f-" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            <span class="sr-only">Compartir en Twitter</span>
+                                            <i class="icono-arg-twitter-pajaro" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            <span class="sr-only">Compartir en Linkedin</span>
+                                            <i class="icono-arg-linkedin-in" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            <span class="sr-only">Compartir en Whatsapp</span>
+                                            <i class="icono-arg-whatsapp-telefono" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" target="_blank" rel="noopener noreferrer">
+                                            <span class="sr-only">Compartir en Telegram</span>
+                                            <i class="icono-arg-telegram-avion" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="post">
+
+                                <h1 class="post-title">Estrategia Nacional de Acción para el empoderamiento climático</h1>
+
+                                <div class="post-text">
+
+                                    <p>
+                                        Argentina avanza en sus compromisos climáticos nacionales e internacionales. Desde la presentación de su segunda NDC en 2020, ha aumentado su ambición climática y promovido políticas públicas sobre cambio climático. Entre 2022 y 2023, desarrolló la primera Estrategia Nacional de Acción para el Empoderamiento Climático (EnACE) mediante un proceso participativo federal. La EnACE busca articular capacidades para impulsar acciones transformadoras frente al cambio climático, consolidando enfoques y acciones para empoderar a personas e instituciones en el país.
+
+                                    </p>
+
+                                    <p>
+                                        La estrategia surge de la importancia de un abordaje multisectorial y multiactoral, tanto privado como público, social y gubernamental, de la problemática del cambio climático. Se desarrolla en cumplimiento con lo establecido por la Ley Nro. 27.520 de “Presupuestos Mínimos de Adaptación y Mitigación al Cambio Climático Global”, que explicita la necesidad de preparar a la sociedad ante los cambios climáticos futuros, promocionar una nueva conciencia ambiental que reduzca los impactos y aumente la adaptación mediante la información, participación pública, la sensibilización y el fortalecimiento de capacidades.
+
+                                    </p>
+
+                                    <p>
+                                        La ENACE se basa en diversos instrumentos legales nacionales, como la Ley General del Ambiente N.º 25.675, que promueve la educación ambiental, la Ley de Presupuestos Mínimos de Cambio Climático N.º 27.520, la Ley "Yolanda" N.º 27.592 sobre capacitación en sostenibilidad para funcionarios públicos y la Ley de Educación Ambiental Integral N.º 27.621, que establece la Estrategia Nacional de Educación Ambiental Integral. A nivel regional, se vincula con el Acuerdo de Escazú, ratificado en 2021, que garantiza la participación pública en asuntos ambientales a través de un proceso participativo amplio.
+                                    </p>
+
+                                    <div class="d-flex">
+                                        <a href="https://ciam.ambiente.gob.ar/images/uploaded/recursos/439/2023%20ENACE%20Argentina_final.pdf" target="_blank" class="btn btn-azul-claro btn-small">Descarga la Estrategia</a>
+                                        <div class="dropdown">
+                                            <button class="btn btn-azul-claro btn-small dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Documentación complementaria
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                              <li><a class="dropdown-item" href="#">Documento 1</a></li>
+                                              <li><a class="dropdown-item" href="#">Documento 2</a></li>
+                                              <li><a class="dropdown-item" href="#">Documento 3</a></li>
+                                            </ul>
+                                        </div>
+                                        <a href="../biblioteca.html#capacitaciones" class="btn btn-azul-claro btn-small">Capacitaciones</a>
+                                        <a href="../biblioteca.html" class="btn btn-azul-claro btn-small">Acceso a la información</a>
+                                    </div>
+
+                                    <p class="text-center">
+                                        <img src="../main/images/gestion-climatica/enace.png" alt="ENACE | Componentes y enfoques transversales" class="img-byheight">
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+                    
+                <!-- end post page -->
+
+                <footer class="main-footer">
+                    <div class="container">
+                        <div class="row">
+
+                            <div class="col-md-3 col-sm-12 col-footer col-footer-brand">
+                                <img src="../main/images/logo_snic_azul.svg" class="logo-snic" alt="">
+                                <p><a href="#"><img src="../main/images/logo_argentina-azul.svg" alt="Argentina.gob.ar"></a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Gestión climática</a></p>
+                                <p><a href="#">Recursos</a></p>
+                                <p><a href="#">Normativas</a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Biblioteca</a></p>
+                                <p><a href="#">Formación y capacitaciones</a></p>
+                                <p><a href="#">Enlaces de interés</a></p>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 col-footer">
+                                <p><a href="#">Acerca de este sitio</a></p>
+                                <p><a href="#">Terminos y condiciones</a></p>
+                                <p><a href="#">Contacto</a></p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="container-fluid border-top-amarillo">
+                        <div class="row sub-footer"><div class="container"></div></div>
+                    </div>
+                </footer>
+
+
+            <!-- end content -->
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Javascript de chaque page -->
+    <!-- {% block javascript %}{% endblock%} -->
+    <!-- End Javascript de chaque page-->
+
+    <!-- Javascript general -->
+    <script src="../main/js/snic.js"></script>
+    <script src="../main/js/accessibility.js"></script>
+    <!-- End Javascript general-->
+
+</body>
+</html>

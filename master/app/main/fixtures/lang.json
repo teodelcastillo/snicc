@@ -1,0 +1,1 @@
+[{"model": "main.language", "pk": "en", "fields": {"name": "English", "order": 2}}, {"model": "main.language", "pk": "es", "fields": {"name": "Español", "order": 1}}, {"model": "main.language", "pk": "gu", "fields": {"name": "Guarani", "order": 20}}, {"model": "main.language", "pk": "qu", "fields": {"name": "Quechua", "order": 20}}]

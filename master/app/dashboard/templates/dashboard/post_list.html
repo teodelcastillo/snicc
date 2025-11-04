@@ -1,0 +1,51 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+            <h2>Lista de publicaciones</h2>
+            {% if request.user.is_writer %}
+            <a href="{% url 'dashboard:new' %}" class="btn btn-amarillo">Nueva publicación</a>
+            {% endif %}
+        </div>
+        <table class="table">
+            <tr><th>Tipo</th><th>Sección</th><th>Publicación</th>{% for lang in languages %}<th>{{lang.name}}</th>{% endfor %}
+            {% comment %} {% if request.user.access.can_delete %}<th>eliminar</th>{% endif %} {% endcomment %}
+            </tr>
+    
+            {% for p in posts %}
+        <tr><td>{{p.get_type_display}}</td><td>{{p.category}}</td>
+            <td>
+                {% if p.is_draft %}[borrado]{% endif %}
+                {% if request.user.is_writer %}<a href="{% url 'dashboard:edit' p.id %}">{{p}}</a>
+                {% else %}{{p.content}}
+                {% endif %}
+                <div class="editedby">Editado por última vez el {{p.content.date}} por {{p.content.user}} 
+                    <a href="{% url 'dashboard:history' p.id 'es' %}"><span class="material-symbols-outlined" title="historia">history</span></a>
+                    <a href="{% url 'mainv2:post' p.slug %}"><span class="material-symbols-outlined" title="ver">visibility</span></a>
+                </div>
+            </td>   
+            {% with p.lang_list as pll %}
+            {% for lang in languages %}
+                <td><a href="{% url 'dashboard:translation' p.id lang.code %}"><span class="material-symbols-outlined"  title="editar">
+                {% if lang.is_default or lang in pll %}<span style="color:green;">check</span>{% else %}<span style="color:red;">close</span>{% endif %}
+                </span></a>
+                </td>
+            {% endfor %}{% endwith %}
+            {% if not p.protected and request.user.access.can_delete %}<td><a href="{% url 'dashboard:delete' p.id %}" onclick="clicked(event)">
+                <span class="material-symbols-outlined" style="color:red;" title="eliminar">delete</span></a></td>{% endif %}
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
+</div>
+<script>
+    function clicked(e)
+    {
+        if(!confirm('Are you sure? This will delete the post, along with all translations and past edits.')) {
+            e.preventDefault();
+        }
+    }
+</script>
+    
+{% endblock %}

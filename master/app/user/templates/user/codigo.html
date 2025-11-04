@@ -1,0 +1,74 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+<!-- Login page -->
+<div class="account-content">
+    
+    <div class="post-row-mobile row">
+        <div class="offset-2 col-lg-8 col-xl-8 col-account">
+
+            <!-- Si l'utilisateur est en train de s'enregistrer -->
+            {% if case == 'register' %}
+            <p class="register-steps">{% ts 'PASO' lang %} 2 / 3</p>
+            {% endif %}
+
+            <h1 class="post-title post-title-code">{% ts 'Ingresá el código recibido en tu email' lang %}</h1>
+
+            <div class="login-content">
+                <!-- Ajouter la class invalid si invalide, sinon ajouter valid, après submit , ex: class="form-login valid"-->
+                <form name="formLogin" class="form-login{% if error %} invalid{% endif %}" action="." method="POST" >
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <div class="form-group-digits">
+                            <input name="firstdigit" class="digit is-valid" type="number" required id="firstdigit" size="1" maxlength="1" tabindex="0" min="0"
+                            max="9">
+                            <input name="seconddigit" class="digit is-valid" type="number" required id="secondtdigit" size="1" maxlength="1" tabindex="1" min="0"
+                            max="9">
+                            <input name="thirddigit" class="digit is-valid" type="number" required id="thirddigit" size="1" maxlength="1"  tabindex="2"  min="0"
+                            max="9">
+                            <input name="fourthdigit" class="digit is-valid" type="number" required id="fourthdigit" size="1" maxlength="1" tabindex="3" min="0"
+                            max="9">
+                        </div>
+                        {% comment %} <div id="emailHelp" class="form-text cursor-pointer helper" onClick="window.location.reload();">{% ts 'Reenviar código por email.' lang %}</div> {% endcomment %}
+                        {% comment %} <div class="valid-feedback"><i class="bi bi-check2-circle"></i>Código verificado con éxito</div> {% endcomment %}
+                        <div class="invalid-feedback"><i class="bi bi-check2-circle"></i>{% ts 'Código incorrecto, intentelo de nuevo' lang %}</div>
+                    </div>
+
+                    <button id="send_code" type="submit" class="btn btn-login disabled">Aceptar</button>
+                </form>
+
+
+            </div>
+
+        </div>
+        
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            $(":input[type='number']").keyup(function(event){
+                if(/^\d+$/.test(event.key)) {
+                    if ($(this).next('[type="number"]').length > 0){
+                    $(this).next('[type="number"]')[0].focus();
+                    }else{
+                        if ($(this).parent().next().find('[type="number"]').length > 0){
+                            $(this).parent().next().find('[type="number"]')[0].focus();
+                        }
+                    }
+                }
+                if(document.getElementById('firstdigit').value !=  '' && 
+                document.getElementById('secondtdigit').value !=  '' && 
+                document.getElementById('thirddigit').value !=  '' && 
+                document.getElementById('fourthdigit').value !=  '' ) {
+                    document.getElementById('send_code').classList.remove('disabled');                    
+                }
+
+            });
+        });
+    </script>
+
+</div>
+<!-- end post page -->
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+      "titulo" : "Capacidad instalada de todas las centrales nucleares de la red",
+      "valores" : ["Capacidad instalada", 1730, 1755, 1755, 1755, 1755, 1755],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las centrales nucleares de la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>En 2016, Atucha II aumentó su capacidad."],
+      "min" : 1357,
+      "max" :1800,
+      "unidad" : "MW"
+}

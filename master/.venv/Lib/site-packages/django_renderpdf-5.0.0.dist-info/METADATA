@@ -1,0 +1,67 @@
+Metadata-Version: 2.1
+Name: django-renderpdf
+Version: 5.0.0
+Summary: Django app to render django templates as PDF files.
+Author-email: Hugo Osvaldo Barrera <hugo@whynothugo.nl>
+License: ISC
+Project-URL: repository, https://github.com/WhyNotHugo/django-renderpdf/
+Project-URL: documentation, https://django-renderpdf.readthedocs.io/
+Project-URL: changelog, https://github.com/WhyNotHugo/django-renderpdf/blob/main/CHANGELOG.rst
+Project-URL: issues, https://github.com/WhyNotHugo/django-renderpdf/issues/
+Project-URL: funding, https://whynothugo.nl/sponsor/
+Keywords: django,weasyprint,pdf
+Classifier: Development Status :: 6 - Mature
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 3.2
+Classifier: Framework :: Django :: 4.0
+Classifier: Framework :: Django :: 4.1
+Classifier: Framework :: Django :: 4.2
+Classifier: License :: OSI Approved :: ISC License (ISCL)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.9
+Description-Content-Type: text/x-rst
+License-File: LICENCE
+Requires-Dist: django >=2.2
+Requires-Dist: weasyprint <63
+Provides-Extra: docs
+Requires-Dist: sphinx ; extra == 'docs'
+Provides-Extra: lint
+Requires-Dist: ruff ; extra == 'lint'
+Requires-Dist: mypy ; extra == 'lint'
+
+django-renderpdf
+================
+
+**django-renderpdf** is a Django app to render django templates as PDF files.
+
+Introduction
+------------
+
+Rendering PDFs for web developers is generally pretty non-trivial, and there's
+no common approach to doing this. django-renderpdf attempts to allow reusing
+all the known tools and skills when generating a PDF file in a Django app:
+
+* Use Django template files, which are internally rendered as HTML and them PDF
+  files.
+* Use staticfiles app to include any CSS or image files.
+* Simply subclass a ``PDFView`` class which has an interface very similar to
+  Django's own built-in ``View`` classes.
+
+Documentation
+-------------
+
+The full documentation is available at https://django-renderpdf.readthedocs.io/.
+
+Licence
+-------
+
+django-renderpdf is licensed under the ISC licence. See LICENCE for details.

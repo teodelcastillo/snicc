@@ -1,0 +1,528 @@
+{% extends 'mainv2/base.html' %}
+{% load static %}
+{% block head %}
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- bootstrap-select : Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+    <!-- Load c3.css -->
+    <link href="{% static 'main/css/c3.css' %}" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'main/css/mye.css' %}" type="text/css">
+    <script type="text/javascript">
+
+        var pilaresColorsDisunity = {};
+        var statusColors = {};
+        
+        var categoriesInputs = [
+            "Líneas y enfoques",
+            "Enfoques transversales",
+            "Líneas instrumentales",
+            "Líneas estratégicas"
+        ];
+        var linesInputs = [
+            "Gestión integral del riesgo",
+            "Salud",
+            "Transición laboral justa",
+            "Financiamiento para la transición",
+            "Fortalecimiento institucional",
+            "Investigación, desarrollo tecnológico e innovación",
+            "Conservación de la biodiversidad y bienes comunes",
+            "Gestión sostenible de sistemas alimentarios y bosques",
+            "Movilidad sostenible",
+            "Territorios sostenibles y resilientes",
+            "Transición energética",
+            "Transición productiva"
+        ];
+        var pilaresInputs = [
+            "Adaptación",
+            "Mitigación",
+            "Pérdidas y daños",
+            "Adaptación y Mitigación",
+            "Adaptación y Pérdidas y daños",
+            "Mitigación y Pérdidas y daños",
+            "Adaptación, Mitigación y Pérdidas y daños"
+        ]
+    </script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mye-content">
+    <div class="mye-header">
+        <div class="mye-title-content" >
+            <h1 id="mye-title">Módulo de Monitoreo y Evaluación<i class="bi bi-info-circle" data-bs-toggle="offcanvas" data-bs-target="#drawerRightInfo" aria-controls="drawerRightInfo"></i></h1>
+        </div>
+        <div class="mye-buttons float-end me-2">
+            <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
+                <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar documentos"><span>Descargar documentos</span></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/measure/export.csv">Descargar en lista (CSV)</a></li>
+                    <li><div class="dropdown-item" id="download_pdf">Descargar en fichas (PDF)</div></li>
+                    <li><div class="dropdown-item" onclick="openDetailPopup([], true)">Descargar detalle (PDF)</div></li>
+                </ul>
+            </div>
+            <a href="/editor/measure/"><img src="{% static 'main/images/mye/admin.svg' %}" alt="Admin MyE"><span>Admin MyE</span></a>
+        </div>
+    </div>
+    <div class="mye-body">
+        <div class="mye-body-content"><!-- col-auto px-0-->
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                  <button class="nav-link active" id="nav-general-tab" data-bs-toggle="tab" data-bs-target="#nav-general" type="button" role="tab" aria-controls="nav-general" aria-selected="true">Aspectos generales</button>
+                  <button class="nav-link" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-details" aria-selected="false">Detalles</button>
+                </div>
+            </nav>
+            <div class="tab-content filter-opened" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
+                    <div class="tab-content-header">
+                        <div class="c3-title"></div>
+                        <div class="header-buttons">
+                            <button type="button" class="btn btn-light btn-filter" data-bs-toggle="offcanvas" data-bs-target="#drawerFilters" aria-controls="drawerFilters">
+                                <i class="bi bi-filter"></i>
+                                <span>Filtros</span>
+                            </button>
+        
+                            <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                  <div class="nav-link active" id="pills-bars-tab" data-bs-toggle="pill" data-bs-target="#pills-bars" role="tab" aria-controls="pills-bars" aria-selected="true">
+                                    <img src="{% static 'main/images/mye/vertical-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
+                                    <img src="{% static 'main/images/mye/vertical-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
+                                  </div>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                  <div class="nav-link" id="pills-bars-list-tab" data-bs-toggle="pill" data-bs-target="#pills-bars-list" role="tab" aria-controls="pills-bars-list" aria-selected="false">
+                                    <img src="{% static 'main/images/mye/horizontal-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
+                                    <img src="{% static 'main/images/mye/horizontal-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
+                                  </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pill-content tab-pane fade show active" id="pills-bars" role="tabpanel" aria-labelledby="pills-bars-tab">
+
+                            <div class="circle-outer">
+
+                                <ul class="circle">
+                                  <li>
+                                      <div class="content-slice first">
+                                        <div class="c3-title">
+                                            <select class="selectpicker show-tick selectpicker-lineas-enfoques" id="selectpicker_title_bar">
+                                                <option class="title-select-lineas-enfoques">Líneas y enfoques</option>
+                                                <option>Enfoques transversales</option>
+                                                <option>Líneas instrumentales</option>
+                                                <option>Líneas estratégicas</option>
+                                            </select>
+                                        </div>
+                                        <div class="content-graphs">
+                                            <div id="chart_lineas_enfoques"></div>     
+                                        </div>
+                                      </div>
+                                      <div class="background"><div></div></div>
+                                  </li>
+                                  <li>
+                                      <div class="content-slice second">
+                                        <div class="c3-title">
+                                            <div class="c3-title-space">Pilares de la acción climática en Argentina</div>
+                                        </div>
+                                        <div class="content-graphs">
+                                            <div id="chart_pilares"></div>
+                                        </div>
+                                      </div>
+                                      <div class="background"><div></div></div>
+                                  </li>
+                                  <li>
+                                      <div class="content-slice third">
+                                        <div class="c3-title">
+                                            <div class="c3-title-space">Estado de implementación</div>
+                                        </div>
+                                        <div class="content-graphs">
+                                            <div id="chart_semaforo"></div>
+                                        </div>
+                                      </div>
+                                      <div class="background"><div></div></div>
+                                  </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="tab-pill-content tab-pane fade" id="pills-bars-list" role="tabpanel" aria-labelledby="pills-bars-list-tab">
+                            <div class="content-stacked-chart">
+                                <div class="c3-title">
+                                    <select class="selectpicker show-tick selectpicker-lineas-enfoques" id="selectpicker_title_stackedbar">
+                                        <option class="title-select-lineas-enfoques">Líneas y enfoques</option>
+                                        <option>Enfoques transversales</option>
+                                        <option>Líneas instrumentales</option>
+                                        <option>Líneas estratégicas</option>
+                                    </select>
+                                </div>
+                                <div id="stacked_bar_chart"></div>
+                            </div>
+                            <div id="stacked_bar_chart_legends">
+                                <div class="legend-left">
+                                    <div class="c3-title">
+                                        <div class="c3-title-space">
+                                            Pilares de la acción climática en Argentina
+                                            <div class="buttons-switch">
+                                                <i id="hide_0" class="bi bi-eye-slash hide-all active" data-bs-toggle="tooltip" data-bs-placement="top" title="Ocultar todos" onclick="toogleGroups(0, 'hide', this)"></i>
+                                                <i id="show_0" class="bi bi-eye show-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar todos" onclick="toogleGroups(0, 'show', this)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="legend-right">
+                                    <div class="c3-title">
+                                        <div class="c3-title-space">
+                                            Estado de implementación
+                                            <div class="buttons-switch">
+                                                <i id="hide_1" class="bi bi-eye-slash hide-all active" data-bs-toggle="tooltip" data-bs-placement="top" title="Ocultar todos" onclick="toogleGroups(1, 'hide', this)"></i>
+                                                <i id="show_1" class="bi bi-eye show-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar todos" onclick="toogleGroups(1, 'show', this)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="tab-pane fade view-cards" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
+
+                    <div class="tab-content-header">
+                        <div class="c3-title">Líneas de acción y medidas <i class="bi bi-info-circle" data-bs-toggle="offcanvas" data-bs-target="#lineas_accion_info" aria-controls="drawerRightInfo"></i></div>
+                        <div class="header-buttons">
+                            <button type="button" class="btn btn-light btn-filter" data-bs-toggle="offcanvas" data-bs-target="#drawerFilters" aria-controls="drawerFilters">
+                                <i class="bi bi-filter"></i>
+                                <span>Filtros</span>
+                            </button>
+                            <ul class="nav nav-pills" id="pills-details-tab">
+                                <li class="nav-item">
+                                <div class="nav-link active" id="pills-cards-tab">
+                                    <img src="{% static 'main/images/mye/cards-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
+                                    <img src="{% static 'main/images/mye/cards-white.svg' %}" alt="Filtrar" class="img-bars-white">
+                                </div>
+                                </li>
+                                <li class="nav-item">
+                                <div class="nav-link" id="pills-cards-list-tab">
+                                    <img src="{% static 'main/images/mye/horizontal-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
+                                    <img src="{% static 'main/images/mye/horizontal-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
+                                </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="pills-details-tabContent">
+                        <div class="container-fluid tab-pill-content">
+
+                            <div class="content-filters"></div>
+
+                            <div class="content-details row">
+
+                                <div id="content_status_graph" class="content-details-status col-3">
+                                    <div class="no-select" id="title_status">Gráfico del estado de implementacion de las medidas de las líneas de acción <span>(<div id="filter_status_text">0</div> seleccionadas)</span></div>
+                                    <div class="links-content-status btn-group" role="group" aria-label="">
+                                        <div class="btn btn-primary btn-dpd-action" onclick="openDetailPopup(actionsSelecteds.length == 1 ? encodeURI(JSON.stringify(actionsSelecteds[0])):actionsSelecteds)">
+                                            <i class="bi bi-file-earmark"></i>
+                                            Detalles
+                                        </div>
+                                        <div class="btn btn-primary btn-dpd-action" id="download_selecteds_actions">
+                                            <i class="bi bi-download"></i>
+                                            Descarga
+                                        </div>
+                                    </div>
+                                    <div class="chart-content-status">
+                                        <div id="chart_status_measures"></div>
+                                    </div>
+                                    <div class="legend-status-measures"><div class="legend-html"></div></div>
+                                </div>
+
+                                <!-- Modal Detalle -->
+                                <div class="col-9" id="action_detail_popup" tabindex="-1" aria-labelledby="measureDetailLabel" data-bs-backdrop="false" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <div onclick="$('#action_detail_popup').modal('hide');" class="btn-back">
+                                                    <i class="bi bi-arrow-left-short"></i> Volver
+                                                </div>
+                                                <div class="links-content-status">
+                                                    <div class="btn btn-dpd-action" onclick="saveDetailPDF()">
+                                                        <i class="bi bi-download"></i>
+                                                        Descarga
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-body" id="measures_detail_content"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal INGEI -->
+                                <div class="col-9" id="ingei_popup" tabindex="-1" aria-labelledby="ingei_popup_title" data-bs-backdrop="false" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <div onclick="$('#ingei_popup').modal('hide');" class="btn-back">
+                                                    <i class="bi bi-arrow-left-short"></i> Volver
+                                                </div>
+                                            </div>
+                                            <div class="modal-body" id="ingei_content">
+                                                <h1 class="modal-title fs-5" id="ingei_popup_title"></h1>
+                                                <div id="nav"><div class="nav_monitoreo" id="nav_monitoreo"></div></div>
+                                                <div id="body">
+                                                    <div class="content">
+                                                        <div class="info">
+                                                            <h1 id="chart_title" class="monitoreo">Distribución de GEI</h1>
+                                                            <div class="ley">
+                                                            <span id="unidad_de_medida" style="display: none">
+                                                                Unidad de medida:
+                                                                <strong><span id="chart_unidad">MtCO₂e</span></strong>
+                                                            </span>
+                                                            </div>
+                                                        </div>
+                                                    
+                                                        <!-- GRAFICO -->
+                                                        <div id="chart" class="c3"></div>
+                                                        <div id="chart_custom_legend"></div>
+                                                        <div id="chart_descripcion"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="content-details-measures col-9">
+                                    <div class="measures-counter">
+                                        <div>
+                                            <input class="form-check-input" type="checkbox" value="0" id="check_all_actions">
+                                            <label for="check_all_actions">Seleccionar / Deseleccionar todas</label>
+                                        </div>
+                                        <div class="selecteds-actions">Líneas de acción seleccionadas <span id="measures_selecteds">0</span>/<span id="total_actions">0</span></div>
+                                    </div>
+                                    <div class="measures-cards-content">
+
+                                        <div id="content_actions_graphs" class="row row-cols-1 row-cols-xl-2 g-4"></div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        
+
+        
+    </div>
+</div>
+
+{% endblock %}
+{% block loading %}
+<div class="wrap-shadow" id="loading">
+    <div class="uil-default-css">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div class="loading-text">Cargando</div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="drawerRightInfo" aria-labelledby="drawerRightInfoLabel">
+    <div class="offcanvas-header">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <h5 class="offcanvas-title" id="drawerRightInfoLabel">Sobre el Módulo de Monitoreo y Evaluación</h5>
+        <div class="offcanvas-text">
+            <p>El sistema de monitoreo de Argentina es una herramienta clave para seguir el progreso de las acciones propuestas en el Plan Nacional de Adaptación y Mitigación al cambio climático.  A través de una serie de indicadores, mide los avances en distintos sectores y regiones del país, permitiendo evaluar la efectividad de las políticas climáticas.</p>
+            <p>Además, busca fomentar la transparencia y la mejora continua de las estrategias de adaptación y mitigación. En conclusión, este sistema es fundamental para asegurar que Argentina cumpla con sus compromisos internacionales y proteja a su ciudadanía y ecosistemas, reduciendo su vulnerabilidad frente al cambio climático.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Lineas y enfoques , y Pilares de la accion climatica-->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="graphiquesInfo">
+    <div class="offcanvas-header">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Enfoques transversales" style="display: none;">Enfoques transversales</h5>
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Líneas instrumentales" style="display: none;">Líneas instrumentales</h5>
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Líneas estratégicas" style="display: none;">Líneas estratégicas</h5>
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Adaptación" style="display: none;">Adaptación</h5>
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Mitigación" style="display: none;">Mitigación</h5>
+        <h5 class="offcanvas-title offcanvas-title-graph" data-title-offcanvas-graph="Pérdidas y daños" style="display: none;">Pérdidas y daños</h5>
+
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Enfoques transversales" style="display: none;">
+            <p>Los enfoques transversales del PNAyMCC constituyen temas de la agenda pública y de la realidad social que atraviesan cada una de las políticas climáticas, convirtiéndose así en fundamentos para la implementación de las medidas de adaptación y mitigación del cambio climático.</p>
+        </div>
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Líneas instrumentales" style="display: none;">
+            <p>Las líneas instrumentales del PNAyMCC generan las condiciones habilitantes para la implementación efectiva de las líneas estratégicas y de los enfoques transversales.</p>
+        </div>
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Líneas estratégicas" style="display: none;">
+            <p>Las líneas estratégicas del PNAyMCC están orientadas a impulsar un desarrollo bajo en emisiones y resiliente a los efectos del cambio climático y representan los ejes centrales para alcanzar los compromisos nacionales.</p>
+        </div>
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Adaptación" style="display: none;">
+            <p>Se consideran medidas de adaptación a “las políticas, estrategias, acciones, programas y proyectos que puedan prevenir, atenuar o minimizar los daños o impactos asociados al Cambio Climático y explorar y aprovechar las nuevas oportunidades de los eventos climáticos” (Ley n.o 27520, 2019). Las medidas de adaptación apuntan a reducir los riesgos de que las comunidades, especialmente los sectores en situación de mayor vulnerabilidad; los ecosistemas y los sistemas productivos sufran los impactos negativos del cambio climático.</p>
+        </div>
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Mitigación" style="display: none;">
+            <p>Se consideran medidas de mitigación a “las acciones orientadas a reducir las emisiones de gases de efecto invernadero responsables del cambio climático así como medidas destinadas a potenciar, mantener, crear y mejorar sumideros de carbono” (Ley n.o 27520, 2019).</p>
+        </div>
+        <div class="offcanvas-text offcanvas-text-graph" data-text-offcanvas-graph="Pérdidas y daños" style="display: none;">
+            <p>De manera general, suele definírselos como los costos residuales que no pueden ser evitados por las vías de la adaptación y mitigación.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- Lineas de accion y medidas popup -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="lineas_accion_info">
+    <div class="offcanvas-header">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <h5 class="offcanvas-title" id="drawerRightInfoLabel">Líneas de acción y medidas</h5>
+        <div class="offcanvas-text">
+            <p>Texto Líneas de acción y medidas</p>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Filtros -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="drawerFilters" aria-labelledby="drawerFiltersLabel">
+    <div class="offcanvas-header">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <h5 class="offcanvas-title" id="drawerFiltersLabel">Filtros</h5>
+        <div class="offcanvas-text mye-filter">
+                            
+            <div class="form-group" id="form_group_lineas"><!--data-bs-toggle="tooltip" data-bs-placement="top" title="Líneas estratégicas, enfoques transversales, líneas instrumentales"-->
+                <select class="selectpicker show-tick selectpicker-lineas-enfoques" data-container="#drawerFilters" id="selectpicker_select_label">
+                    <option class="title-select-lineas-enfoques">Líneas y enfoques</option>
+                    <option>Enfoques transversales</option>
+                    <option>Líneas instrumentales</option>
+                    <option>Líneas estratégicas</option>
+                </select>
+                <select select-group-id="Enfoques transversales" class="selectpicker selectpickers-lineas" multiple title="-" data-container="#drawerFilters" data-actions-box="true" id="select_cat_1">
+                    <optgroup label="Enfoques transversales" id="optgroup_enfoques">
+                        <option>Gestión integral del riesgo</option>
+                        <option>Salud</option>
+                        <option>Transición laboral justa</option>
+                    </optgroup>
+                </select>
+                <select select-group-id="Líneas instrumentales" class="selectpicker selectpickers-lineas" multiple title="-" data-container="#drawerFilters" data-actions-box="true" id="select_cat_2">
+                    <optgroup label="Líneas instrumentales" id="optgroup_lineas_instru">
+                        <option>Financiamiento para la transición</option>
+                        <option>Fortalecimiento institucional</option>
+                        <option>Investigación, desarrollo tecnológico e innovación</option>
+                    </optgroup>
+                </select>
+                <select select-group-id="Líneas estratégicas" class="selectpicker selectpickers-lineas" multiple title="-" data-container="#drawerFilters" data-actions-box="true" id="select_cat_3">
+                    <optgroup label="Líneas estratégicas" id="optgroup_lineas_estra"></optgroup>
+                        <option>Conservación de la biodiversidad y bienes comunes</option>
+                        <option>Gestión sostenible de sistemas alimentarios y bosques</option>
+                        <option>Movilidad sostenible</option>
+                        <option>Territorios sostenibles y resilientes</option>
+                        <option>Transición energética</option>
+                        <option>Transición productiva</option>
+                    </optgroup>
+                </select>
+            </div>
+            <script type="text/javascript">
+                var adaptacion = "Adaptación";
+                var mitigacion = "Mitigación";
+                var perdidas = "Pérdidas y daños";
+            </script>
+            <div class="form-group">
+                <!--<label>Pilares de la acción climática en Argentina</label>-->
+                <select id="select_pilares" class="selectpicker selectpickers" multiple title="Pilares de la acción climática" data-header="<div class='btn-group btn-group-sm btn-group-pilares' role='group' aria-label='pilares button group'><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(adaptacion)'>Adaptación</button><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(mitigacion)'>Mitigación</button><button type='button' class='btn btn-pilar' onclick='selectGroupPilar(perdidas)'>Pérdidas y daños</button></div>" data-size="7" data-container="#drawerFilters" data-actions-box="true">
+                    <option>Adaptación</option>
+                    <option>Mitigación</option>
+                    <option>Pérdidas y daños</option>
+                    <option>Adaptación y Mitigación</option>
+                    <option>Adaptación y Pérdidas y daños</option>
+                    <option>Mitigación y Pérdidas y daños</option><!--disabled-->
+                    <option>Adaptación, Mitigación y Pérdidas y daños</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <!--<label>Estado de implementación</label>-->
+                <select id="select_estado" class="selectpicker selectpickers" multiple title="Estado de implementación" data-size="7" data-container="#drawerFilters" data-actions-box="true">
+                    <option>En implementación avanzada</option>
+                    <option>En implementación inicial</option>
+                    <option>En programación</option>
+                    <option>A definir</option>
+                </select>
+            </div>   
+
+            <div class="form-group">
+                <!--<label>Año de cumplimiento</label>-->
+                <select id="select_ano_cumplimiento" class="selectpicker selectpickers" multiple title="Año de cumplimiento" data-container="#drawerFilters" data-size="7" data-actions-box="true">
+                    {% comment %} <option>2000</option>
+                    <option>2012</option>
+                    <option>2020</option>
+                    <option>2021</option>
+                    <option>2022</option> {% endcomment %}
+                    <option>2023</option>
+                    <option>2024</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                    <option>2027</option>
+                    <option>2028</option>
+                    <option>2030</option>
+                    <option>2035</option>
+                </select>
+            </div> 
+
+        </div>
+
+    </div>
+</div>
+<a href="#pills-details-tabContent" id="scroll_btn"></a>
+{% endblock %}
+{% block javascript %}
+
+
+<!-- bootstrap-select : Latest JavaScript -->
+<script src="{% static 'main/js/bootstrap-select.js' %}"></script>
+
+<!-- bootstrap-select :  Latest JavaScript translation files -->
+<script src="{% static 'main/js/defaults-es_ES.js' %}"></script>
+
+<!-- Load d3.js and c3.js -->
+<script src="{% static 'main/js/d3.min.js' %}" charset="utf-8"></script>
+
+<script src="{% static 'main/js/chart.js' %}" charset="utf-8"></script>
+<script src="{% static 'main/js/c3.min.js' %}"></script>
+
+<script src="{% static 'main/js/jquery.printelement.js' %}"></script>
+
+<script src="{% static 'main/js/ingei.js' %}"></script>
+<script src="{% static 'main/js/c3-rounded-corner.js' %}"></script>
+<script src="{% static 'main/js/mye.js' %}"></script>
+
+
+{% endblock%}

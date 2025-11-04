@@ -1,0 +1,12 @@
+{
+      "titulo" : "Generación de todas las plantas renovables no convencionales conectadas a la red",
+      "valores5" : ["Biogás", 83602.8, 57510.3, 64053.6, 145307.637, 255528.212, 304116.135],
+      "valores4" : ["Biomasa", 194983.825, 193216.935, 242599.611, 251701.654, 299158.405, 420956.102],
+      "valores3" : ["PAH", 1706814.251, 1938041.714, 1814546.463, 1528340.446, 1546154.912, 1339315.511],
+      "valores2" : ["Solar", 14670.648, 14263.319, 16405.158, 108116.528, 799684.913, 1344319.081],
+      "valores1" : ["Eólica", 592950.963, 546770.473, 615817.755, 1412742.723, 4962932.596, 9407679.065],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "max":13500000,
+      "descripcion" : ["Generación de electricidad de todas las plantas eólicas, solares, a biomasa y a biogás, y pequeños aprovechamientos hidroeléctricos (PAH) de potencia menor a 50 MW conectados a la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "MWh"
+}

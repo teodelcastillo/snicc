@@ -1,0 +1,74 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+<!-- Login page -->
+<div class="account-content">
+
+<div class="post-row-mobile row">
+    <div class="offset-2 col-lg-8 col-xl-8 col-account">
+
+        <p class="register-steps">{% ts 'PASO' lang %} 3 / 3</p>
+
+        <h1 class="post-title">{% ts 'Seleccioná tu perfil' lang %}</h1>
+
+        <p class="p-black">{% ts 'Podrás cambiarlo mas adelante si es necesario' lang %}</p>
+
+        {% comment %} <div class="info-profile">
+            <span id="profile_general" class="show">Perfil orientado a personas sin conocimiento de la temática, también investigadores, jóvenes, estudiantes, gente curiosa ávida de conocimiento.</span>
+            <span id="profile_gp_locales">profile_gp_locales Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_gp_provincial">profile_gp_provincial Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_gp_nacional">profile_gp_nacional Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_privado">profile_privado Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_ongs">profile_ongs Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_pueblos">profile_pueblos Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_docentes">profile_docentes Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+            <span id="profile_juventudes">profile_juventudes Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard</span>
+        </div>
+     {% endcomment %}
+
+        <div class="register-content reg-profile">
+            <!-- Ajouter la class invalid si invalide, sinon ajouter valid, après submit , ex: class="form-login valid"-->
+            <form name="formRegister" class="form-login form-profile" action="." method="POST">
+                {% csrf_token %}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {% for profile in profiles %}
+                    <div class="position-relative">
+                        <input type="radio" class="btn-check" name="profile" id="profile-{{profile.code}}" 
+                            autocomplete="off" {% if 'general' in profile.code %}checked {% endif %}value="{{profile.code}}" style="background-color:{{profile.color}};">
+                        <label class="btn" for="profile-{{profile.code}}" style="background-color:{{profile.color}};">
+                            {% if profile.image %}<img src="{{profile.image.url}}" alt="">{% endif %}
+                            <span>{{profile.name}}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <script type="text/javascript">
+                    var rad = document.formRegister.profile;
+                    for (var i = 0; i < rad.length; i++) {
+                        rad[i].addEventListener('change', function() {
+                            var elems = document.querySelectorAll(".show");
+                            [].forEach.call(elems, function(el) {
+                                el.classList.remove("show");
+                            });
+                            document.getElementById(this.value).classList.add('show');
+                        });
+                    }
+                </script>
+            
+                
+                <button id="send" type="submit" class="btn btn-login">{% ts 'Listo' lang %}</button>
+            </form>
+
+
+        </div>
+
+    </div>
+    
+</div>
+
+
+</div>
+                    
+{% endblock %}

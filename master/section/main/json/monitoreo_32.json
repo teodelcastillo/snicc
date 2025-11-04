@@ -1,0 +1,8 @@
+{
+      "titulo" : "Proporción de kilómetros recorridos por trenes eléctricos",
+      "valores" : ["Proporción de kilómetros recorridos", 56.30, 77.90, 86.50, 81.90, 75.80, 92.70],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Proporción de kilómetros recorridos por trenes eléctricos de la línea Roca, con respecto a los kilómetros totales recorridos por trenes eléctricos y a diesel de dicha línea.", "<br><br>Fuente: Comisión Nacional de Regulación del Transporte (CNRT).","<br><br>El Plan Nacional de Adaptación y Mitigación al Cambio Climático define una meta para este indicador como parte del set de indicadores de la medida MS-09: <i>'Al año 2026 contar con 83,6 km de vías ferroviarias electrificadas'"],
+      "unidad" : "%",
+      "cantDecimales": 2
+}

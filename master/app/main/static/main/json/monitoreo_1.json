@@ -1,0 +1,9 @@
+{
+      "titulo" : "Generación de todas las centrales nucleares de la red",
+      "valores" : ["Generación de electricidad", 6518525, 7677292, 5716228, 6452918, 7927077, 10010880],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las centrales nucleares de la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>En 2016, Atucha II aumentó su capacidad.", "<br>En 2017, Atucha II estuvo cuatro meses sin generar.","<br>En 2018, Atucha II operó seis meses a menor capacidad."],
+      "min" : 4790000,
+      "max" : 10500000,
+      "unidad" : "MWh"
+}

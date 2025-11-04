@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="margin: 0 auto; width: 90%;">
+    <form action='.' method='GET'>
+        {% comment %} {% csrf_token %} {% endcomment %}
+    <div>
+        <select name='cat' id='cat'>
+            {% for cat in linecat %}<option value={{cat.id}}>{{cat}}</option>{% endfor %}
+        </select>
+    </div>
+    <div>Año cumplimiento 
+        <select multiple name='year' id='year'>
+            {% for year in years %}<option value={{year}}>{{year}}</option>{% endfor %}
+        </select>
+    </div>
+    <div>Lineas/Enfoques
+        <select multiple name='line' id='line'>
+            {% for line in lines %}<option value={{line.id}}>[{{line.category}}] {{line.name}}</option>{% endfor %}
+        </select>
+    </div>
+    {% comment %} <div>
+    Action
+    <select name='action' id='action'>
+        {% for action in actions %}<option value={{action.id}}>{{action.name}}</option>{% endfor %}
+    </select>
+    </div> {% endcomment %}
+    <div>Pilares
+        <select multiple name='pilar' id='pilar'>
+            {% for pil in pilares %}<option value={{pil.id}}>{{pil.name}}</option>{% endfor %}
+        </select>
+    </div>
+    <div>Estado
+        <select multiple name='status' id='status'>
+            {% for status in statuses %}<option value="{{status.label}}">{{status.label}}</option>{% endfor %}
+        </select>    
+    </div>
+    <input type="submit" value="filter">
+    </form>
+    
+    {% if res %}
+    <div>
+    Result of <kbd>{% url 'measure:filter' %}?{{request.META.QUERY_STRING}}</kbd> :<br/>
+    <code>{{res}}</code>
+    </div>
+    {% endif %}    
+</div>
+{% endblock %}

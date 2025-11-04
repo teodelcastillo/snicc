@@ -1,0 +1,93 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}                        
+<!-- Recursos page -->
+<div class="post-content">
+    <div class="col-md-1 social-share">
+        {% include 'mainv2/social.html' %}
+    </div>
+    <div class="post-row-mobile row">
+        <div class="offset-md-1 col-md-10 col-post">
+
+            <div class="breadcrumbs-content">
+                <ol class="breadcrumb" role="list" aria-label="Migas de pan" >
+                    <li><a href="index.html">{% ts 'Home' lang %}</a></li>
+                    <li class="active" aria-current="page">{% ts 'Recursos' lang %}</li>
+                </ol>
+            </div>
+
+            <div class="col-md-1 social-share-mobile">
+                {% include 'mainv2/social.html' %}
+            </div>
+
+            <div class="post">
+
+                <h1 class="post-title">{% ts 'Recursos' lang %}</h1>
+
+                <div class="post-text">
+
+                    <div class="section-cards section">
+                        <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+
+                            <div class="col">
+                                <a class="card" href="https://simarcc.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{%static 'main/images/cards/simarcc.svg'%}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">SIMARCC</h6>
+                                        <p>{% ts 'Ofrece mapas detallados que muestran los riesgos climáticos en diferentes regiones del país, como inundaciones, sequías, granizo, vientos intensos, incendios y heladas.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="https://inventariogei.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{%static 'main/images/cards/ingei.svg'%}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">INGEI</h6>
+                                        <p>{% ts 'El Inventario Nacional de Gases de Efecto Invernadero permite identificar aquellos sectores del país con mayor potencial de reducción de emisiones a través de la implementación de Medidas de Mitigación.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="{% url 'mainv2:staticpage' 'mye.html' %}">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{%static 'main/images/cards/mye.svg'%}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">Módulo de Monitoreo y Evaluación</h6>
+                                        <p>{% ts 'Información sobre el monitoreo de los procesos y resultados de adaptación y mitigación en el marco del PNAyMCC.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <a class="card" href="https://ciam.ambiente.gob.ar/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{%static 'main/images/cards/medio-ambiente.svg'%}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">CIAM</h6>
+                                        <p>{% ts 'Plataforma que agrupa datos, estadísticas, informes de monitoreo, mapas, infografías y otros recursos relacionados con el medio ambiente.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+    
+<!-- end post page -->
+{% endblock %}

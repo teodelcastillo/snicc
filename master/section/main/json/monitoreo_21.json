@@ -1,0 +1,10 @@
+{
+      "titulo" : "Corte de biodiésel en gasoil",
+      "valores" : ["Corte de biodiésel", 8.98459618738304, 9.28247223667788, 10.0736272723721, 9.6173733148966, 9.453003989937, 4.92886854151459],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Corte de biodiésel en gasoil, calculado dividiendo las ventas de biodiésel para corte por las ventas de gasoil cortado.","<br><br>Fuente: Secretaría de Energía.", "<br><br>En 2018, disminuyó levemente el consumo interno de biodiésel.<br><br>Los datos del 2020 son provisorios.<br>Meta PNAyMCC al 2030: Se logra abastecer el 20% de la oferta de nafta y gasoil para transporte con biocombustibles."],
+      "min" : 4,
+      "max" : 10.00,
+      "unidad" : "%",
+      "cantDecimales": 1
+}

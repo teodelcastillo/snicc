@@ -1,0 +1,123 @@
+main.content-staff {
+    height: calc(100vh - 4.5rem);
+    display: flex;
+}
+
+.header-row {
+    margin-left: 220px;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    height: 2.35rem;
+}
+
+.header-row a.item {
+    color: var(--blanco);
+    margin: 0 1rem;
+}
+
+main.content-staff .content-edition {
+    height: calc(100% - 2.35rem);
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+main.content-staff .content-edition .content-edition-title {
+    display: flex;
+    justify-content: space-between;
+}
+main.content-staff .content-edition .content-edition-title .btn {
+    height: max-content;
+}
+main.content-staff textarea {
+    width: 100%;
+    height: 100%;
+    font-family: "Lora", serif;
+}
+.wmd-preview {
+    font-family: "Lora", serif;
+}
+
+.content-edition h1,
+.content-edition h2,
+.content-edition h3 {
+    padding-left: 0.5rem;
+}
+
+
+
+
+/* info */
+main.content-staff .editedby {
+    font-size: smaller;
+    color: grey;
+}
+
+/* translations */
+.content-edition .split {
+    width: 100%;
+    table-layout: fixed;    
+}
+.content-edition .split td{
+    position:relative;
+}
+
+.content-edition .split .wmd-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.content-edition .split .wmd-panel, .content-edition .split .wmd-input {
+    height: 100%;
+}
+
+/* remove the preview for now */
+.content-edition .split .wmd-preview{
+    display:none;
+}
+
+/* history
+main.content-staff .history-table {
+
+} */
+
+
+/* diff table */
+main.content-staff .diff {
+    margin-top:40px;
+    width: 100%;
+    /*font-family: "Apercu", monospace, sans-serif;*/
+}
+
+main.content-staff .diff_add {
+    background-color: rgb(193, 247, 112);
+}
+
+main.content-staff .diff_sub {
+    background-color: rgb(255, 109, 109);
+}
+
+main.content-staff .diff_header a{
+    color: red;
+}
+
+/* measures */
+
+.line{
+    background-color: var(--amarillo);
+    border: 2px solid white;
+    padding: 5px;
+}
+
+
+.action{
+    background-color: #ebd3a4;
+    border: 2px solid white;
+    padding: 5px;
+}
+
+.measure {
+    background-color: white;
+    border: 1px solid var(--amarillo);
+}

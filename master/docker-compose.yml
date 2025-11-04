@@ -1,0 +1,40 @@
+version: '3.3'
+
+services:
+  django:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    environment:
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}    
+      # in case of postgres setup :
+      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # POSTGRES_USER: django
+      # POSTGRES_DB: snicc
+    volumes:
+      - ./app:/code
+    networks:
+      - snicc
+
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - ${HOST_PORT}:80
+      - ${HOST_PORT_SSL}:443
+    networks:
+      - snicc
+    depends_on:
+      - django
+    volumes:
+      - ./cert:/etc/nginx/cert
+      - ./nginx-config.conf:/etc/nginx/conf.d/default.conf
+      - ./app/static:/files/static
+      - ./app/media:/files/media
+      - ./section:/files/section
+
+networks:
+  snicc:

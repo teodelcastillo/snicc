@@ -1,0 +1,60 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+<!-- Login page -->
+<div class="account-content">
+    
+    <div class="post-row-mobile row">
+        <div class="login-content">
+
+            <h1 class="post-title">{% ts 'Inicia sesión' lang %}</h1>
+
+            <script type="text/javascript">
+                function validateLogin() {
+                    var a = document.getElementById('phone').value;
+                    if ((a == null || a == "") ) {
+                    alert("Por favor, introduzca su teléfono celular");
+                    return false;
+                    }
+                }
+            </script>
+            <form class="form-login" action="." onsubmit="return validateLogin()" method="POST">
+                {% csrf_token %}
+                <div class="input-single-btn">
+                    <input type="email" class="form-control" placeholder="{% ts 'E-mail' lang %}" id="email" required name="email">
+                    {% comment %} <div id="emailHelp" class="form-text">{% ts 'E-mail' lang %}</div> {% endcomment %}
+
+                    {% if error %}
+                    <div class="is-invalid mb-4"></div>
+                    <div class="invalid-feedback">{{error}}</div>
+                    {% endif %}
+
+                </div>
+                <button type="submit" class="btn btn-login" id="button_login">{% ts 'Ingresar' lang %}</button>
+                <div class="register-text">
+                    <p>{% ts '¿No tenés cuenta?' lang %}<a href="{% url 'user:register' %}">{% ts 'Registrate' lang %}</a></p>
+                </div>
+            </form>
+            <script type="text/javascript">
+                (function() {
+                    document.getElementById('phone').addEventListener("change", (event) => {
+                        console.log('&aqui');
+                        if(event.target.value != null && event.target.value != '') {
+                            document.getElementById('button_login').classList.remove('disabled');
+                        } else {
+                            document.getElementById('button_login').classList.add('disabled');
+                        }
+                    });
+                })();
+            </script>
+
+        </div>
+        
+        
+    </div>
+
+
+</div>
+
+{% endblock %}                

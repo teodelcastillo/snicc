@@ -1,0 +1,127 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+                <!-- Regulations page -->
+                <div class="link-new-norm-content">
+                    
+                    <div class="post-row-mobile row">
+                        <h1 class="post-title">{% ts 'Normativas' lang %}</h1>
+                        <div class="col-md-3 col-categories">
+
+                            <div class="cat-content">
+                                <h5>{% ts 'Categorias' lang %}</h5>
+                                {% for k,v in total.items %}
+                                {% if regfilter == k %}<a href="." class="active">
+                                {% else %}<a href="?filter={{k}}">{%endif%}
+                                    <span>{% ts k.capitalize lang %}</span> 
+                                    <span class="badge text-bg-secondary">{{v}}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="dropdown dropdown-categories">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% ts 'Categorias' lang %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% for k,v in total.items %}
+                                    <li>
+                                        <a class="dropdown-item" href="?filter={{k}}">
+                                            <span>{% ts k.capitalize lang %}</span>
+                                            <span class="badge text-bg-secondary">{{v}}</span>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-8 col-post">
+
+                            <form class="main-form search-form" role="search" action="." method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
+                                <div class="input-group">
+                                    <input placeholder="{% ts 'Buscá por ley, decreto, resolución o palabra clave' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                                    <span class="input-group-btn">
+                                    <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
+                                        <img src="{% static 'main/images/iconos/search.svg'%}" alt=""></i><span class="sr-only">Buscá por ley, decreto, resolución o palabra clave</span>
+                                    </button>
+                                </span></div>
+                                </div>
+                            </form>
+
+                            <div class="norm-content">
+                                <div class="row row-norm-img">
+                                    <div>
+                                        <img src="{% static 'main/images/normativas/decreto.svg'%}" alt="Decreto">
+                                        <span>{% ts 'Decreto' lang %}</span>
+                                    </div>
+                                    <div>
+                                        <img src="{% static 'main/images/normativas/ley.svg'%}" alt="Ley">
+                                        <span>{% ts 'Ley' lang %}</span>
+                                    </div>
+                                    <div>
+                                        <img src="{% static 'main/images/normativas/decisiones administrativas.svg'%}" alt="Decisiones administrativas">
+                                        <span>{% ts 'Decisiones administrativas' lang %}</span>
+                                    </div>
+                                    <div>
+                                        <img src="{% static 'main/images/normativas/resolucion.svg'%}" alt="Resoluciones">
+                                        <span>{% ts 'Resoluciones' lang %}</span>
+                                    </div>
+                                </div>
+
+                                <div class="section-cards row row-cols-1 row-cols-md-2">
+
+                                    {% for reg in regs %}{% with content=reg|translate:lang %}
+                                    <div class="col">
+                                        <a class="card card-link" href="{{ reg.url }}" target="_blank">
+                                            <div class="card-body">
+                                                <div class="card-title icon-link">
+                                                    <img src="{% static 'main/images/normativas/'%}{{reg.linktype.lower}}.svg" alt="Ley">
+                                                    <h5>{{ content.name }}</h5>
+                                                </div>
+                                                <p class="card-text">{{content.description}}</p>
+                                                {% comment %} <a href="#enlace-externo" class="btn btn-azul-claro btn-small">Ver enlace</a> {% endcomment %}
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {% endwith %}{% endfor %}
+
+
+                                </div>
+
+                            </div>
+
+                            <div class="pagination-content">
+                                <nav aria-label="...">
+                                    <ul class="pagination">
+                                        {% if regs.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
+                                        </li>
+                                        {% endif %}
+                
+                                        {%for p in regs.paginator.get_elided_page_range %}
+                                        <li class="page-item {% if p == regs.number %}disabled active{% endif %}">
+                                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+                                        </li>
+                                        {% endfor %}
+                
+                                        {% if regs.has_next %}
+                                          <li class="page-item">
+                                            <a class="page-link" href="{% querystring page=regs.paginator.num_pages %}"></a>
+                                        </li>
+                                        {% endif %}
+                
+                                    </ul>
+                                </nav>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+
+                    
+                </div>
+                    
+                <!-- end post page -->
+{% endblock %}
