@@ -80,10 +80,11 @@
                         <div class="row">
                             <h3>{% ts 'Novedades' lang %}</h3>
                         </div>
+                        <!-- Carrusel de noticias segun BBDD. Se gestiona desde el portal admin --> 
                         <div class="row row-cols-1 row-cols-md-3">
                             {% for n in news %}{% with content=n|translate:lang %}
                             <div class="col">
-                                <a class="card" href="{% url 'mainv2:post' n.slug %}"><!-- Remarque: ajouter target="_blank" si lien externe-->
+                                <a class="card" href="{% url 'mainv2:post' n.slug %}"> <!-- Remarque: ajouter target="_blank" si lien externe-->
                                     <img src="{{n.image.url}}" class="card-img-top" alt="{{content.title}}">
                                     <div class="card-body">
                                         <h5 class="card-title">
