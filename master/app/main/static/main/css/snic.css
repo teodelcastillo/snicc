@@ -1111,6 +1111,18 @@ main {
     border-radius: 30px;
     aspect-ratio: 1;
 }
+
+.row-suscribite {
+    color: var(--Text-Colour-2, #2B2B2B);
+    leading-trim: both;
+    text-edge: cap;
+    font-family: Lora;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 47px; /* 146.875% */
+}
+
 .section-banner-home .banner-home-images .rows-images img {
     height: 50%;
     margin-bottom: 7.5%;
