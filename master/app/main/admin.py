@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 admin.site.site_header = 'SNIC admin'
-admin.site.register(Language)
+# admin.site.register(Language)
 
 class PostVersionInline(admin.TabularInline):
     model = PostVersion

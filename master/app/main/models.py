@@ -412,3 +412,32 @@ class StaticTransVersion(models.Model):
 
     class Meta:
         unique_together = ('lang', 'es')
+
+
+from django.contrib import admin
+from .models import Post, PostVersion, Language, Profile
+
+# --- Posts y versiones ---
+
+class PostVersionInline(admin.TabularInline):
+    model = PostVersion
+    extra = 1
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'slug', 'status', 'type', 'category', 'date')
+    list_filter = ('status', 'type', 'category')
+    search_fields = ('slug',)
+    # prepopulated_fields = {'slug': ('content',)}  # ❌ eliminar o comentar esta línea
+    inlines = [PostVersionInline]
+
+
+# --- Otros modelos útiles ---
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'order')
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'hidden')
