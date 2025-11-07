@@ -16,7 +16,7 @@
                             <div class="snic-homepage">SNIC</div>
                             <h1>{% ts 'Sistema Nacional de Información sobre Cambio Climático' lang %}</h1>
                             <!-- <h2>{% ts 'Información sobre la política climática nacional que responde a la Ley 27.520/19.' lang %}</h2> -->
-                            <p>{% ts 'Gestionado por la Subsecretaría de Ambiente,<br/> integra datos de sistemas como SInIA y SIMARCC, y ofrece acceso gratuito a información útil para políticas climáticas.' lang %}</p>
+                            <p>{% ts 'El Sistema Nacional de Información Climática (SNIC) es una herramienta que nos permite conocer los avances de Argentina en acción climática. La información del sistema está basada en tres pilares:<br/>● Mitigación<br/>● Adaptación<br/>● Pérdidas y daños.' lang %}</p>
                         </div>
                         <div class="banner-home-images">
                             <div class="column-image">
@@ -29,6 +29,30 @@
                         </div>
                         <div class="small-circle"></div>
                     </div>
+                    <div style="
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 31px;
+                    text-align: center;
+                    ">
+                    <img
+                        style="width: 171px; height: 171px; border-radius: 20px;"
+                        src="{% static 'main/images/home/tierra-home-page.png' %}"
+                        alt=""
+                    />
+                    <div style="max-width: 809px; text-align: left;">
+                        <span style="color: black; font-size: 16px; font-family: Montserrat; font-weight: 400; line-height: 33px;">
+                        La creación del SNIC responde a la Ley n° 27520 que en su artículo 17 expresa: <br/>
+                        </span>
+                        <span style="color: #242C4F; font-size: 16px; font-family: Montserrat; font-weight: 500; line-height: 33px;">
+                        “Créase el Sistema Nacional de Información sobre Cambio Climático como instrumento para el diagnóstico y desarrollo de planes de respuesta al cambio climático en las diferentes jurisdicciones y para garantizar la robustez y transparencia del inventario nacional de gases de efecto invernadero y monitoreo de medidas de mitigación”
+                        </span>
+                    </div>
+                    </div>
+
 
                     <!-- Si no conectado -->
                     {% if request.user.is_anonymous %}
