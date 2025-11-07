@@ -81,7 +81,9 @@
                                 </div>
                             </form>
                             
-                            
+                            {# --- Eliminando de la UI las categorias de contenido de las normas --- #}
+
+                            <!--
                             <div class="norm-content">
                                 <div class="row row-norm-img">
                                     <div>
@@ -103,7 +105,6 @@
                                 </div>
 
                                 <div class="section-cards row row-cols-1 row-cols-md-2">
-
                                     {% for reg in regs %}{% with content=reg|translate:lang %}
                                     <div class="col">
                                         <a class="card card-link" href="{{ reg.url }}" target="_blank">
@@ -113,16 +114,15 @@
                                                     <h5>{{ content.name }}</h5>
                                                 </div>
                                                 <p class="card-text">{{content.description}}</p>
-                                                {% comment %} <a href="#enlace-externo" class="btn btn-azul-claro btn-small">Ver enlace</a> {% endcomment %}
                                             </div>
                                         </a>
                                     </div>
                                     {% endwith %}{% endfor %}
-
-
                                 </div>
-
                             </div>
+                            -->
+
+                            
 
                             <div class="pagination-content">
                                 <nav aria-label="...">
