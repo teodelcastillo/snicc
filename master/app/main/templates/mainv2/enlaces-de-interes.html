@@ -1,82 +1,171 @@
-{% extends 'mainv2/base.html' %}        
+<style>
+  .featured-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  .featured-card {
+    flex: 1 1 calc(50% - 12px);
+    max-width: calc(50% - 12px);
+    padding: 18px;
+    background: #fff;
+    border-radius: 30px;
+    outline: 1px #D8D8D8 solid;
+    outline-offset: -1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 28px;
+    box-sizing: border-box;
+  }
+  @media (max-width: 768px) {
+    .featured-card {
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+
+{% extends 'mainv2/base.html' %}
 {% load static snicc_i18n %}
 {% block content %}
 
-                <!-- Links page -->
-                <div class="link-new-norm-content">
-                    
-                    <div class="post-row-mobile row">
-                        <h1 class="post-title">{% ts 'Enlaces de interés' lang %}</h1>
-                        
-                        <div class="col-md-3 col-categories">
-                            <div class="cat-content">
-                                <h5>{% ts 'Categorias' lang %}</h5>
-                                {% for k,v in total.items %}{% if v %}
-                                {% if catfilter == k %}<a href="." class="active">
-                                {% else %}<a href="?filter={{k}}">{%endif%}
-                                    <span>{% ts k.capitalize lang %}</span> 
-                                    <span class="badge text-bg-secondary">{{v}}</span>
-                                </a>
-                                {% endif %}{% endfor %}
-                            </div>
-                            <div class="dropdown dropdown-categories">
-                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {% ts 'Categorias' lang %}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    {% for k,v in total.items %}{% if v %}<li>
-                                    {% if catfilter == k %}<a href="." class="active">
-                                    {% else %}<a href="?filter={{k}}">{%endif%}
-                                        <span>{% ts k.capitalize lang %}</span> 
-                                        <span class="badge text-bg-secondary">{{v}}</span>
-                                    </a></li>
-                                    {% endif %}{% endfor %}    
-                                </ul>
-                            </div>
-                        </div>
+<!-- Links page -->
+<div class="link-new-norm-content">
+  <div class="post-row-mobile row">
+    <h1 class="post-title">{% ts 'Enlaces de interés' lang %}</h1>
 
-                        <div class="col-md-8 col-post">
+    <div class="col-md-3 col-categories">
+      <div class="cat-content">
+        <h5>{% ts 'Categorias' lang %}</h5>
+        {% for k,v in total.items %}{% if v %}
+          {% if catfilter == k %}
+            <a href="." class="active">
+          {% else %}
+            <a href="?filter={{k}}">
+          {% endif %}
+              <span>{% ts k.capitalize lang %}</span>
+              <span class="badge text-bg-secondary">{{v}}</span>
+            </a>
+        {% endif %}{% endfor %}
+      </div>
 
-                            <div class="links-content">
-                                {% for item in qset %}{% with content=item|translate:lang %}
-                                <div class="row-link">
-                                    <h2>{{content.name}}</h2>
-                                    <p>{{content.description}}</p>
-                                    <a href="{{item.url}}" target="_blank" class="btn btn-azul-claro">{% ts 'Ir al sitio' lang %}</a>
-                                </div>
-                                {% endwith %}{% endfor %}
-                            </div>
+      <div class="dropdown dropdown-categories">
+        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {% ts 'Categorias' lang %}
+        </button>
+        <ul class="dropdown-menu">
+          {% for k,v in total.items %}{% if v %}
+            <li>
+              {% if catfilter == k %}
+                <a href="." class="active">
+              {% else %}
+                <a href="?filter={{k}}">
+              {% endif %}
+                <span>{% ts k.capitalize lang %}</span>
+                <span class="badge text-bg-secondary">{{v}}</span>
+              </a>
+            </li>
+          {% endif %}{% endfor %}
+        </ul>
+      </div>
+    </div>
 
-                            <div class="pagination-content">
-                                <nav aria-label="...">
-                                    <ul class="pagination">
-                                        {% if qset.has_previous %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="{% querystring page=1 %}">&lt;</a>
-                                        </li>
-                                        {% endif %}
-                
-                                        {%for p in qset.paginator.get_elided_page_range %}
-                                        <li class="page-item {% if p == qset.number %}disabled active{% endif %}">
-                                            <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
-                                        </li>
-                                        {% endfor %}
-                
-                                        {% if qset.has_next %}
-                                          <li class="page-item">
-                                            <a class="page-link" href="{% querystring page=qset.paginator.num_pages %}"></a>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </nav>
-                            </div>
+    <div class="col-md-8 col-post">
+    <!-- 🔹 Sección destacada: 4 cards fijas -->
+    <div class="featured-cards">
+        <div class="featured-card">
+            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
+            </div>
+            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
+            SIMARCC
+            </div>
+            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
+            Ofrece mapas detallados que muestran los riesgos climáticos en diferentes regiones del país, como inundaciones, sequías, granizo, vientos intensos, incendios y heladas.
+            </div>
+        </div>
 
-                        </div>
-                        
-                    </div>
-                    {% include 'mainv2/subscription.html' %}
-                </div>
-                    
-                <!-- end post page -->
+        <div class="featured-card">
+            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
+            </div>
+            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
+            SNIC
+            </div>
+            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
+            Plataforma central que consolida información climática nacional, incluyendo inventarios GEI, medidas de mitigación, adaptación y financiamiento climático.
+            </div>
+        </div>
+
+        <div class="featured-card">
+            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
+            </div>
+            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
+            INGEI
+            </div>
+            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
+            Muestra las emisiones y absorciones de gases de efecto invernadero por sector, permitiendo el seguimiento de las políticas de mitigación en el país.
+            </div>
+        </div>
+
+        <div class="featured-card">
+            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
+            </div>
+            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
+            NDC
+            </div>
+            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
+            Presenta los compromisos nacionales de reducción de emisiones y adaptación al cambio climático asumidos en el marco del Acuerdo de París.
+            </div>
+        </div>
+    </div>
+
+
+
+      <!-- 🔹 Enlaces dinámicos desde la base de datos -->
+      <div class="links-content mt-8">
+        {% for item in qset %}{% with content=item|translate:lang %}
+          <div class="row-link">
+            <h2>{{content.name}}</h2>
+            <p>{{content.description}}</p>
+            <a href="{{item.url}}" target="_blank" class="btn btn-azul-claro">{% ts 'Ir al sitio' lang %}</a>
+          </div>
+        {% endwith %}{% endfor %}
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination-content">
+        <nav aria-label="...">
+          <ul class="pagination">
+            {% if qset.has_previous %}
+              <li class="page-item"><a class="page-link" href="{% querystring page=1 %}">&lt;</a></li>
+            {% endif %}
+
+            {% for p in qset.paginator.get_elided_page_range %}
+              <li class="page-item {% if p == qset.number %}disabled active{% endif %}">
+                <a class="page-link" href="{% querystring page=p %}">{{p}}</a>
+              </li>
+            {% endfor %}
+
+            {% if qset.has_next %}
+              <li class="page-item"><a class="page-link" href="{% querystring page=qset.paginator.num_pages %}">&gt;</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+
+    </div>
+  </div>
+
+  {% include 'mainv2/subscription.html' %}
+</div>
 
 {% endblock %}
