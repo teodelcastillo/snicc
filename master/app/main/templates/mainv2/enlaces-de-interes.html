@@ -78,57 +78,65 @@
       </div>
     </div>
 
-    <div class="col-md-8 col-post">
+    <div class="col-md-8 col-post w-full mb-8">
     <!-- 🔹 Sección destacada: 4 cards fijas -->
-    <div class="featured-cards">
-        <div class="featured-card">
-            <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
-            </div>
-            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
-            SIMARCC
-            </div>
-            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
-            Ofrece mapas detallados que muestran los riesgos climáticos en diferentes regiones del país, como inundaciones, sequías, granizo, vientos intensos, incendios y heladas.
-            </div>
-        </div>
+    <div class=" section-cards section">
 
-        <div class="featured-card">
-            <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
-            </div>
-            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
-            SNIC
-            </div>
-            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
-            Plataforma central que consolida información climática nacional, incluyendo inventarios GEI, medidas de mitigación, adaptación y financiamiento climático.
-            </div>
-        </div>
+            <div class="row w-100 row-cols-1 row-cols-lg-2 gx-0 gy-3 gx-lg-4 gy-lg-4 justify-content-center cards-recursos">
 
-        <div class="featured-card">
-            <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
-            </div>
-            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
-            INGEI
-            </div>
-            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
-            Muestra las emisiones y absorciones de gases de efecto invernadero por sector, permitiendo el seguimiento de las políticas de mitigación en el país.
-            </div>
-        </div>
+                <div class="col-12 col-lg-6 d-flex">
+                <a class="card d-block w-100 h-100" href="https://simarcc.ambiente.gob.ar/" target="_blank">
+                    <div class="card-body">
+                    <div class="circle-recursos">
+                        <img src="{% static 'main/images/cards/simarccv2.svg' %}" alt="...">
+                    </div>
+                    <h6 class="card-title">SIMARCC</h6>
+                    <p>{% ts 'Ofrece mapas detallados que muestran los riesgos climáticos en diferentes regiones del país, como inundaciones, sequías, granizo, vientos intensos, incendios y heladas.' lang %}</p>
+                    </div>
+                </a>
+                </div>
 
-        <div class="featured-card">
-            <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:84px; height:84px; background:#2E6695; border-radius:9999px;"></div>
-            </div>
-            <div style="color:#2B2B2B; font:600 18px Montserrat, sans-serif; text-align:center;">
-            NDC
-            </div>
-            <div style="color:#808080; font:400 14px Montserrat, sans-serif; line-height:24.33px; text-align:center;">
-            Presenta los compromisos nacionales de reducción de emisiones y adaptación al cambio climático asumidos en el marco del Acuerdo de París.
-            </div>
-        </div>
-    </div>
+                <div class="col-12 col-lg-6 d-flex">
+                <a class="card d-block w-100 h-100" href="https://inventariogei.ambiente.gob.ar/" target="_blank">
+                    <div class="card-body">
+                    <div class="circle-recursos">
+                        <img src="{% static 'main/images/cards/ingeiV2.svg' %}" alt="...">
+                    </div>
+                    <h6 class="card-title">INGEI</h6>
+                    <p>{% ts 'El Inventario Nacional de Gases de Efecto Invernadero permite identificar aquellos sectores del país con mayor potencial de reducción de emisiones a través de la implementación de Medidas de Mitigación.' lang %}</p>
+                    </div>
+                </a>
+                </div>
+
+                <div class="col-12 col-lg-6 d-flex">
+                <a class="card d-block w-100 h-100" href="{% url 'mainv2:staticpage' 'mye.html' %}">
+                    <div class="card-body">
+                    <div class="circle-recursos">
+                        <img src="{% static 'main/images/cards/mye.svg' %}" alt="...">
+                    </div>
+                    <h6 class="card-title">Módulo de Monitoreo y Evaluación</h6>
+                    <p>{% ts 'Información sobre el monitoreo de los procesos y resultados de adaptación y mitigación en el marco del PNAyMCC.' lang %}</p>
+                    </div>
+                </a>
+                </div>
+
+                <div class="col-12 col-lg-6 d-flex">
+                <a class="card d-block w-100 h-100" href="https://ciam.ambiente.gob.ar/" target="_blank">
+                    <div class="card-body">
+                    <div class="circle-recursos">
+                        <img src="{% static 'main/images/cards/medio-ambiente.svg' %}" alt="...">
+                    </div>
+                    <h6 class="card-title">CIAM</h6>
+                    <p>{% ts 'Plataforma que agrupa datos, estadísticas, informes de monitoreo, mapas, infografías y otros recursos relacionados con el medio ambiente.' lang %}</p>
+                    </div>
+                </a>
+                </div>
+
+
+
+
+                        </div>
+                    </div>
 
 
 
