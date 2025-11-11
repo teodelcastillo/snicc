@@ -71,43 +71,50 @@
                     </ul>
                 </div>
 
-                {% if post.links.all %}
-                <div class="table-contents-post">
-                    <h5>{% ts 'Enlaces relacionados' lang %}</h5>
-                    <ul class="table-contents-list">
-                        {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
-                        <li>
-                            {% if link.view %}
-                                {% if link.viewargs %}
-                                    <a href="{% url link.view link.viewargs %}">{{ ccontent.title }}</a>
-                                {% else %}
-                                    <a href="{% url link.view %}">{{ ccontent.title }}</a>
-                                {% endif %}
-                            {% else %}
-                                <a href="{{ link.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
-                                    {{ ccontent.title }}
-                                </a>
-                            {% endif %}
-                        </li>
-                        {% endwith %}{% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
+              {% if post.links.all %}
+              <div class="table-contents-post">
+                <h5 style="display:flex; align-items:center;">
+                  <img src="{% static 'main/images/iconos/link-alt.svg' %}" alt="Ícono enlace" width="18" style="margin-right: 6px;">
+                  {% ts 'Enlaces relacionados' lang %}
+                </h5>
+                <ul class="table-contents-list">
+                  {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                  <li>
+                    {% if link.view %}
+                      {% if link.viewargs %}
+                        <a href="{% url link.view link.viewargs %}">{{ ccontent.title }}</a>
+                      {% else %}
+                        <a href="{% url link.view %}">{{ ccontent.title }}</a>
+                      {% endif %}
+                    {% else %}
+                      <a href="{{ link.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                        {{ ccontent.title }}
+                      </a>
+                    {% endif %}
+                  </li>
+                  {% endwith %}{% endfor %}
+                </ul>
+              </div>
+              {% endif %}
 
-                {% if post.books.all %}
-                <div class="table-contents-post">
-                    <h5>{% ts 'Documentación' lang %}</h5>
-                    <ul class="table-contents-list">
-                        {% for book in post.books.all %}{% with content=book.book|translate:lang %}
-                        <li>
-                            <a href="{{ book.book.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
-                                {{ content.title }}
-                            </a>
-                        </li>
-                        {% endwith %}{% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
+              {% if post.books.all %}
+              <div class="table-contents-post">
+                <h5 style="display:flex; align-items:center;">
+                  <img src="{% static 'main/images/iconos/file-6.svg' %}" alt="Ícono documento" width="18" style="margin-right: 6px;">
+                  {% ts 'Documentación' lang %}
+                </h5>
+                <ul class="table-contents-list">
+                  {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                  <li>
+                    <a href="{{ book.book.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                      {{ content.title }}
+                    </a>
+                  </li>
+                  {% endwith %}{% endfor %}
+                </ul>
+              </div>
+              {% endif %}
+
 
                 {% if post.is_news %}
                 <div class="subscription-right">
