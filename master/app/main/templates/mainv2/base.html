@@ -165,10 +165,12 @@
                         <img src="{% static 'main/images/sections/gestion-climatica.svg' %}" alt="">
                         <span>{% ts 'Gestión climática' lang %}</span>
                     </a>
+                    <!--
                     <a href="{% url 'mainv2:staticpage' 'recursos.html' %}" class="nav-link" aria-current="page" >
                         <img src="{% static 'main/images/sections/recursos.svg' %}" alt="">
                         <span>{% ts 'Recursos' lang %}</span>
                     </a>
+                    -->
                     <a href="{% url 'mainv2:regulations' %}" class="nav-link" aria-current="page" >
                         <img src="{% static 'main/images/sections/normativas.svg' %}" alt="">
                         <span>{% ts 'Normativas' lang %}</span>
@@ -181,7 +183,7 @@
                         <img src="{% static 'main/images/sections/novedades.svg' %}" alt="">
                         <span>{% ts 'Novedades' lang %}</span>
                     </a>
-                    <a href="{% url 'mainv2:enlaces' %}" class="nav-link" aria-current="page" >
+                    <a href="{% url 'mainv2:enlaces' %}" class="nav-link" aria-current="page" style="align-items: middle;">
                         <img src="{% static 'main/images/sections/enlaces.svg' %}" alt="">
                         <span>{% ts 'Enlaces de interés' lang %}</span>
                     </a>
