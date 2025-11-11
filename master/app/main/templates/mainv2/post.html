@@ -39,18 +39,56 @@
             <div class="post">
                 <h1 id="posttop" class="post-title">{{content.title}}</h1>
 
-                {% if toc %}
-                <div class="dropdown dropdown-table-contents">
-                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {% ts 'Tabla de contenidos' lang %}
-                    </button>
-                    <ul class="dropdown-menu">
-                        {% for k in toc %}
-                        <li><a class="dropdown-item" href="#{{k.id}}">{{k.name}}</a></li>
-                        {% endfor %}
-                    </ul>
+                {% with content=post|translate:lang %}
+                <div class="dropdown dropdown-table-contents d-block d-xl-none">
+                  <button class="btn dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{% static 'main/images/iconos/multi-folder.svg' %}" alt="Ícono contenidos" width="18" class="me-1 align-text-top">
+                    {% ts 'Explorar contenidos' lang %}
+                  </button>
+                  <ul class="dropdown-menu w-100">
+
+                    <li><a class="dropdown-item" href="#posttop">{{ content.title }}</a></li>
+
+                    {% for k in toc %}
+                      <li><a class="dropdown-item" href="#{{k.id}}">{{k.name}}</a></li>
+                    {% endfor %}
+
+                    {% if post.links.all %}
+                      <li><hr class="dropdown-divider"></li>
+                      <li class="dropdown-header">{% ts 'Enlaces relacionados' lang %}</li>
+                      {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                        <li>
+                          {% if link.view %}
+                            {% if link.viewargs %}
+                              <a class="dropdown-item" href="{% url link.view link.viewargs %}">{{ ccontent.title }}</a>
+                            {% else %}
+                              <a class="dropdown-item" href="{% url link.view %}">{{ ccontent.title }}</a>
+                            {% endif %}
+                          {% else %}
+                            <a class="dropdown-item" href="{{ link.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                              {{ ccontent.title }}
+                            </a>
+                          {% endif %}
+                        </li>
+                      {% endwith %}{% endfor %}
+                    {% endif %}
+
+                    {% if post.books.all %}
+                      <li><hr class="dropdown-divider"></li>
+                      <li class="dropdown-header">{% ts 'Documentación' lang %}</li>
+                      {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                        <li>
+                          <a class="dropdown-item" href="{{ book.book.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                            {{ content.title }}
+                          </a>
+                        </li>
+                      {% endwith %}{% endfor %}
+                    {% endif %}
+
+                  </ul>
                 </div>
-                {% endif %}
+                {% endwith %}
+
 
                 <div class="post-text">
                     {{ html|safe }}
