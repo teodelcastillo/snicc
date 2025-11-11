@@ -12,7 +12,7 @@
     </div>
     <div class="post-row-mobile row">
         {% with content=post|translate:lang %}
-        <div class="offset-md-1 col-md-10 {% if toc %}col-xl-7 {% endif %}col-post pe-0 pe-xl-5">
+        <div class="offset-md-1 col-md-10 {% if toc %}col-xl-7 {% endif %}col-post  pe-xl-5">
             <div class="breadcrumbs-content">
                 <ol class="breadcrumb" role="list" aria-label="breadcrumb">
                     <li><a href="{% url 'mainv2:landing' %}">{% ts 'Home' lang %}</a></li>
@@ -45,7 +45,7 @@
                     <img src="{% static 'main/images/iconos/multi-folder.svg' %}" alt="Ícono contenidos" width="18" class="me-1 align-text-top">
                     {% ts 'Explorar contenidos' lang %}
                   </button>
-                  <ul class="dropdown-menu w-100">
+                  <ul class="dropdown-menu w-100" style="max-height: 400px; overflow-y: auto;">
 
                     <li><a class="dropdown-item" href="#posttop">{{ content.title }}</a></li>
 
