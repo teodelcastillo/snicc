@@ -184,9 +184,9 @@
 
                     <div class="section-cards section">
                         <div class="row">
-                            <h3>{% ts 'Recursos' lang %}</h3>
+                            <h3>{% ts 'Enlaces de Interés' lang %}</h3>
                         </div>
-                        <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+                            <div class="row row-cols-md-5 cards-recursos flex-nowrap overflow-auto" style="gap: 1rem;">
 
                             <div class="col">
                                 <a class="card" href="https://simarcc.ambiente.gob.ar/" target="_blank">
@@ -232,6 +232,18 @@
                                     </div>
                                 </a>
                             </div>
+                            <div class="col">
+                                <a class="card" href="https://snicc.ambiente.gob.ar/main/planes/" target="_blank">
+                                    <div class="card-body">
+                                        <div class="circle-recursos">
+                                            <img src="{% static 'main/images/cards/pnaymcc.svg' %}" alt="...">
+                                        </div>
+                                        <h6 class="card-title">Planes de Respuesta Jurisdiccionales</h6>
+                                        <p>{% ts 'Visualización de los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.' lang %}</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
 
 
                         </div>
