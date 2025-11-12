@@ -76,300 +76,473 @@
     </div>
     <div class="mye-body">
         <div class="mye-body-content"><!-- col-auto px-0-->
-<!-- Nuevo navbar estilo moderno -->
-<div class="bg-white border rounded-3 shadow-lg overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
-  <div class="d-grid" style="grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid rgba(38,44,81,0.15); background: linear-gradient(to right, rgba(38,44,81,0.05), rgba(38,44,81,0.02), rgba(38,44,81,0.05));">
-    
-    <!-- Tab 1 -->
-    <button 
-      class="tab-btn active d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold border-end"
-      id="nav-panorama-tab" 
-      data-bs-toggle="tab" 
-      data-bs-target="#nav-panorama" 
-      type="button" 
-      role="tab" 
-      aria-controls="nav-panorama" 
-      aria-selected="true"
-      style="border-color: rgba(38,44,81,0.15); background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85)); color: #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: all 0.3s ease;">
-        <i class="bi bi-pie-chart-fill" style="font-size: 1rem;"></i>
-        Panorama General
-    </button>
+    <!-- Nuevo navbar estilo moderno -->
+    <div class="bg-white border rounded-3 shadow-lg overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
+<!-- Contenedor de tabs -->
+<div class="nav nav-tabs" role="tablist"
+     style="display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; border-bottom: 1px solid rgba(38,44,81,0.15); justify-items: center; padding: 2px;">
 
-    <!-- Tab 2 -->
-    <button 
-      class="tab-btn d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold border-end"
-      id="nav-medidas-tab" 
-      data-bs-toggle="tab" 
-      data-bs-target="#nav-medidas" 
-      type="button" 
-      role="tab" 
-      aria-controls="nav-medidas" 
-      aria-selected="false"
-      style="border-color: rgba(38,44,81,0.15); color: #262C51; background: none; transition: all 0.3s ease;">
-        <i class="bi bi-bar-chart-fill" style="font-size: 1rem;"></i>
-        Medidas
-    </button>
 
-    <!-- Tab 3 -->
-    <button 
-      class="tab-btn d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold"
-      id="nav-marco-tab" 
-      data-bs-toggle="tab" 
-      data-bs-target="#nav-marco" 
-      type="button" 
-      role="tab" 
-      aria-controls="nav-marco" 
-      aria-selected="false"
-      style="color: #262C51; background: none; transition: all 0.3s ease;">
-        <i class="bi bi-book-fill" style="font-size: 1rem;"></i>
-        Líneas y Enfoques
-    </button>
+  <!-- Tab 1 -->
+  <button 
+    class="nav-link d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold"
+    id="nav-marco-tab"
+    data-bs-toggle="tab"
+    data-bs-target="#nav-panorama"
+    type="button"
+    role="tab"
+    aria-controls="nav-marco"
+    aria-selected="false"
+    style="color: #262C51; background: none;">
+    <i class="bi bi-pie-chart-fill" style="font-size: 1rem;"></i>
+    Panorama General
+  </button>
 
+  <!-- Tab 2 -->
+  <button 
+    class="nav-link d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold"
+    id="nav-marco-tab"
+    data-bs-toggle="tab"
+    data-bs-target="#nav-medidas"
+    type="button"
+    role="tab"
+    aria-controls="nav-marco"
+    aria-selected="false"
+    style="color: #262C51; background: none;">
+    <i class="bi bi-bar-chart-fill" style="font-size: 1rem;"></i>
+    Medidas
+  </button>
+
+  <!-- Tab 3 -->
+  <button 
+    class="nav-link d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold"
+    id="nav-marco-tab"
+    data-bs-toggle="tab"
+    data-bs-target="#nav-marco"
+    type="button"
+    role="tab"
+    aria-controls="nav-marco"
+    aria-selected="false"
+    style="color: #262C51; background: none;">
+    <i class="bi bi-book-fill" style="font-size: 1rem;"></i>
+    Líneas y Enfoques
+  </button>
+</div>
+
+    </div>
+    <!-- Contenido de tabs -->
+    <div class="tab-content" id="nav-tabContent">
+<!-- TAB: Panorama General -->
+<div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
+
+  <!-- Header con título y botón de descarga -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h2 class="fw-semibold mb-1" style="color:#262C51;">Vista General del Sistema</h2>
+      <p class="text-muted mb-0">Análisis estadístico y estado de todas las medidas del plan</p>
+    </div>
+    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
+      <i class="bi bi-download"></i> Descargar Reporte General
+    </button>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card border shadow-lg h-100 position-relative overflow-hidden">
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background:linear-gradient(to bottom right, rgba(38,44,81,0.05), transparent); opacity:0; transition:opacity .3s;"></div>
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+          <div class="d-flex justify-content-between align-items-center text-nowrap" style="color:#262C51;">
+            <span class="fw-semibold">Total de Medidas</span>
+            <div class="p-2 rounded" style="background-color:rgba(38,44,81,0.1);">
+              <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="mb-1" style="color:#262C51;">148</h3>
+          <p class="text-muted mb-0">Acciones en monitoreo</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border border-success-subtle shadow-lg h-100 overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, #e7f9ed, #f5fff9);">
+          <div class="d-flex justify-content-between align-items-center text-success fw-semibold">
+            <span>Progreso Avanzado</span>
+            <div class="p-2 rounded" style="background-color:#d1fadf;">
+              <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="text-success mb-1">62%</h3>
+          <p class="text-muted mb-0">Medidas con progreso avanzado</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border border-info-subtle shadow-lg h-100 overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, #eaf5ff, #f9fcff);">
+          <div class="d-flex justify-content-between align-items-center text-info fw-semibold">
+            <span>En Ejecución</span>
+            <div class="p-2 rounded" style="background-color:#d7efff;">
+              <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="text-info mb-1">34</h3>
+          <p class="text-muted mb-0">Medidas en desarrollo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos principales -->
+  <div class="row g-4 mb-5">
+    <!-- Gráfico Tipología -->
+    <div class="col-lg-6">
+      <div class="card shadow-lg border overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+          <h5 class="fw-semibold mb-0" style="color:#262C51;">Tipología de Medidas</h5>
+          <small class="text-muted">Clasificación según adaptación, mitigación y pérdidas y daños</small>
+        </div>
+        <div class="card-body" style="height:400px;">
+          <div id="chart_tipo_medidas" style="height:100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico Progreso -->
+    <div class="col-lg-6">
+      <div class="card shadow-lg border overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+          <h5 class="fw-semibold mb-0" style="color:#262C51;">Estado de Avance General</h5>
+          <small class="text-muted">Distribución de medidas según su nivel de progreso</small>
+        </div>
+        <div class="card-body" style="height:400px;">
+          <div id="chart_estado_general" style="height:100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Análisis del panorama -->
+  <div class="card shadow-lg border overflow-hidden">
+    <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Panorama</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h6 class="mb-2" style="color:#262C51;">Categoría predominante</h6>
+          <p class="text-muted mb-0">
+            Adaptación + Mitigación con <strong>42</strong> medidas
+          </p>
+        </div>
+        <div class="col-md-6">
+          <h6 class="mb-2" style="color:#262C51;">Estado predominante</h6>
+          <p class="text-muted mb-0">
+            En Curso con <strong>56</strong> medidas
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-            <div class="tab-content filter-opened" id="nav-tabContent">
-                <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
-                    <div class="tab-content-header">
-                        <div class="c3-title"></div>
-                        <div class="header-buttons">
-                            <button type="button" class="btn btn-light btn-filter" data-bs-toggle="offcanvas" data-bs-target="#drawerFilters" aria-controls="drawerFilters">
-                                <i class="bi bi-filter"></i>
-                                <span>Filtros</span>
-                            </button>
-        
-                            <ul class="nav nav-pills" id="pills-tab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                  <div class="nav-link active" id="pills-bars-tab" data-bs-toggle="pill" data-bs-target="#pills-bars" role="tab" aria-controls="pills-bars" aria-selected="true">
-                                    <img src="{% static 'main/images/mye/vertical-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
-                                    <img src="{% static 'main/images/mye/vertical-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
-                                  </div>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                  <div class="nav-link" id="pills-bars-list-tab" data-bs-toggle="pill" data-bs-target="#pills-bars-list" role="tab" aria-controls="pills-bars-list" aria-selected="false">
-                                    <img src="{% static 'main/images/mye/horizontal-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
-                                    <img src="{% static 'main/images/mye/horizontal-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
-                                  </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="tab-content" id="pills-tabContent">
-                        <div class="tab-pill-content tab-pane fade show active" id="pills-bars" role="tabpanel" aria-labelledby="pills-bars-tab">
+<!-- TAB: Medidas -->
+<div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
 
-                            <div class="circle-outer">
-
-                                <ul class="circle">
-                                  <li>
-                                      <div class="content-slice first">
-                                        <div class="c3-title">
-                                            <select class="selectpicker show-tick selectpicker-lineas-enfoques" id="selectpicker_title_bar">
-                                                <option class="title-select-lineas-enfoques">Líneas y enfoques</option>
-                                                <option>Enfoques transversales</option>
-                                                <option>Líneas instrumentales</option>
-                                                <option>Líneas estratégicas</option>
-                                            </select>
-                                        </div>
-                                        <div class="content-graphs">
-                                            <div id="chart_lineas_enfoques"></div>     
-                                        </div>
-                                      </div>
-                                      <div class="background"><div></div></div>
-                                  </li>
-                                  <li>
-                                      <div class="content-slice second">
-                                        <div class="c3-title">
-                                            <div class="c3-title-space">Pilares de la acción climática en Argentina</div>
-                                        </div>
-                                        <div class="content-graphs">
-                                            <div id="chart_pilares"></div>
-                                        </div>
-                                      </div>
-                                      <div class="background"><div></div></div>
-                                  </li>
-                                  <li>
-                                      <div class="content-slice third">
-                                        <div class="c3-title">
-                                            <div class="c3-title-space">Estado de implementación</div>
-                                        </div>
-                                        <div class="content-graphs">
-                                            <div id="chart_semaforo"></div>
-                                        </div>
-                                      </div>
-                                      <div class="background"><div></div></div>
-                                  </li>
-                                </ul>
-                            </div>
-
-                        </div>
-                        <div class="tab-pill-content tab-pane fade" id="pills-bars-list" role="tabpanel" aria-labelledby="pills-bars-list-tab">
-                            <div class="content-stacked-chart">
-                                <div class="c3-title">
-                                    <select class="selectpicker show-tick selectpicker-lineas-enfoques" id="selectpicker_title_stackedbar">
-                                        <option class="title-select-lineas-enfoques">Líneas y enfoques</option>
-                                        <option>Enfoques transversales</option>
-                                        <option>Líneas instrumentales</option>
-                                        <option>Líneas estratégicas</option>
-                                    </select>
-                                </div>
-                                <div id="stacked_bar_chart"></div>
-                            </div>
-                            <div id="stacked_bar_chart_legends">
-                                <div class="legend-left">
-                                    <div class="c3-title">
-                                        <div class="c3-title-space">
-                                            Pilares de la acción climática en Argentina
-                                            <div class="buttons-switch">
-                                                <i id="hide_0" class="bi bi-eye-slash hide-all active" data-bs-toggle="tooltip" data-bs-placement="top" title="Ocultar todos" onclick="toogleGroups(0, 'hide', this)"></i>
-                                                <i id="show_0" class="bi bi-eye show-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar todos" onclick="toogleGroups(0, 'show', this)"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="legend-right">
-                                    <div class="c3-title">
-                                        <div class="c3-title-space">
-                                            Estado de implementación
-                                            <div class="buttons-switch">
-                                                <i id="hide_1" class="bi bi-eye-slash hide-all active" data-bs-toggle="tooltip" data-bs-placement="top" title="Ocultar todos" onclick="toogleGroups(1, 'hide', this)"></i>
-                                                <i id="show_1" class="bi bi-eye show-all" data-bs-toggle="tooltip" data-bs-placement="top" title="Mostrar todos" onclick="toogleGroups(1, 'show', this)"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-                <div class="tab-pane fade view-cards" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
-
-                    <div class="tab-content-header">
-                        <div class="c3-title">Líneas de acción y medidas <i class="bi bi-info-circle" data-bs-toggle="offcanvas" data-bs-target="#lineas_accion_info" aria-controls="drawerRightInfo"></i></div>
-                        <div class="header-buttons">
-                            <button type="button" class="btn btn-light btn-filter" data-bs-toggle="offcanvas" data-bs-target="#drawerFilters" aria-controls="drawerFilters">
-                                <i class="bi bi-filter"></i>
-                                <span>Filtros</span>
-                            </button>
-                            <ul class="nav nav-pills" id="pills-details-tab">
-                                <li class="nav-item">
-                                <div class="nav-link active" id="pills-cards-tab">
-                                    <img src="{% static 'main/images/mye/cards-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
-                                    <img src="{% static 'main/images/mye/cards-white.svg' %}" alt="Filtrar" class="img-bars-white">
-                                </div>
-                                </li>
-                                <li class="nav-item">
-                                <div class="nav-link" id="pills-cards-list-tab">
-                                    <img src="{% static 'main/images/mye/horizontal-bars-gray.svg' %}" alt="Filtrar" class="img-bars-gray">
-                                    <img src="{% static 'main/images/mye/horizontal-bars-white.svg' %}" alt="Filtrar" class="img-bars-white">
-                                </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="tab-content" id="pills-details-tabContent">
-                        <div class="container-fluid tab-pill-content">
-
-                            <div class="content-filters"></div>
-
-                            <div class="content-details row">
-
-                                <div id="content_status_graph" class="content-details-status col-3">
-                                    <div class="no-select" id="title_status">Gráfico del estado de implementacion de las medidas de las líneas de acción <span>(<div id="filter_status_text">0</div> seleccionadas)</span></div>
-                                    <div class="links-content-status btn-group" role="group" aria-label="">
-                                        <div class="btn btn-primary btn-dpd-action" onclick="openDetailPopup(actionsSelecteds.length == 1 ? encodeURI(JSON.stringify(actionsSelecteds[0])):actionsSelecteds)">
-                                            <i class="bi bi-file-earmark"></i>
-                                            Detalles
-                                        </div>
-                                        <div class="btn btn-primary btn-dpd-action" id="download_selecteds_actions">
-                                            <i class="bi bi-download"></i>
-                                            Descarga
-                                        </div>
-                                    </div>
-                                    <div class="chart-content-status">
-                                        <div id="chart_status_measures"></div>
-                                    </div>
-                                    <div class="legend-status-measures"><div class="legend-html"></div></div>
-                                </div>
-
-                                <!-- Modal Detalle -->
-                                <div class="col-9" id="action_detail_popup" tabindex="-1" aria-labelledby="measureDetailLabel" data-bs-backdrop="false" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <div onclick="$('#action_detail_popup').modal('hide');" class="btn-back">
-                                                    <i class="bi bi-arrow-left-short"></i> Volver
-                                                </div>
-                                                <div class="links-content-status">
-                                                    <div class="btn btn-dpd-action" onclick="saveDetailPDF()">
-                                                        <i class="bi bi-download"></i>
-                                                        Descarga
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-body" id="measures_detail_content"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Modal INGEI -->
-                                <div class="col-9" id="ingei_popup" tabindex="-1" aria-labelledby="ingei_popup_title" data-bs-backdrop="false" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <div onclick="$('#ingei_popup').modal('hide');" class="btn-back">
-                                                    <i class="bi bi-arrow-left-short"></i> Volver
-                                                </div>
-                                            </div>
-                                            <div class="modal-body" id="ingei_content">
-                                                <h1 class="modal-title fs-5" id="ingei_popup_title"></h1>
-                                                <div id="nav"><div class="nav_monitoreo" id="nav_monitoreo"></div></div>
-                                                <div id="body">
-                                                    <div class="content">
-                                                        <div class="info">
-                                                            <h1 id="chart_title" class="monitoreo">Distribución de GEI</h1>
-                                                            <div class="ley">
-                                                            <span id="unidad_de_medida" style="display: none">
-                                                                Unidad de medida:
-                                                                <strong><span id="chart_unidad">MtCO₂e</span></strong>
-                                                            </span>
-                                                            </div>
-                                                        </div>
-                                                    
-                                                        <!-- GRAFICO -->
-                                                        <div id="chart" class="c3"></div>
-                                                        <div id="chart_custom_legend"></div>
-                                                        <div id="chart_descripcion"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="content-details-measures col-9">
-                                    <div class="measures-counter">
-                                        <div>
-                                            <input class="form-check-input" type="checkbox" value="0" id="check_all_actions">
-                                            <label for="check_all_actions">Seleccionar / Deseleccionar todas</label>
-                                        </div>
-                                        <div class="selecteds-actions">Líneas de acción seleccionadas <span id="measures_selecteds">0</span>/<span id="total_actions">0</span></div>
-                                    </div>
-                                    <div class="measures-cards-content">
-
-                                        <div id="content_actions_graphs" class="row row-cols-1 row-cols-xl-2 g-4"></div>
-
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                </div>
+  <!-- Tarjetas de estadísticas -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card border shadow-lg h-100 overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+          <div class="d-flex justify-content-between align-items-center" style="color:#262C51;">
+            <span class="fw-semibold">Total de Medidas</span>
+            <div class="p-2 rounded" style="background-color:rgba(38,44,81,0.1);">
+              <i class="bi bi-bullseye"></i>
             </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="mb-1" style="color:#262C51;">148</h3>
+          <p class="text-muted mb-0">Medidas registradas en monitoreo</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border border-success-subtle shadow-lg h-100 overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, #e7f9ed, #f5fff9);">
+          <div class="d-flex justify-content-between align-items-center text-success fw-semibold">
+            <span>Progreso Avanzado</span>
+            <div class="p-2 rounded" style="background-color:#d1fadf;">
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="text-success mb-1">62%</h3>
+          <p class="text-muted mb-0">Con nivel de avance alto</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border border-info-subtle shadow-lg h-100 overflow-hidden">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, #eaf5ff, #f9fcff);">
+          <div class="d-flex justify-content-between align-items-center text-info fw-semibold">
+            <span>En Ejecución</span>
+            <div class="p-2 rounded" style="background-color:#d7efff;">
+              <i class="bi bi-speedometer2"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="text-info mb-1">34</h3>
+          <p class="text-muted mb-0">Medidas actualmente en desarrollo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección principal -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width:6px;height:32px;background:linear-gradient(to bottom,#262C51,rgba(38,44,81,0.5));border-radius:4px;"></div>
+    <h2 class="fw-semibold mb-0" style="color:#262C51;">Explorar Medidas</h2>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="position-relative mb-5">
+    <i class="bi bi-search position-absolute" style="left:16px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:1.2rem;"></i>
+    <input 
+      type="text"
+      id="search_measures"
+      class="form-control ps-5 py-3 border-2 rounded-3"
+      placeholder="Buscar medidas por título, descripción o responsable..."
+    >
+  </div>
+
+  <!-- Contenedor principal -->
+  <div class="row g-4">
+    
+    <!-- Panel de filtros lateral -->
+    <div class="col-lg-3">
+      <div class="card border shadow-sm rounded-3">
+        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.08), rgba(38,44,81,0.03));">
+          <h6 class="fw-semibold mb-0" style="color:#262C51;">Filtros</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
+            <select id="filtro_tipo" class="form-select">
+              <option value="">Todas</option>
+              <option>Adaptación</option>
+              <option>Mitigación</option>
+              <option>Pérdidas y Daños</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
+            <select id="filtro_linea" class="form-select">
+              <option value="">Todas</option>
+              <option>Transversales</option>
+              <option>Instrumentales</option>
+              <option>Estratégicas</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
+            <select id="filtro_nivel" class="form-select">
+              <option value="all">Todos</option>
+              <option>Inicial</option>
+              <option>En curso</option>
+              <option>Avanzada</option>
+            </select>
+          </div>
+          <button class="btn w-100 text-white" style="background-color:#262C51;">Limpiar filtros</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listado de medidas -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-4" style="border:2px solid rgba(38,44,81,0.1);">
+        <p class="mb-0 text-muted">
+          Mostrando <span class="fw-semibold" style="color:#262C51;">24</span> de 148 medidas
+        </p>
+      </div>
+
+      <!-- Si no hay resultados -->
+      <div class="text-center py-5 border border-dashed rounded-3" id="no_results" style="border-color:rgba(38,44,81,0.2);display:none;">
+        <i class="bi bi-search mb-3" style="font-size:3rem;color:rgba(38,44,81,0.4);"></i>
+        <h5 class="text-muted mb-2">No se encontraron medidas</h5>
+        <p class="text-muted">Intenta ajustar los filtros o términos de búsqueda</p>
+      </div>
+
+      <!-- Cards de medidas -->
+      <div id="measures_list" class="row row-cols-1 g-4">
+        <!-- Ejemplo de card -->
+        <div class="col">
+          <div class="card shadow-sm border h-100 rounded-3 hover-shadow">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-semibold" style="color:#262C51;">Implementación de Energías Renovables</h5>
+                <span class="badge bg-success">Avanzada</span>
+              </div>
+              <p class="text-muted mb-2">Promueve la adopción de tecnologías limpias para reducir emisiones de carbono en el sector energético.</p>
+              <p class="text-muted small mb-3"><i class="bi bi-person"></i> Ministerio de Energía</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-info text-dark">Mitigación</span>
+                <button class="btn btn-sm text-white" style="background-color:#262C51;">Ver detalles</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Más cards se generan dinámicamente -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: Marco Conceptual -->
+<div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
+
+  <!-- Card principal -->
+  <div class="card border shadow-lg overflow-hidden rounded-3">
+
+    <!-- Header con título y descripción -->
+    <div class="border-bottom p-4" 
+         style="background:linear-gradient(to right, rgba(38,44,81,0.15), rgba(38,44,81,0.08), rgba(38,44,81,0.05));">
+      <h2 class="fw-semibold mb-2" style="color:#262C51;">Líneas y Enfoques</h2>
+      <p class="text-muted mb-0">
+        Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas.
+      </p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="card-body p-4">
+      <div class="row g-4">
+        
+        <!-- Ejemplo 1 -->
+        <div class="col-md-6">
+          <div class="card h-100 border shadow-sm rounded-3 overflow-hidden position-relative"
+               style="transition:all 0.3s ease;">
+            <div class="card-header border-bottom position-relative"
+                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
+                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
+                          filter:blur(20px); pointer-events:none;"></div>
+              <div class="d-flex align-items-start gap-3">
+                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                     style="background:linear-gradient(to bottom right,#262C51,rgba(38,44,81,0.85)); width:48px; height:48px;">
+                  <i class="bi bi-globe text-white fs-5"></i>
+                </div>
+                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Enfoques Transversales</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Incorporan principios de equidad, género, derechos humanos y sostenibilidad para fortalecer la implementación de las políticas climáticas.
+              </p>
+              <span class="badge rounded-pill text-white" 
+                    style="background-color:#262C51;opacity:0.85;">Enfoque Transversal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejemplo 2 -->
+        <div class="col-md-6">
+          <div class="card h-100 border shadow-sm rounded-3 overflow-hidden position-relative"
+               style="transition:all 0.3s ease;">
+            <div class="card-header border-bottom position-relative"
+                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
+                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
+                          filter:blur(20px); pointer-events:none;"></div>
+              <div class="d-flex align-items-start gap-3">
+                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                     style="background:linear-gradient(to bottom right,#00695c,#00897b); width:48px; height:48px;">
+                  <i class="bi bi-gear-fill text-white fs-5"></i>
+                </div>
+                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Líneas Instrumentales</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Conjunto de herramientas técnicas y de gestión que permiten operacionalizar las acciones climáticas a nivel sectorial y territorial.
+              </p>
+              <span class="badge rounded-pill text-white" 
+                    style="background-color:#00897b;opacity:0.85;">Instrumental</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejemplo 3 -->
+        <div class="col-md-6">
+          <div class="card h-100 border shadow-sm rounded-3 overflow-hidden position-relative"
+               style="transition:all 0.3s ease;">
+            <div class="card-header border-bottom position-relative"
+                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
+                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
+                          filter:blur(20px); pointer-events:none;"></div>
+              <div class="d-flex align-items-start gap-3">
+                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                     style="background:linear-gradient(to bottom right,#3949ab,#5c6bc0); width:48px; height:48px;">
+                  <i class="bi bi-compass text-white fs-5"></i>
+                </div>
+                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Líneas Estratégicas</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Direccionan la acción climática hacia resultados de largo plazo, integrando innovación, financiamiento y fortalecimiento institucional.
+              </p>
+              <span class="badge rounded-pill text-white" 
+                    style="background-color:#5c6bc0;opacity:0.85;">Estratégica</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejemplo 4 -->
+        <div class="col-md-6">
+          <div class="card h-100 border shadow-sm rounded-3 overflow-hidden position-relative"
+               style="transition:all 0.3s ease;">
+            <div class="card-header border-bottom position-relative"
+                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
+                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
+                          filter:blur(20px); pointer-events:none;"></div>
+              <div class="d-flex align-items-start gap-3">
+                <div class="p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+                     style="background:linear-gradient(to bottom right,#9c27b0,#ba68c8); width:48px; height:48px;">
+                  <i class="bi bi-diagram-3 text-white fs-5"></i>
+                </div>
+                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Pilares de Gobernanza</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Promueven coordinación interinstitucional, participación social y transparencia en la implementación de las políticas climáticas.
+              </p>
+              <span class="badge rounded-pill text-white" 
+                    style="background-color:#9c27b0;opacity:0.85;">Gobernanza</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+
         </div>
 
         
@@ -423,7 +596,7 @@
         <div class="shadow-lg rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
           
           <!-- Header -->
-          <div class="p-4 d-flex align-items-center justify-content-between" ">
+          <div class="p-4 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
               <div class="p-3 rounded-3 text-white shadow-sm d-flex align-items-center justify-content-center" style="background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85));">
                 <i class="bi bi-info-lg fs-4"></i>
