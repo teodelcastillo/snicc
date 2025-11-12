@@ -49,8 +49,18 @@
 
 <div class="mye-content">
     <div class="mye-header">
-        <div class="mye-title-content" >
-            <h1 id="mye-title">Módulo de Monitoreo y Evaluación<i class="bi bi-info-circle" data-bs-toggle="offcanvas" data-bs-target="#drawerRightInfo" aria-controls="drawerRightInfo"></i></h1>
+        <div class="mye-title-content" style="display:block;">
+            <h1 id="mye-title">
+            Módulo de Monitoreo y Evaluación - Cambio Climático
+            <i class="bi bi-info-circle"
+                role="button"
+                style="cursor: pointer; margin-left: 8px; font-size: 1.1em;"
+                data-bs-toggle="modal"
+                data-bs-target="#drawerRightInfo"
+                aria-label="Ver información sobre el módulo">
+            </i>
+            </h1>            
+            <p style="margin-left: 40px">Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático</p>
         </div>
         <div class="mye-buttons float-end me-2">
             <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
@@ -343,18 +353,115 @@
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="drawerRightInfo" aria-labelledby="drawerRightInfoLabel">
-    <div class="offcanvas-header">
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+<!-- Ícono disparador -->
+<h1 id="mye-title">
+  Módulo de Monitoreo y Evaluación - Cambio Climático
+  <i class="bi bi-info-circle"
+     role="button"
+     style="cursor: pointer; margin-left: 8px; font-size: 1.1em;"
+     data-bs-toggle="modal"
+     data-bs-target="#drawerRightInfo"
+     aria-label="Ver información sobre el módulo">
+  </i>
+</h1>
+<p style="margin-left: 40px">
+  Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
+</p>
+
+<!-- Modal -->
+<div class="modal fade" id="drawerRightInfo" tabindex="-1" aria-labelledby="drawerRightInfoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content border-0 shadow-lg" >
+
+      <div class="modal-body p-4">
+        <!-- Card principal -->
+        <div class="shadow-lg rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
+          
+          <!-- Header -->
+          <div class="p-4 d-flex align-items-center justify-content-between" ">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-3 rounded-3 text-white shadow-sm d-flex align-items-center justify-content-center" style="background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85));">
+                <i class="bi bi-info-lg fs-4"></i>
+              </div>
+              <div>
+                <h5 class="mb-1 fw-semibold" style="color: #262C51;">¿Qué es el Módulo de Evaluación y Monitoreo?</h5>
+                <p class="mb-0 text-muted">
+                  Herramienta para el seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
+                </p>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <!-- Contenido -->
+          <div class="p-4">
+            <div class="border-top pt-3 mb-4">
+              <h5 class="mb-2" style="color: #262C51;">Propósito del Sistema</h5>
+              <p class="text-muted">
+                El sistema de monitoreo de Argentina es una herramienta clave para seguir el progreso de las 
+                acciones propuestas en el Plan Nacional de Adaptación y Mitigación al cambio climático. 
+                A través de una serie de indicadores, mide los avances en distintos sectores y regiones del país.
+              </p>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="bg-white p-4 rounded-3 shadow-sm h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
+                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
+                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                    Evaluación de Efectividad
+                  </h6>
+                  <p class="text-muted mb-0">
+                    Permite evaluar la efectividad de las políticas climáticas implementadas en todo el territorio nacional.
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="bg-white p-4 rounded-3 shadow-sm h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
+                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
+                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                    Transparencia y Mejora
+                  </h6>
+                  <p class="text-muted mb-0">
+                    Busca fomentar la transparencia y la mejora continua de las estrategias de adaptación y mitigación.
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="bg-white p-4 rounded-3 shadow-sm h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
+                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
+                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                    Compromisos Internacionales
+                  </h6>
+                  <p class="text-muted mb-0">
+                    Fundamental para asegurar que Argentina cumpla con sus compromisos climáticos internacionales.
+                  </p>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="bg-white p-4 rounded-3 shadow-sm h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
+                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
+                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                    Protección Ciudadana
+                  </h6>
+                  <p class="text-muted mb-0">
+                    Protege a la ciudadanía y ecosistemas, reduciendo la vulnerabilidad frente al cambio climático.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end card -->
+      </div>
     </div>
-    <div class="offcanvas-body">
-        <h5 class="offcanvas-title" id="drawerRightInfoLabel">Sobre el Módulo de Monitoreo y Evaluación</h5>
-        <div class="offcanvas-text">
-            <p>El sistema de monitoreo de Argentina es una herramienta clave para seguir el progreso de las acciones propuestas en el Plan Nacional de Adaptación y Mitigación al cambio climático.  A través de una serie de indicadores, mide los avances en distintos sectores y regiones del país, permitiendo evaluar la efectividad de las políticas climáticas.</p>
-            <p>Además, busca fomentar la transparencia y la mejora continua de las estrategias de adaptación y mitigación. En conclusión, este sistema es fundamental para asegurar que Argentina cumpla con sus compromisos internacionales y proteja a su ciudadanía y ecosistemas, reduciendo su vulnerabilidad frente al cambio climático.</p>
-        </div>
-    </div>
+  </div>
 </div>
+
+
+
 
 <!-- Lineas y enfoques , y Pilares de la accion climatica-->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="graphiquesInfo">
