@@ -391,6 +391,55 @@ def measure_pdf_recalc(request):
     return redirect('admin:index')
 
 
+def mye_overview(request):
+    context = base_context(request)
+
+    # Total medidas activas
+    measures = Measure.active.all()
+    total_measures = measures.count()
+
+    # Conteos por estado
+    count_by_status = Counter(measures.values_list('status', flat=True))
+    avanzada = count_by_status.get(Measure.Status.avanzada, 0)
+    inicial = count_by_status.get(Measure.Status.inicial, 0)
+    exec_count = avanzada + inicial
+    percent_advanced = round((avanzada / total_measures) * 100) if total_measures > 0 else 0
+
+    # Pilar predominante
+    top_pilar = (Pilar.objects
+                 .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
+                 .order_by('-num')
+                 .first())
+    top_pilar_name = top_pilar.name if top_pilar else ""
+    top_pilar_count = top_pilar.num if top_pilar else 0
+
+    # Estado predominante (agrupado)
+    prog = count_by_status.get(Measure.Status.prog, 0)
+    indef = count_by_status.get(Measure.Status.adefinir, 0)
+    if exec_count >= prog and exec_count >= indef:
+        pred_status_name = "En Curso"
+        pred_status_count = exec_count
+    elif prog >= indef:
+        pred_status_name = "En programación"
+        pred_status_count = prog
+    else:
+        pred_status_name = "A definir"
+        pred_status_count = indef
+
+    context.update({
+        'total_measures': total_measures,
+        'percent_advanced': percent_advanced,
+        'execution_count': exec_count,
+        'top_pilar_name': top_pilar_name,
+        'top_pilar_count': top_pilar_count,
+        'pred_status_name': pred_status_name,
+        'pred_status_count': pred_status_count,
+    })
+
+    return render(request, 'mainv2/mye.html', context)
+
+
+
 
 app_name='measure'
 urlpatterns = [
@@ -404,4 +453,6 @@ urlpatterns = [
     path('export.csv', many_measures_csv, name='csv-export'),
     path('action/<int:id>/', action_details, name='action_details'),
     path('recalc/', measure_pdf_recalc, name='recalc'),
+    path('mye/', mye_overview, name='mye'),
+
 ]
