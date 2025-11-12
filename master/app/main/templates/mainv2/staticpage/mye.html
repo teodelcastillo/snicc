@@ -47,21 +47,24 @@
 
 {% block content %}
 
-<div class="mye-content" style="background-color: white !important;">
-    <div class="mye-header">
-        <div class="mye-title-content" style="display:block;">
-            <h1 id="mye-title">
-            Módulo de Monitoreo y Evaluación - Cambio Climático
+        <div class="mye-content" style="background-color: white !important;">
+            <div class="mye-header">
+        <div class="mye-title-content" style="display: flex; flex-direction: column; align-items: flex-start;">
+          <h1 id="mye-title" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            Módulo de Monitoreo - Cambio Climático
             <i class="bi bi-info-circle"
-                role="button"
-                style="cursor: pointer; margin-left: 8px; font-size: 1.1em;"
-                data-bs-toggle="modal"
-                data-bs-target="#drawerRightInfo"
-                aria-label="Ver información sobre el módulo">
+              role="button"
+              style="cursor: pointer; font-size: 1.1em;"
+              data-bs-toggle="modal"
+              data-bs-target="#drawerRightInfo"
+              aria-label="Ver información sobre el módulo">
             </i>
-            </h1>            
-            <p style="margin-left: 40px">Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático</p>
+          </h1>
+          <p style="margin: 0 0 0 40px; color: #555;">
+            Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
+          </p>
         </div>
+
         <div class="mye-buttons float-end me-2">
             <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
                 <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar documentos"><span>Descargar documentos</span></button>
