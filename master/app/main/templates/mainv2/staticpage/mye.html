@@ -467,134 +467,133 @@
 <!-- TAB: Marco Conceptual -->
 <div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
 
-  <!-- Card principal -->
-  <div class="card border shadow-md overflow-hidden rounded-3">
+  <!-- Header con título y botón -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h2 class="fw-semibold mb-1" style="color:#262C51;">Líneas y Enfoques</h2>
+      <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
+    </div>
+    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
+      <i class="bi bi-download"></i> Descargar Catálogo Completo
+    </button>
+  </div>
 
-    <!-- Header con título y descripción -->
-    <div class="border-bottom p-4" 
-         style="background:linear-gradient(to right, rgba(38,44,81,0.15), rgba(38,44,81,0.08), rgba(38,44,81,0.05));">
-      <h2 class="fw-semibold mb-2" style="color:#262C51;">Líneas y Enfoques</h2>
-      <p class="text-muted mb-0">
-        Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas.
-      </p>
+  <!-- Grilla de Cards -->
+  <div class="row g-4 mb-5">
+
+    <!-- 🟣 Enfoques Transversales -->
+    <div class="col-md-6">
+      <div class="card border shadow-md position-relative overflow-hidden"
+           style="height:220px; border-color:#c5cae9; transition:all .3s ease;">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+             style="height:90px; padding:24px; background:linear-gradient(to right, #e8eaf6, #f3e5f5); border-color:#c5cae9; color:#262C51;">
+          <span class="fw-semibold">Enfoques Transversales</span>
+          <div class="p-2 rounded d-flex align-items-center justify-content-center"
+               style="background-color:#e3e0f3; width:36px; height:36px;">
+            <i class="bi bi-globe" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+             style="height:calc(220px - 90px); padding-left:24px;">
+          <p class="text-muted mb-2">
+            Incorporan principios de equidad, género, derechos humanos y sostenibilidad para fortalecer las políticas climáticas.
+          </p>
+          <span class="badge rounded-pill text-white" style="background-color:#262C51; opacity:0.85;">Transversal</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Contenido -->
-    <div class="card-body p-4">
+    <!-- 🟢 Líneas Instrumentales -->
+    <div class="col-md-6">
+      <div class="card border shadow-md position-relative overflow-hidden"
+           style="height:220px; border-color:#c8e6c9; transition:all .3s ease;">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+             style="height:90px; padding:24px; background:linear-gradient(to right, #e7f9ed, #f5fff9); border-color:#c8e6c9; color:#198754;">
+          <span class="fw-semibold">Líneas Instrumentales</span>
+          <div class="p-2 rounded d-flex align-items-center justify-content-center"
+               style="background-color:#d1fadf; width:36px; height:36px;">
+            <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+             style="height:calc(220px - 90px); padding-left:24px;">
+          <p class="text-muted mb-2">
+            Conjunto de herramientas técnicas y de gestión que permiten operacionalizar las acciones climáticas a nivel sectorial y territorial.
+          </p>
+          <span class="badge rounded-pill text-white" style="background-color:#00897b; opacity:0.85;">Instrumental</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔵 Líneas Estratégicas -->
+    <div class="col-md-6">
+      <div class="card border shadow-md position-relative overflow-hidden"
+           style="height:220px; border-color:#bbdefb; transition:all .3s ease;">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+             style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
+          <span class="fw-semibold">Líneas Estratégicas</span>
+          <div class="p-2 rounded d-flex align-items-center justify-content-center"
+               style="background-color:#d7efff; width:36px; height:36px;">
+            <i class="bi bi-compass" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+             style="height:calc(220px - 90px); padding-left:24px;">
+          <p class="text-muted mb-2">
+            Direccionan la acción climática hacia resultados de largo plazo, integrando innovación, financiamiento e institucionalidad.
+          </p>
+          <span class="badge rounded-pill text-white" style="background-color:#5c6bc0; opacity:0.85;">Estratégica</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🟣 Pilares de Gobernanza -->
+    <div class="col-md-6">
+      <div class="card border shadow-md position-relative overflow-hidden"
+           style="height:220px; border-color:#e1bee7; transition:all .3s ease;">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+             style="height:90px; padding:24px; background:linear-gradient(to right, #f3e5f5, #f9f3ff); border-color:#e1bee7; color:#9c27b0;">
+          <span class="fw-semibold">Pilares de Gobernanza</span>
+          <div class="p-2 rounded d-flex align-items-center justify-content-center"
+               style="background-color:#f0d7f8; width:36px; height:36px;">
+            <i class="bi bi-diagram-3" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+             style="height:calc(220px - 90px); padding-left:24px;">
+          <p class="text-muted mb-2">
+            Promueven coordinación interinstitucional, participación social y transparencia en la implementación de políticas climáticas.
+          </p>
+          <span class="badge rounded-pill text-white" style="background-color:#9c27b0; opacity:0.85;">Gobernanza</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sección inferior: análisis -->
+  <div class="card shadow-md border overflow-hidden" style="min-height:185px;">
+    <div class="card-header border-bottom flex-column justify-content-center"
+         style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
+                border-color:#bbdefb; color:#0d6efd;">
+      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Marco Conceptual</h5>
+    </div>
+    <div class="card-body">
       <div class="row g-4">
-        
-        <!-- Ejemplo 1 -->
         <div class="col-md-6">
-          <div class="card h-100 border shadow-md rounded-3 overflow-hidden position-relative"
-               style="transition:all 0.3s ease;">
-            <div class="card-header border-bottom position-relative"
-                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
-                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
-                          filter:blur(20px); pointer-events:none;"></div>
-              <div class="d-flex align-items-start gap-3">
-                <div class="p-3 rounded-3 shadow-md d-flex align-items-center justify-content-center"
-                     style="background:linear-gradient(to bottom right,#262C51,rgba(38,44,81,0.85)); width:48px; height:48px;">
-                  <i class="bi bi-globe text-white fs-5"></i>
-                </div>
-                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Enfoques Transversales</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              <p class="text-muted mb-3">
-                Incorporan principios de equidad, género, derechos humanos y sostenibilidad para fortalecer la implementación de las políticas climáticas.
-              </p>
-              <span class="badge rounded-pill text-white" 
-                    style="background-color:#262C51;opacity:0.85;">Enfoque Transversal</span>
-            </div>
-          </div>
+          <h6 class="mb-2" style="color:#262C51;">Enfoque más transversal</h6>
+          <p class="text-muted mb-0">Equidad de género y derechos humanos integrados en <strong>3 líneas</strong>.</p>
         </div>
-
-        <!-- Ejemplo 2 -->
         <div class="col-md-6">
-          <div class="card h-100 border shadow-md rounded-3 overflow-hidden position-relative"
-               style="transition:all 0.3s ease;">
-            <div class="card-header border-bottom position-relative"
-                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
-                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
-                          filter:blur(20px); pointer-events:none;"></div>
-              <div class="d-flex align-items-start gap-3">
-                <div class="p-3 rounded-3 shadow-md d-flex align-items-center justify-content-center"
-                     style="background:linear-gradient(to bottom right,#00695c,#00897b); width:48px; height:48px;">
-                  <i class="bi bi-gear-fill text-white fs-5"></i>
-                </div>
-                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Líneas Instrumentales</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              <p class="text-muted mb-3">
-                Conjunto de herramientas técnicas y de gestión que permiten operacionalizar las acciones climáticas a nivel sectorial y territorial.
-              </p>
-              <span class="badge rounded-pill text-white" 
-                    style="background-color:#00897b;opacity:0.85;">Instrumental</span>
-            </div>
-          </div>
+          <h6 class="mb-2" style="color:#262C51;">Línea estratégica predominante</h6>
+          <p class="text-muted mb-0">Innovación y fortalecimiento institucional presentes en <strong>5 medidas</strong>.</p>
         </div>
-
-        <!-- Ejemplo 3 -->
-        <div class="col-md-6">
-          <div class="card h-100 border shadow-md rounded-3 overflow-hidden position-relative"
-               style="transition:all 0.3s ease;">
-            <div class="card-header border-bottom position-relative"
-                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
-                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
-                          filter:blur(20px); pointer-events:none;"></div>
-              <div class="d-flex align-items-start gap-3">
-                <div class="p-3 rounded-3 shadow-md d-flex align-items-center justify-content-center"
-                     style="background:linear-gradient(to bottom right,#3949ab,#5c6bc0); width:48px; height:48px;">
-                  <i class="bi bi-compass text-white fs-5"></i>
-                </div>
-                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Líneas Estratégicas</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              <p class="text-muted mb-3">
-                Direccionan la acción climática hacia resultados de largo plazo, integrando innovación, financiamiento y fortalecimiento institucional.
-              </p>
-              <span class="badge rounded-pill text-white" 
-                    style="background-color:#5c6bc0;opacity:0.85;">Estratégica</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ejemplo 4 -->
-        <div class="col-md-6">
-          <div class="card h-100 border shadow-md rounded-3 overflow-hidden position-relative"
-               style="transition:all 0.3s ease;">
-            <div class="card-header border-bottom position-relative"
-                 style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-              <div class="position-absolute top-0 end-0 w-25 h-25 rounded-circle" 
-                   style="background:linear-gradient(to bottom left, rgba(38,44,81,0.05), transparent);
-                          filter:blur(20px); pointer-events:none;"></div>
-              <div class="d-flex align-items-start gap-3">
-                <div class="p-3 rounded-3 shadow-md d-flex align-items-center justify-content-center"
-                     style="background:linear-gradient(to bottom right,#9c27b0,#ba68c8); width:48px; height:48px;">
-                  <i class="bi bi-diagram-3 text-white fs-5"></i>
-                </div>
-                <h5 class="fw-semibold mb-0 mt-1" style="color:#262C51;">Pilares de Gobernanza</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              <p class="text-muted mb-3">
-                Promueven coordinación interinstitucional, participación social y transparencia en la implementación de las políticas climáticas.
-              </p>
-              <span class="badge rounded-pill text-white" 
-                    style="background-color:#9c27b0;opacity:0.85;">Gobernanza</span>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 </div>
+
+
     </div>
 
         </div>
