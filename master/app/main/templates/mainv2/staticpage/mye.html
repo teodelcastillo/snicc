@@ -77,9 +77,9 @@
     <div class="mye-body">
         <div class="mye-body-content"><!-- col-auto px-0-->
     <!-- Nuevo navbar estilo moderno -->
-    <div class="bg-white border rounded-3 shadow-lg overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
+    <div class="bg-white border rounded-3 overflow-hidden"  style="border: none !important;" >
 <!-- Contenedor de tabs -->
-<div class="bg-white border rounded-3 shadow-lg overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
+<div class="bg-white border rounded-3 shadow-sm overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
   <!-- Tabs Navigation -->
   <ul class="nav nav-tabs w-100" id="myeTabs" role="tablist" 
       style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(38,44,81,0.15);">
@@ -154,12 +154,12 @@
 
   <!-- 🟣 Total de Medidas -->
   <div class="col-md-4">
-    <div class="card border shadow-lg position-relative overflow-hidden"
+    <div class="card border shadow-sm position-relative overflow-hidden"
          style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
       
       <!-- Header (40px alto, 24px padding, centrado) -->
       <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05)); border-color:rgba(38,44,81,0.15); color:#262C51;">
+           style="height:90px; padding:24px; ">
         <span class="fw-semibold">Total de Medidas</span>
         <div class="p-2 rounded d-flex align-items-center justify-content-center" 
              style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
@@ -178,7 +178,7 @@
 
   <!-- 🟢 Progreso Avanzado -->
   <div class="col-md-4">
-    <div class="card border shadow-lg position-relative overflow-hidden"
+    <div class="card border shadow-sm position-relative overflow-hidden"
          style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
       
       <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
@@ -200,7 +200,7 @@
 
   <!-- 🔵 En Ejecución -->
   <div class="col-md-4">
-    <div class="card border shadow-lg position-relative overflow-hidden"
+    <div class="card border shadow-sm position-relative overflow-hidden"
          style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
       
       <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
@@ -228,7 +228,7 @@
 
   <!-- 🟣 Gráfico Tipología de Medidas -->
   <div class="col-lg-6">
-    <div class="card border shadow-lg h-100 overflow-hidden position-relative"
+    <div class="card border shadow-sm h-100 overflow-hidden position-relative"
          style="transition: all 0.3s ease; border-color: rgba(38,44,81,0.15);">
       
       <!-- Overlay hover -->
@@ -255,7 +255,7 @@
 
   <!-- 🔵 Gráfico Estado de Avance General -->
   <div class="col-lg-6">
-    <div class="card border shadow-lg h-100 overflow-hidden position-relative"
+    <div class="card border shadow-sm h-100 overflow-hidden position-relative"
          style="transition: all 0.3s ease; border-color:#bbdefb;">
       
       <!-- Overlay hover -->
@@ -284,7 +284,7 @@
 
 
   <!-- Análisis del panorama -->
-  <div class="card shadow-lg border overflow-hidden" style="min-height:185px;">
+  <div class="card shadow-sm border overflow-hidden" style="min-height:185px;">
     <div class="card-header border-bottom flex-column justify-content-center"
            style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
       <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Panorama</h5>
@@ -313,7 +313,7 @@
   <!-- Tarjetas de estadísticas -->
   <div class="row g-4 mb-5">
     <div class="col-md-4">
-      <div class="card border shadow-lg h-100 overflow-hidden">
+      <div class="card border shadow-sm h-100 overflow-hidden">
         <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
           <div class="d-flex justify-content-between align-items-center" style="color:#262C51;">
             <span class="fw-semibold">Total de Medidas</span>
@@ -330,7 +330,7 @@
     </div>
 
     <div class="col-md-4">
-      <div class="card border border-success-subtle shadow-lg h-100 overflow-hidden">
+      <div class="card border border-success-subtle shadow-sm h-100 overflow-hidden">
         <div class="card-header border-bottom" style="background:linear-gradient(to right, #e7f9ed, #f5fff9);">
           <div class="d-flex justify-content-between align-items-center text-success fw-semibold">
             <span>Progreso Avanzado</span>
@@ -347,7 +347,7 @@
     </div>
 
     <div class="col-md-4">
-      <div class="card border border-info-subtle shadow-lg h-100 overflow-hidden">
+      <div class="card border border-info-subtle shadow-sm h-100 overflow-hidden">
         <div class="card-header border-bottom" style="background:linear-gradient(to right, #eaf5ff, #f9fcff);">
           <div class="d-flex justify-content-between align-items-center text-info fw-semibold">
             <span>En Ejecución</span>
@@ -468,7 +468,7 @@
 <div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
 
   <!-- Card principal -->
-  <div class="card border shadow-lg overflow-hidden rounded-3">
+  <div class="card border shadow-sm overflow-hidden rounded-3">
 
     <!-- Header con título y descripción -->
     <div class="border-bottom p-4" 
@@ -643,11 +643,11 @@
 <!-- Modal -->
 <div class="modal fade" id="drawerRightInfo" tabindex="-1" aria-labelledby="drawerRightInfoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content border-0 shadow-lg" >
+    <div class="modal-content border-0 shadow-sm" >
 
       <div class="modal-body p-4">
         <!-- Card principal -->
-        <div class="shadow-lg rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
+        <div class="shadow-sm rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
           
           <!-- Header -->
           <div class="p-4 d-flex align-items-center justify-content-between">
