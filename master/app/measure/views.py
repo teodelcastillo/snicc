@@ -483,6 +483,7 @@ urlpatterns = [
     path('<int:id>/', measure_fields, name='details'),
     path('filter.json', measure_filter_json, name='filter'),
     path('details.json', filter_details, name='details'),
+    path('filter-simple.json', measure_list_json, name='filter_simple'),
     path('lines.json', line_details, name='line_details'),
     path('export.pdf', many_measures_pdf, name='concat-pdf-export'),
     path('export.csv', many_measures_csv, name='csv-export'),
