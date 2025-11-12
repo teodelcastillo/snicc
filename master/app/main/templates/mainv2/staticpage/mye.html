@@ -76,12 +76,57 @@
     </div>
     <div class="mye-body">
         <div class="mye-body-content"><!-- col-auto px-0-->
-            <nav>
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                  <button class="nav-link active" id="nav-general-tab" data-bs-toggle="tab" data-bs-target="#nav-general" type="button" role="tab" aria-controls="nav-general" aria-selected="true">Aspectos generales</button>
-                  <button class="nav-link" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-details" aria-selected="false">Detalles</button>
-                </div>
-            </nav>
+<!-- Nuevo navbar estilo moderno -->
+<div class="bg-white border rounded-3 shadow-lg overflow-hidden" style="border-color: rgba(38,44,81,0.15);">
+  <div class="d-grid" style="grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid rgba(38,44,81,0.15); background: linear-gradient(to right, rgba(38,44,81,0.05), rgba(38,44,81,0.02), rgba(38,44,81,0.05));">
+    
+    <!-- Tab 1 -->
+    <button 
+      class="tab-btn active d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold border-end"
+      id="nav-panorama-tab" 
+      data-bs-toggle="tab" 
+      data-bs-target="#nav-panorama" 
+      type="button" 
+      role="tab" 
+      aria-controls="nav-panorama" 
+      aria-selected="true"
+      style="border-color: rgba(38,44,81,0.15); background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85)); color: #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: all 0.3s ease;">
+        <i class="bi bi-pie-chart-fill" style="font-size: 1rem;"></i>
+        Panorama General
+    </button>
+
+    <!-- Tab 2 -->
+    <button 
+      class="tab-btn d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold border-end"
+      id="nav-medidas-tab" 
+      data-bs-toggle="tab" 
+      data-bs-target="#nav-medidas" 
+      type="button" 
+      role="tab" 
+      aria-controls="nav-medidas" 
+      aria-selected="false"
+      style="border-color: rgba(38,44,81,0.15); color: #262C51; background: none; transition: all 0.3s ease;">
+        <i class="bi bi-bar-chart-fill" style="font-size: 1rem;"></i>
+        Medidas
+    </button>
+
+    <!-- Tab 3 -->
+    <button 
+      class="tab-btn d-flex align-items-center justify-content-center gap-2 py-3 fw-semibold"
+      id="nav-marco-tab" 
+      data-bs-toggle="tab" 
+      data-bs-target="#nav-marco" 
+      type="button" 
+      role="tab" 
+      aria-controls="nav-marco" 
+      aria-selected="false"
+      style="color: #262C51; background: none; transition: all 0.3s ease;">
+        <i class="bi bi-book-fill" style="font-size: 1rem;"></i>
+        Líneas y Enfoques
+    </button>
+
+  </div>
+</div>
             <div class="tab-content filter-opened" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
                     <div class="tab-content-header">
