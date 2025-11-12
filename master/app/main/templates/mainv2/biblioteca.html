@@ -35,28 +35,43 @@
       </div>
 
       <!-- Columna del dropdown ordenar (alineado a la derecha) -->
-      <div class="col-md-9 d-flex justify-content-end align-items-center">
-        <form class="sort-form" action="{% url 'mainv2:library' %}" method="get" class="ms-auto">
-          <!-- Preservar filtros activos -->
-          <input type="hidden" name="pattern" value="{{ request.GET.pattern }}">
-          <input type="hidden" name="filter"  value="{{ request.GET.filter }}">
-          <input type="hidden" name="format"  value="{{ request.GET.format }}">
-          <input type="hidden" name="author"  value="{{ request.GET.author }}">
+<div class="col-md-9 d-flex justify-content-end align-items-center">
+  <form class="sort-form ms-auto" action="{% url 'mainv2:library' %}" method="get">
+    <!-- Preservar filtros activos -->
+    <input type="hidden" name="pattern" value="{{ request.GET.pattern }}">
+    <input type="hidden" name="filter"  value="{{ request.GET.filter }}">
+    <input type="hidden" name="format"  value="{{ request.GET.format }}">
+    <input type="hidden" name="author"  value="{{ request.GET.author }}">
 
-          <label for="sort" class="me-2 mb-0 small text-muted">{% ts 'Ordenar por' lang %}</label>
-          <select id="sort" name="sort" class="form-select d-inline-block" style="width: 220px;" onchange="this.form.submit()">
-            <option value="recent" {% if request.GET.sort == 'recent' or not request.GET.sort %}selected{% endif %}>
-              {% ts 'Agregados recientemente' lang %}
-            </option>
-            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>
-              {% ts 'Título (A–Z)' lang %}
-            </option>
-            <option value="author" {% if request.GET.sort == 'author' %}selected{% endif %}>
-              {% ts 'Autor (A–Z)' lang %}
-            </option>
-          </select>
-        </form>
-      </div>
+    <div style="
+      display: flex;
+      width: 291px;
+      height: 38px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 3px;
+      flex-shrink: 0;
+    ">
+      <select id="sort" name="sort"
+              class="form-select"
+              style="width: 100%; height: 100%; font-size: 14px; color: #262C51;"
+              onchange="this.form.submit()">
+        <option disabled selected>{% ts 'Ordenar por' lang %}</option>
+        <option value="recent" {% if request.GET.sort == 'recent' or not request.GET.sort %}selected{% endif %}>
+          {% ts 'Agregados recientemente' lang %}
+        </option>
+        <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>
+          {% ts 'Título (A–Z)' lang %}
+        </option>
+        <option value="author" {% if request.GET.sort == 'author' %}selected{% endif %}>
+          {% ts 'Autor (A–Z)' lang %}
+        </option>
+      </select>
+    </div>
+  </form>
+</div>
+
     </div>
     <!-- Fin toolbar -->
 
