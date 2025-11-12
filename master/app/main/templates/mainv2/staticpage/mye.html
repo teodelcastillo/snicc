@@ -131,7 +131,7 @@
 
     </div>
     <!-- Contenido de tabs -->
-    <div class="tab-content" id="nav-tabContent">
+    <div class="tab-content" id="nav-tabContent" style="margin-top:20px;">
 <!-- TAB: Panorama General -->
 <div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
 
@@ -146,93 +146,144 @@
     </button>
   </div>
 
-  <!-- Tarjetas resumen -->
-  <div class="row g-4 mb-5">
-    <div class="col-md-4">
-      <div class="card border shadow-lg h-100 position-relative overflow-hidden">
-        <div class="position-absolute top-0 start-0 w-100 h-100" style="background:linear-gradient(to bottom right, rgba(38,44,81,0.05), transparent); opacity:0; transition:opacity .3s;"></div>
-        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-          <div class="d-flex justify-content-between align-items-center text-nowrap" style="color:#262C51;">
-            <span class="fw-semibold">Total de Medidas</span>
-            <div class="p-2 rounded" style="background-color:rgba(38,44,81,0.1);">
-              <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <h3 class="mb-1" style="color:#262C51;">148</h3>
-          <p class="text-muted mb-0">Acciones en monitoreo</p>
+<!-- Tarjetas resumen -->
+<div class="row g-4 mb-5">
+
+  <!-- 🟣 Total de Medidas -->
+  <div class="col-md-4">
+    <div class="card border shadow-lg position-relative overflow-hidden"
+         style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
+      
+      <!-- Header (40px alto, 24px padding, centrado) -->
+      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+           style="height:90px; padding:24px; background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05)); border-color:rgba(38,44,81,0.15); color:#262C51;">
+        <span class="fw-semibold">Total de Medidas</span>
+        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+             style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
+          <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-4">
-      <div class="card border border-success-subtle shadow-lg h-100 overflow-hidden">
-        <div class="card-header border-bottom" style="background:linear-gradient(to right, #e7f9ed, #f5fff9);">
-          <div class="d-flex justify-content-between align-items-center text-success fw-semibold">
-            <span>Progreso Avanzado</span>
-            <div class="p-2 rounded" style="background-color:#d1fadf;">
-              <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <h3 class="text-success mb-1">62%</h3>
-          <p class="text-muted mb-0">Medidas con progreso avanzado</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card border border-info-subtle shadow-lg h-100 overflow-hidden">
-        <div class="card-header border-bottom" style="background:linear-gradient(to right, #eaf5ff, #f9fcff);">
-          <div class="d-flex justify-content-between align-items-center text-info fw-semibold">
-            <span>En Ejecución</span>
-            <div class="p-2 rounded" style="background-color:#d7efff;">
-              <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <h3 class="text-info mb-1">34</h3>
-          <p class="text-muted mb-0">Medidas en desarrollo</p>
-        </div>
+      <!-- Body -->
+      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+          style="height:calc(220px - 40px); padding-left:24px;">
+        <h3 class="mb-1 fw-semibold" style="color:#262C51;">148</h3>
+        <p class="text-muted mb-0">Acciones en monitoreo</p>
       </div>
     </div>
   </div>
 
-  <!-- Gráficos principales -->
-  <div class="row g-4 mb-5">
-    <!-- Gráfico Tipología -->
-    <div class="col-lg-6">
-      <div class="card shadow-lg border overflow-hidden">
-        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-          <h5 class="fw-semibold mb-0" style="color:#262C51;">Tipología de Medidas</h5>
-          <small class="text-muted">Clasificación según adaptación, mitigación y pérdidas y daños</small>
-        </div>
-        <div class="card-body" style="height:400px;">
-          <div id="chart_tipo_medidas" style="height:100%;"></div>
+  <!-- 🟢 Progreso Avanzado -->
+  <div class="col-md-4">
+    <div class="card border shadow-lg position-relative overflow-hidden"
+         style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
+      
+      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+           style="height:90px; padding:24px; background:linear-gradient(to right, #e8f5e9, #f5fff9); border-color:#c8e6c9; color:#198754;">
+        <span class="fw-semibold">Progreso Avanzado</span>
+        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+             style="background-color:#d1fadf; width:36px; height:36px;">
+          <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
         </div>
       </div>
-    </div>
 
-    <!-- Gráfico Progreso -->
-    <div class="col-lg-6">
-      <div class="card shadow-lg border overflow-hidden">
-        <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
-          <h5 class="fw-semibold mb-0" style="color:#262C51;">Estado de Avance General</h5>
-          <small class="text-muted">Distribución de medidas según su nivel de progreso</small>
-        </div>
-        <div class="card-body" style="height:400px;">
-          <div id="chart_estado_general" style="height:100%;"></div>
-        </div>
+      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+          style="height:calc(220px - 40px); padding-left:24px;">
+        <h3 class="text-success mb-1 fw-semibold">62%</h3>
+        <p class="text-muted mb-0">Medidas con progreso avanzado</p>
       </div>
     </div>
   </div>
+
+  <!-- 🔵 En Ejecución -->
+  <div class="col-md-4">
+    <div class="card border shadow-lg position-relative overflow-hidden"
+         style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
+      
+      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
+        <span class="fw-semibold">En Ejecución</span>
+        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+             style="background-color:#d7efff; width:36px; height:36px;">
+          <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
+        </div>
+      </div>
+
+      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+          style="height:calc(220px - 40px); padding-left:24px;">
+        <h3 class="mb-1 fw-semibold" style="color:#262C51;">148</h3>
+        <p class="text-muted mb-0">Acciones en monitoreo</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Gráficos principales -->
+<div class="row g-4 mb-5">
+
+  <!-- 🟣 Gráfico Tipología de Medidas -->
+  <div class="col-lg-6">
+    <div class="card border shadow-lg h-100 overflow-hidden position-relative"
+         style="transition: all 0.3s ease; border-color: rgba(38,44,81,0.15);">
+      
+      <!-- Overlay hover -->
+      <div class="position-absolute top-0 start-0 w-100 h-100"
+           style="background:linear-gradient(to bottom right, rgba(38,44,81,0.1), transparent);
+                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
+
+      <!-- Header con estilo principal oscuro -->
+      <div class="card-header border-bottom flex-column justify-content-center"
+          style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
+                  border-color:#bbdefb; color:#0d6efd; text-align:left;">
+        <h5 class="fw-semibold mb-1" style="margin:0;">Tipología de Medidas</h5>
+        <small class="text-muted" style="margin:0;">Clasificación según adaptación, mitigación y pérdidas y daños</small>
+      </div>
+
+
+
+      <!-- Body -->
+      <div class="card-body position-relative" style="height:400px; z-index:2;">
+        <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔵 Gráfico Estado de Avance General -->
+  <div class="col-lg-6">
+    <div class="card border shadow-lg h-100 overflow-hidden position-relative"
+         style="transition: all 0.3s ease; border-color:#bbdefb;">
+      
+      <!-- Overlay hover -->
+      <div class="position-absolute top-0 start-0 w-100 h-100"
+           style="background:linear-gradient(to bottom right, #e3f2fd, transparent);
+                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
+
+      <!-- Header con estilo azul claro -->
+      <div class="card-header border-bottom flex-column justify-content-center"
+           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
+        <h5 class="fw-semibold mb-1">Estado de Avance General</h5>
+        <small class="text-muted">
+          Distribución de medidas según su nivel de progreso
+        </small>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body position-relative" style="height:400px; z-index:2;">
+        <div id="chart_estado_general" style="height:100%; width:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
 
   <!-- Análisis del panorama -->
-  <div class="card shadow-lg border overflow-hidden">
-    <div class="card-header border-bottom" style="background:linear-gradient(to right, rgba(38,44,81,0.1), rgba(38,44,81,0.05));">
+  <div class="card shadow-lg border overflow-hidden" style="min-height:185px;">
+    <div class="card-header border-bottom flex-column justify-content-center"
+           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
       <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Panorama</h5>
     </div>
     <div class="card-body">
