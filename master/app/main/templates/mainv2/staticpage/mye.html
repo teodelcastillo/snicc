@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 1️⃣ Cargar datos desde el backend
   async function loadMeasures() {
     try {
-      const res = await fetch("/measure/filter.json");
+      const res = await fetch("/measure/filter-simple.json");
       const data = await res.json();
       measures = data.measures || data.data || [];
       renderMeasures(measures);
