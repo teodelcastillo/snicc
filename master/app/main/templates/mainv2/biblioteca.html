@@ -1,150 +1,177 @@
-{% extends 'mainv2/base.html' %}        
+{% extends 'mainv2/base.html' %}
 {% load static snicc_i18n %}
 {% block content %}
-                <!-- Library page -->
-                <div class="library-search-content">
-                    
-                    <div class="post-row-mobile row">
-                        <h1 class="post-title post-title-blue">{% ts 'Biblioteca SNIC' lang %}</h1>
-                        <div class="col-md-3 col-categories">
+<!-- Library page -->
+<div class="library-search-content">
+  <div class="post-row-mobile row">
+    <h1 class="post-title post-title-blue">{% ts 'Biblioteca SNIC' lang %}</h1>
 
-                            <div class="cat-content">
-                                <h5>{% ts 'Categorias' lang %}</h5>
-                                {% for k,v in total.items %}{% if v %}
-                                {% if catfilter == k %}<a href="." class="active">
-                                {% else %}<a href="list/?filter={{k}}">{%endif%}
-                                    <span>{% ts k.capitalize lang %}</span> 
-                                    <span class="badge text-bg-secondary">{{v}}</span>
-                                </a>
-                                {% endif %}{% endfor %}
-                            </div>
-                            <div class="dropdown dropdown-categories">
-                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {% ts 'Categorias' lang %}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    {% for k,v in total.items %}{% if v %}<li>
-                                    {% if catfilter == k %}<a href="." class="active">
-                                    {% else %}<a href="list/?filter={{k}}">{%endif%}
-                                        <span>{% ts k.capitalize lang %}</span> 
-                                        <span class="badge text-bg-secondary">{{v}}</span>
-                                    </a></li>
-                                    {% endif %}{% endfor %}
-                                </ul>
-                            </div>
-                            
-                            <div class="cat-content">
-                                <h5>{% ts 'Autores' lang %}</h5>
-                                {% for a in authors %}
-                                <a href="list/?author={{a.id}}">
-                                    <span>{{a}}</span> 
-                                    <span class="badge text-bg-secondary">{{a.nbb}}</span>
-                                </a>
-                                {% endfor %}
-                            </div>
-                            <div class="dropdown dropdown-categories">
-                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {% ts 'Autores' lang %}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    {% for a in authors %}<li>
-                                    <a href="list/?author={{a.id}}">
-                                        <span>{{a}}</span> 
-                                        <span class="badge text-bg-secondary">{{a.nbb}}</span>
-                                    </a></li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
+    <!-- Toolbar superior: buscador (mismo ancho que sidebar) + ordenar -->
+    <div class="library-toolbar row align-items-center mb-3">
+      <!-- Columna del buscador (mismo ancho que sidebar col-md-3) -->
+      <div class="col-md-3">
+        <form class="main-form search-form" role="search" action="{% url 'mainv2:library' %}" method="get">
+          <div class="input-group w-100">
+            <input placeholder="{% ts 'Buscá por autor, título...' lang %}"
+                   class="input-search form-control"
+                   id="pattern"
+                   name="pattern"
+                   value="{{ request.GET.pattern|default_if_none:'' }}"
+                   size="20"
+                   maxlength="255">
+            <span class="input-group-btn">
+              <button class="bg-white btn-search-reset btn btn-primary form-submit"
+                      aria-label="Buscar"
+                      type="submit"
+                      id="edit-submit"
+                      name="op"
+                      value="buscar">
+                <img src="{% static 'main/images/iconos/search.svg' %}" alt="">
+                <span class="sr-only">{% ts 'Buscá por autor, título...' lang %}</span>
+              </button>
+            </span>
+          </div>
+        </form>
+      </div>
 
-                        <div class="col-md-8 col-post">
+      <!-- Columna del dropdown ordenar (alineado a la derecha) -->
+      <div class="col-md-9 d-flex justify-content-end align-items-center">
+        <form class="sort-form" action="{% url 'mainv2:library' %}" method="get" class="ms-auto">
+          <!-- Preservar filtros activos -->
+          <input type="hidden" name="pattern" value="{{ request.GET.pattern }}">
+          <input type="hidden" name="filter"  value="{{ request.GET.filter }}">
+          <input type="hidden" name="format"  value="{{ request.GET.format }}">
+          <input type="hidden" name="author"  value="{{ request.GET.author }}">
 
-                            <form class="main-form search-form" role="search" action="{% url 'mainv2:library' %}" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
-                                <div class="input-group">
-                                    <input placeholder="{% ts 'Buscá por autor, título...' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
-                                    <span class="input-group-btn">
-                                    <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
-                                        <img src="main/images/iconos/search.svg" alt=""></i><span class="sr-only">{% ts 'Buscá por autor, título...' lang %}</span>
-                                    </button>
-                                </span></div>
-                                </div>
-                            </form>
+          <label for="sort" class="me-2 mb-0 small text-muted">{% ts 'Ordenar por' lang %}</label>
+          <select id="sort" name="sort" class="form-select d-inline-block" style="width: 220px;" onchange="this.form.submit()">
+            <option value="recent" {% if request.GET.sort == 'recent' or not request.GET.sort %}selected{% endif %}>
+              {% ts 'Agregados recientemente' lang %}
+            </option>
+            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>
+              {% ts 'Título (A–Z)' lang %}
+            </option>
+            <option value="author" {% if request.GET.sort == 'author' %}selected{% endif %}>
+              {% ts 'Autor (A–Z)' lang %}
+            </option>
+          </select>
+        </form>
+      </div>
+    </div>
+    <!-- Fin toolbar -->
 
-                            <div class="library-content">
+    <!-- Columna lateral -->
+    <div class="col-md-3 col-categories">
+      <div class="cat-content">
+        <h5>{% ts 'Categorias' lang %}</h5>
+        {% for k,v in total.items %}
+          {% if v %}
+            {% if k in catfilter %}<a href="." class="active">
+            {% else %}<a href="list/?filter={{k}}">{% endif %}
+              <span>{% ts k.capitalize lang %}</span>
+              <span class="badge text-bg-secondary">{{v}}</span>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
 
-                                <div class="section-cards">
-                                    <div class="row">
-                                        <h4 class="post-title">{% ts 'Accesos directos' lang %}</h4>
-                                    </div>
-                                    <div class="row row-cols-1 row-cols-md-3">
-                                        <div class="col">
-                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=capacitaciones">
-                                                <div class="card-img-top shortcut-img capacitaciones"></div>
-                                                <div class="card-body">
-                                                    <h5 class="card-title">
-                                                        {% ts 'Capacitaciones' lang %}
-                                                    </h5>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <div class="col">
-                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=comunidad">
-                                                <div class="card-img-top shortcut-img comunidad"></div>
-                                                <div class="card-body">
-                                                    <h5 class="card-title">
-                                                        {% ts 'Comunidad educativa' lang %}
-                                                    </h5>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <div class="col">
-                                            <a class="card" href="{% url 'mainv2:library' %}?bookcat=ciudadania">
-                                                <div class="card-img-top shortcut-img ciudadania"></div>
-                                                <div class="card-body">
-                                                    <h5 class="card-title">
-                                                        {% ts 'Ciudadanía' lang %}
-                                                    </h5>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+      <div class="dropdown dropdown-categories">
+        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {% ts 'Categorias' lang %}
+        </button>
+        <ul class="dropdown-menu">
+          {% for k,v in total.items %}
+            {% if v %}
+              <li>
+                {% if k in catfilter %}<a href="." class="active">
+                {% else %}<a href="list/?filter={{k}}">{% endif %}
+                  <span>{% ts k.capitalize lang %}</span>
+                  <span class="badge text-bg-secondary">{{v}}</span>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
 
-                                <div class="section-cards section-nueva-biblioteca">
-                                    <div class="row">
-                                        <h4 class="post-title">{% ts 'Agregados recientemente' lang %}</h4>
-                                    </div>
-                                    <div class="row row-cols-1 row-cols-md-4">
-                                        {% for b in books %}{% with content=b|translate:lang %}
-                                        <div class="col">
-                                            <a class="card" href="{{b.url|default:"#"}}" target="_blank">
-                                                {% if b.image %}
-                                                <img src="{{b.image.url}}" class="card-img-top" alt="">
-                                                {% else %}
-                                                <img src="{% static 'main/images/library/image.png' %}" class="card-img-top" alt="">
-                                                {% endif %}
-                                                <div class="card-body">
-                                                    <h6 class="card-title">
-                                                        {{content.title}}
-                                                    </h6>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        {% endwith %}{% endfor %}
-                                    </div>
-                                </div>
+      <div class="cat-content">
+        <h5>{% ts 'Tipo de archivo' lang %}</h5>
+        {% for f,v in formats.items %}
+          {% if v %}
+            {% if format == f %}<a href="." class="active">
+            {% else %}<a href="list/?format={{f}}">{% endif %}
+              <span>{% ts f lang %}</span>
+              <span class="badge text-bg-secondary">{{v}}</span>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
 
+      {% if authors %}
+        <div class="cat-content">
+          <h5>{% ts 'Autores' lang %}</h5>
+          {% for a in authors %}
+            {% if a.nbb %}
+              {% if author == a %}<a href="." class="active">
+              {% else %}<a href="list/?author={{a.id}}">{% endif %}
+                <span>{{a}}</span>
+                <span class="badge text-bg-secondary">{{a.nbb}}</span>
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
 
+        <div class="dropdown dropdown-categories">
+          <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {% ts 'Autores' lang %}
+          </button>
+          <ul class="dropdown-menu">
+            {% for a in authors %}
+              {% if a.nbb %}
+                <li>
+                  {% if author == a %}<a href="." class="active">
+                  {% else %}<a href="list/?author={{a.id}}">{% endif %}
+                    <span>{{a}}</span>
+                    <span class="badge text-bg-secondary">{{a.nbb}}</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+    <!-- Fin columna lateral -->
 
-                            </div>
-
-
-                        </div>
-                        
+    <!-- Columna principal -->
+    <div class="col-md-8 col-post">
+      <div class="library-content" style="width:100%;">
+        <div class="section-cards section-nueva-biblioteca" style="margin-top:0; padding-top:0;">
+          <div class="row">
+            <h4 class="post-title">{% ts 'Agregados recientemente' lang %}</h4>
+          </div>
+          <div class="row row-cols-1 row-cols-md-4">
+            {% for b in books %}
+              {% with content=b|translate:lang %}
+                <div class="col">
+                  <a class="card" href="{{b.url|default:'#'}}" target="_blank">
+                    {% if b.image %}
+                      <img src="{{b.image.url}}" class="card-img-top" alt="">
+                    {% else %}
+                      <img src="{% static 'main/images/library/image.png' %}" class="card-img-top" alt="">
+                    {% endif %}
+                    <div class="card-body">
+                      <h6 class="card-title">{{content.title}}</h6>
                     </div>
-
-                    
+                  </a>
                 </div>
-                    
-                <!-- end post page -->
+              {% endwith %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fin columna principal -->
+  </div>
+</div>
 {% endblock %}
