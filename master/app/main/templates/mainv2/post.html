@@ -91,8 +91,64 @@
 
 
                 <div class="post-text">
+                  {% if post.ordered_children %}
+                    <div class="section-cards section">
+                      <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+                        {% for child in post.ordered_children %}{% if child.is_published %}{% with ccontent=child|translate:lang %}
+                        <div class="col">
+                          <a class="card" href="{% url 'mainv2:post' child.slug %}">
+                            <div class="card-body">
+                              <div class="circle-recursos">
+                                {% if child.image %}
+                                <img src="{{ child.image.url }}" alt="">
+                                {% endif %}
+                              </div>
+                              <h6 class="card-title">{{ ccontent.title }}</h6>
+                              <p>{{ ccontent.short|default:'' }}</p>
+                            </div>
+                          </a>
+                        </div>
+                        {% endwith %}{% endif %}{% endfor %}
+
+                        {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                        <div class="col">
+                          {% if link.view %}
+                            <a class="card" href="{% if link.viewargs %}{% url link.view link.viewargs %}{% else %}{% url link.view %}{% endif %}">
+                          {% else %}
+                            <a class="card" href="{{ link.url }}">
+                          {% endif %}
+                            <div class="card-body">
+                              <div class="circle-recursos">
+                                {% if link.image %}
+                                <img src="{{ link.image.url }}" alt="">
+                                {% endif %}
+                              </div>
+                              <h6 class="card-title">{{ ccontent.title }}</h6>
+                              <p>{{ ccontent.description|default:'' }}</p>
+                            </div>
+                          </a>
+                        </div>
+                        {% endwith %}{% endfor %}
+                      </div>
+
+                      {% if post.books.exists %}
+                      <div class="dropdown w-100 mt-4">
+                        <button class="btn btn-azul-claro btn-small dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          {% ts 'Documentación complementaria' lang %}
+                        </button>
+                        <ul class="dropdown-menu">
+                          {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                          <li><a class="dropdown-item" href="{{ book.book.url|default:'#' }}" target="_blank">{{ content.title }}</a></li>
+                          {% endwith %}{% endfor %}
+                        </ul>
+                      </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
                     {{ html|safe }}
+                  {% endif %}
                 </div>
+
             </div>
         </div>
 
@@ -130,7 +186,7 @@
                       </a>
                     {% endif %}
                   </li>
-                  {% endwith %}{% endfor %}
+                  {%endwith%} {% endfor %}
                 </ul>
               </div>
               {% endif %}
