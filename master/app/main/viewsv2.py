@@ -52,17 +52,17 @@ def landing(request):
     })
     return render(request, 'mainv2/index.html', context)
 
-def library_front(request):
-    qset = Book.objects.all().order_by('-date')[:4]
-    context = default_context(request, {
-        'books': qset,
-        'authors': Author.objects.all().annotate(nbb=Count('book')).order_by('-nbb')[:5],
-        'total': {
-            c.lower(): Book.objects.filter(category__icontains=c).count()
-            for c in Category
-        }
-    })
-    return render(request, 'mainv2/biblioteca.html', context=context)
+#def library_front(request):
+#    qset = Book.objects.all().order_by('-date')[:4]
+#    context = default_context(request, {
+#        'books': qset,
+#        'authors': Author.objects.all().annotate(nbb=Count('book')).order_by('-nbb')[:5],
+#        'total': {
+#            c.lower(): Book.objects.filter(category__icontains=c).count()
+#            for c in Category
+#        }
+#    })
+#    return render(request, 'mainv2/biblioteca.html', context=context)
 
 def library(request):
     page = request.GET.get('page', 1)
