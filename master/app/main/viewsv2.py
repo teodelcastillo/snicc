@@ -66,6 +66,66 @@ def library_front(request):
 
 def library(request):
     page = request.GET.get('page', 1)
+    sort = request.GET.get('sort', 'recent')
+    catfilter = request.GET.getlist('filter')
+    author = request.GET.get('author')
+    search = request.GET.get('pattern')
+    bookcat = request.GET.get('bookcat')
+    format = request.GET.get('format')
+
+    # ordenar según criterio
+    order_map = {
+        'recent': '-date',
+        'date': '-date',
+        'author': 'authors__name',
+        'title': 'versions__title',
+    }
+    order = order_map.get(sort, '-date')
+
+    # queryset base
+    qset = Book.objects.all()
+    if format:
+        qset = qset.filter(format=format)
+    if bookcat:
+        qset = qset.filter(**{bookcat: True})
+    if search:
+        qset = qset.filter(
+            Q(authors__name__icontains=search) |
+            Q(versions__title__icontains=search) |
+            Q(versions__description__icontains=search)
+        )
+    for cat in catfilter:
+        qset = qset.filter(category__icontains=cat)
+    if author:
+        qset = qset.filter(authors__id=author)
+
+    qset = qset.distinct().order_by(order)
+
+    try:
+        books = Paginator(qset, 8).page(page)
+    except EmptyPage:
+        books = Paginator(qset, 8).page(1)
+
+    context = default_context(request, {
+        'books': books,
+        'catfilter': catfilter,
+        'bookcat': bookcat,
+        'pattern': search,
+        'format': format,
+        'formats': {f: qset.filter(format=f).count() for f in Book.BookFormat},
+        'author': Author.objects.get(id=author) if author else None,
+        'authors': Author.objects.all().annotate(
+            nbb=Count('book', filter=Q(book__in=qset))
+        ).exclude(nbb=0).order_by('-nbb')[:5],
+        'total': {
+            c.lower(): qset.filter(category__icontains=c).count()
+            for c in Category
+        },
+        'current_sort': sort,
+    })
+
+    return render(request, 'mainv2/biblioteca.html', context)
+    page = request.GET.get('page', 1)
     # find the correct query filter
     order = {
         'date': '-date',
