@@ -438,6 +438,41 @@ def mye_overview(request):
 
     return render(request, 'mainv2/mye.html', context)
 
+def measure_list_json(request):
+    """
+    Devuelve un listado simple de medidas activas con los campos principales,
+    usado por el módulo MyE (mye.html) para renderizar las cards dinámicamente.
+    """
+    measures = Measure.active.all().values(
+        "id",
+        "name",
+        "status",
+        "description",
+        "pilares__name",
+        "action__line__name",
+    )
+
+    data = []
+    for m in measures:
+        # Si el campo 'fields' existe, buscamos la autoridad de aplicación
+        measure_obj = Measure.objects.get(id=m["id"])
+        responsable = ""
+        if measure_obj.fields:
+            responsable = measure_obj.fields.get("Autoridad de aplicación", "")
+
+        data.append({
+            "id": m["id"],
+            "name": m["name"],
+            "status": m["status"],
+            "description": m["description"],
+            "pilar": m["pilares__name"],
+            "linea": m["action__line__name"],
+            "responsable": responsable,
+        })
+
+    return JsonResponse({"measures": data})
+
+
 
 
 
