@@ -1,14 +1,13 @@
 {% extends 'mainv2/base.html' %}
 {% load static snicc_i18n %}
 {% block content %}
-<!-- Library page -->
 <div class="library-search-content">
   <div class="post-row-mobile row">
     <h1 class="post-title post-title-blue">{% ts 'Biblioteca SNIC' lang %}</h1>
 
-    <!-- Toolbar superior: buscador (mismo ancho que sidebar) + ordenar -->
+    <!-- Toolbar superior -->
     <div class="library-toolbar row align-items-center mb-3">
-      <!-- Columna del buscador (mismo ancho que sidebar col-md-3) -->
+      <!-- Buscador -->
       <div class="col-md-3">
         <form class="main-form search-form" role="search" action="{% url 'mainv2:library' %}" method="get">
           <div class="input-group w-100">
@@ -16,64 +15,47 @@
                    class="input-search form-control"
                    id="pattern"
                    name="pattern"
-                   value="{{ request.GET.pattern|default_if_none:'' }}"
-                   size="20"
-                   maxlength="255">
+                   value="{{ request.GET.pattern|default_if_none:'' }}">
             <span class="input-group-btn">
-              <button class="bg-white btn-search-reset btn btn-primary form-submit"
-                      aria-label="Buscar"
-                      type="submit"
-                      id="edit-submit"
-                      name="op"
-                      value="buscar">
+              <button class="bg-white btn-search-reset btn btn-primary form-submit" type="submit">
                 <img src="{% static 'main/images/iconos/search.svg' %}" alt="">
-                <span class="sr-only">{% ts 'Buscá por autor, título...' lang %}</span>
               </button>
             </span>
           </div>
         </form>
       </div>
 
-      <!-- Columna del dropdown ordenar (alineado a la derecha) -->
-<div class="col-md-9 d-flex justify-content-end align-items-center">
-  <form class="sort-form ms-auto" action="{% url 'mainv2:library' %}" method="get">
-    <!-- Preservar filtros activos -->
-    <input type="hidden" name="pattern" value="{{ request.GET.pattern }}">
-    <input type="hidden" name="filter"  value="{{ request.GET.filter }}">
-    <input type="hidden" name="format"  value="{{ request.GET.format }}">
-    <input type="hidden" name="author"  value="{{ request.GET.author }}">
+      <!-- Dropdown ordenar -->
+      <div class="col-md-9 d-flex justify-content-end align-items-center">
+        <form class="sort-form ms-auto" action="{% url 'mainv2:library' %}" method="get">
+          <!-- Preservar filtros -->
+          <input type="hidden" name="pattern" value="{{ request.GET.pattern }}">
+          <input type="hidden" name="filter"  value="{{ request.GET.filter }}">
+          <input type="hidden" name="format"  value="{{ request.GET.format }}">
+          <input type="hidden" name="author"  value="{{ request.GET.author }}">
 
-    <div style="
-      display: flex;
-      width: 291px;
-      height: 38px;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 3px;
-      flex-shrink: 0;
-    ">
-      <select id="sort" name="sort"
-              class="form-select"
-              style="width: 100%; height: 100%; font-size: 14px; color: #262C51;"
-              onchange="this.form.submit()">
-        <option disabled selected>{% ts 'Ordenar por' lang %}</option>
-        <option value="recent" {% if request.GET.sort == 'recent' or not request.GET.sort %}selected{% endif %}>
-          {% ts 'Agregados recientemente' lang %}
-        </option>
-        <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>
-          {% ts 'Título (A–Z)' lang %}
-        </option>
-        <option value="author" {% if request.GET.sort == 'author' %}selected{% endif %}>
-          {% ts 'Autor (A–Z)' lang %}
-        </option>
-      </select>
+          {% with current_sort=request.GET.sort|default:"recent" %}
+          <select id="sort" name="sort"
+                  class="form-select"
+                  style="width:291px;height:38px;font-size:14px;color:#262C51;"
+                  onchange="this.form.submit()">
+            <option value="" disabled {% if not request.GET.sort %}selected{% endif %}>
+              {% ts 'Ordenar por' lang %}
+            </option>
+            <option value="recent" {% if current_sort == 'recent' %}selected{% endif %}>
+              {% ts 'Agregados recientemente' lang %}
+            </option>
+            <option value="title" {% if current_sort == 'title' %}selected{% endif %}>
+              {% ts 'Título (A–Z)' lang %}
+            </option>
+            <option value="author" {% if current_sort == 'author' %}selected{% endif %}>
+              {% ts 'Autor (A–Z)' lang %}
+            </option>
+          </select>
+          {% endwith %}
+        </form>
+      </div>
     </div>
-  </form>
-</div>
-
-    </div>
-    <!-- Fin toolbar -->
 
     <!-- Columna lateral -->
     <div class="col-md-3 col-categories">
@@ -81,8 +63,11 @@
         <h5>{% ts 'Categorias' lang %}</h5>
         {% for k,v in total.items %}
           {% if v %}
-            {% if k in catfilter %}<a href="." class="active">
-            {% else %}<a href="list/?filter={{k}}">{% endif %}
+            {% if k in catfilter %}
+              <a href="{% url 'mainv2:library' %}" class="active">
+            {% else %}
+              <a href="{% url 'mainv2:library' %}?filter={{k}}&pattern={{request.GET.pattern}}&format={{request.GET.format}}&author={{request.GET.author}}">
+            {% endif %}
               <span>{% ts k.capitalize lang %}</span>
               <span class="badge text-bg-secondary">{{v}}</span>
             </a>
@@ -90,31 +75,15 @@
         {% endfor %}
       </div>
 
-      <div class="dropdown dropdown-categories">
-        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {% ts 'Categorias' lang %}
-        </button>
-        <ul class="dropdown-menu">
-          {% for k,v in total.items %}
-            {% if v %}
-              <li>
-                {% if k in catfilter %}<a href="." class="active">
-                {% else %}<a href="list/?filter={{k}}">{% endif %}
-                  <span>{% ts k.capitalize lang %}</span>
-                  <span class="badge text-bg-secondary">{{v}}</span>
-                </a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-
       <div class="cat-content">
         <h5>{% ts 'Tipo de archivo' lang %}</h5>
         {% for f,v in formats.items %}
           {% if v %}
-            {% if format == f %}<a href="." class="active">
-            {% else %}<a href="list/?format={{f}}">{% endif %}
+            {% if format == f %}
+              <a href="{% url 'mainv2:library' %}" class="active">
+            {% else %}
+              <a href="{% url 'mainv2:library' %}?format={{f}}&filter={{request.GET.filter}}&pattern={{request.GET.pattern}}&author={{request.GET.author}}">
+            {% endif %}
               <span>{% ts f lang %}</span>
               <span class="badge text-bg-secondary">{{v}}</span>
             </a>
@@ -127,32 +96,16 @@
           <h5>{% ts 'Autores' lang %}</h5>
           {% for a in authors %}
             {% if a.nbb %}
-              {% if author == a %}<a href="." class="active">
-              {% else %}<a href="list/?author={{a.id}}">{% endif %}
+              {% if author == a %}
+                <a href="{% url 'mainv2:library' %}" class="active">
+              {% else %}
+                <a href="{% url 'mainv2:library' %}?author={{a.id}}&filter={{request.GET.filter}}&pattern={{request.GET.pattern}}&format={{request.GET.format}}">
+              {% endif %}
                 <span>{{a}}</span>
                 <span class="badge text-bg-secondary">{{a.nbb}}</span>
               </a>
             {% endif %}
           {% endfor %}
-        </div>
-
-        <div class="dropdown dropdown-categories">
-          <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {% ts 'Autores' lang %}
-          </button>
-          <ul class="dropdown-menu">
-            {% for a in authors %}
-              {% if a.nbb %}
-                <li>
-                  {% if author == a %}<a href="." class="active">
-                  {% else %}<a href="list/?author={{a.id}}">{% endif %}
-                    <span>{{a}}</span>
-                    <span class="badge text-bg-secondary">{{a.nbb}}</span>
-                  </a>
-                </li>
-              {% endif %}
-            {% endfor %}
-          </ul>
         </div>
       {% endif %}
     </div>
@@ -160,33 +113,93 @@
 
     <!-- Columna principal -->
     <div class="col-md-8 col-post">
-      <div class="library-content" style="width:100%;">
-        <div class="section-cards section-nueva-biblioteca" style="margin-top:0; padding-top:0;">
-          <div class="row">
-            <h4 class="post-title">{% ts 'Agregados recientemente' lang %}</h4>
-          </div>
-          <div class="row row-cols-1 row-cols-md-4">
-            {% for b in books %}
-              {% with content=b|translate:lang %}
-                <div class="col">
-                  <a class="card" href="{{b.url|default:'#'}}" target="_blank">
-                    {% if b.image %}
-                      <img src="{{b.image.url}}" class="card-img-top" alt="">
-                    {% else %}
-                      <img src="{% static 'main/images/library/image.png' %}" class="card-img-top" alt="">
-                    {% endif %}
-                    <div class="card-body">
-                      <h6 class="card-title">{{content.title}}</h6>
-                    </div>
-                  </a>
-                </div>
-              {% endwith %}
-            {% endfor %}
-          </div>
+
+      {% if request.GET.filter or request.GET.format or request.GET.author or request.GET.pattern %}
+      <div class="filtros-categorias mb-4 pb-2 border-bottom">
+        <p class="fw-semibold mb-2" style="color:#262C51;">{% ts 'Filtrado por' lang %}</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% if request.GET.filter %}
+            <a href="{% url 'mainv2:library' %}?format={{request.GET.format}}&author={{request.GET.author}}&pattern={{request.GET.pattern}}"
+               class="badge bg-light text-dark border"
+               style="text-decoration:none;">
+              {% ts 'Categoría' lang %}: {{ request.GET.filter|capfirst }} <i class="bi bi-x ms-1"></i>
+            </a>
+          {% endif %}
+          {% if request.GET.format %}
+            <a href="{% url 'mainv2:library' %}?filter={{request.GET.filter}}&author={{request.GET.author}}&pattern={{request.GET.pattern}}"
+               class="badge bg-light text-dark border"
+               style="text-decoration:none;">
+              {% ts 'Tipo de archivo' lang %}: {{ request.GET.format|upper }} <i class="bi bi-x ms-1"></i>
+            </a>
+          {% endif %}
+          {% if request.GET.author %}
+            <a href="{% url 'mainv2:library' %}?filter={{request.GET.filter}}&format={{request.GET.format}}&pattern={{request.GET.pattern}}"
+               class="badge bg-light text-dark border"
+               style="text-decoration:none;">
+              {% ts 'Autor' lang %}: {{ author.name|default:author }} <i class="bi bi-x ms-1"></i>
+            </a>
+          {% endif %}
+          {% if request.GET.pattern %}
+            <a href="{% url 'mainv2:library' %}?filter={{request.GET.filter}}&format={{request.GET.format}}&author={{request.GET.author}}"
+               class="badge bg-light text-dark border"
+               style="text-decoration:none;">
+              {% ts 'Palabra clave' lang %}: "{{ request.GET.pattern }}" <i class="bi bi-x ms-1"></i>
+            </a>
+          {% endif %}
         </div>
       </div>
-    </div>
-    <!-- Fin columna principal -->
-  </div>
-</div>
+      {% endif %}
+
+      <div class="library-content links-content w-100">
+        <div class="section-cards section-nueva-biblioteca" style="margin-top:0;padding-top:0;">
+          <div class="row mb-3">
+            {% if request.GET.sort == 'title' %}
+              <h4 class="post-title">{% ts 'Ordenado por título (A–Z)' lang %}</h4>
+            {% elif request.GET.sort == 'author' %}
+              <h4 class="post-title">{% ts 'Ordenado por autor (A–Z)' lang %}</h4>
+            {% else %}
+              <h4 class="post-title">{% ts 'Agregados recientemente' lang %}</h4>
+            {% endif %}
+          </div>
+
+          {% for b in books %}
+            {% with content=b|translate:lang %}
+              <div class="card mb-3 border-0 border-bottom pb-3">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    {% if b.image %}
+                      <img src="{{ b.image.url }}" alt="" class="rounded" style="width:90px;height:auto;object-fit:cover;">
+                    {% else %}
+                      <img src="{% static 'main/images/library/image.png' %}" alt="" class="rounded" style="width:90px;height:auto;object-fit:cover;">
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <a href="{{ b.url|default:'#' }}" target="_blank" style="text-decoration:none;">
+                      <h5 class="mb-1" style="color:#262C51;">{{ content.title }}</h5>
+                    </a>
+                    {% if b.authors.exists %}
+                      {% with authors=b.authors.all %}
+                        <p class="mb-1" style="font-size:14px;color:#555;">
+                          {% if authors.count > 1 %}{% ts 'Autores' lang %}{% else %}{% ts 'Autor' lang %}{% endif %}:
+                          {% for auth in authors %}
+                            {% if forloop.counter0 > 0 %}, {% endif %}
+                            <a href="{% url 'mainv2:library' %}?author={{auth.id}}&filter={{request.GET.filter}}&pattern={{request.GET.pattern}}&format={{request.GET.format}}"
+                               class="author" style="color:#2B5F8A;">{{ auth }}</a>
+                          {% endfor %}
+                        </p>
+                      {% endwith %}
+                    {% endif %}
+                    <p style="font-size:13px;color:#6c757d;">{{ content.description|truncatewords:30 }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+          {% empty %}
+            <p>{% ts 'No se encontraron resultados para los filtros aplicados.' lang %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div> <!-- Fin columna principal -->
+  </div> <!-- Fin row -->
+</div> <!-- Fin library-search-content -->
 {% endblock %}

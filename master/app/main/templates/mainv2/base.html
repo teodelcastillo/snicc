@@ -175,7 +175,8 @@
                         <img src="{% static 'main/images/sections/normativas.svg' %}" alt="">
                         <span>{% ts 'Normativas' lang %}</span>
                     </a>
-                    <a href="{% url 'mainv2:library-front' %}" class="nav-link" aria-current="page" >
+                    
+                    <a href="{% url 'mainv2:library' %}" class="nav-link" aria-current="page" >
                         <img src="{% static 'main/images/sections/biblioteca.svg' %}" alt="">
                         <span>{% ts 'Biblioteca' lang %}</span>
                     </a>
@@ -253,7 +254,7 @@
                             </div>
         
                             <div class="col-md-3 col-sm-12 col-footer">
-                                <p><a href="{% url 'mainv2:library-front'%}">{% ts 'Biblioteca' lang %}</a></p>
+                                <p><a href="{% url 'mainv2:library'%}">{% ts 'Biblioteca' lang %}</a></p>
                                 <p><a href="#">{% ts 'Formación y capacitaciones' lang %}</a></p>
                                 <p><a href="{% url 'mainv2:enlaces' %}">{% ts 'Enlaces de interés' lang %}</a></p>
                             </div>
