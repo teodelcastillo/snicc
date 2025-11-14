@@ -1,0 +1,53 @@
+{% extends 'dashboard/dashbase.html' %}
+{% block head %}
+<style>
+    .helptext{
+        color: gray;
+        font-size:smaller;
+    }
+    th {
+        border-bottom: 1px solid gray;
+    }
+</style>
+{% comment %} {{ block.super }} {% endcomment %}
+{{form.media}}{% endblock%}
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+            <a class="item" href="{% url 'dashboard:postlist' %}">&lt; Lista de publicaciones</a>
+            {% if form.instance and form.instance.slug %} |             
+            <a class="item" href="{% url 'mainv2:post' form.instance.slug %}">Ver publicación en el sitio &gt;</a>
+            {% endif %}
+        {% if form.instance.id %}
+            <h1>Editar "{{form.instance}}"</h1>
+            <div><i>editado por última vez el {{form.instance.content.date}} por {{form.instance.content.user}} 
+                (<a href="{% url 'dashboard:history' form.instance.id 'es' %}">historia</a>)</i></div>
+        {% else %}
+            <h1>Nueva publicación</h1>
+        {% endif %}
+        </div>
+        <form action='.' method='POST' enctype="multipart/form-data">
+            <input type='submit' name='save' value='save'>
+            <input type='submit' name='save-back' value='save and back to site'>
+            {% csrf_token %}
+            <hr>
+            {% comment %} <div id="profile-values">
+                <h3>Profile adequation</h3>
+            <table>{% for p in profiles %}
+                <tr><td style="text-align:right">{{p}}</td>
+                <td><input id="id_prof-{{p.code}}" name="prof-{{p.code}}" type="range" min="0" max="{{profile_max_value}}" value="{{p.val|default:0}}" step="1">
+                </td></tr>
+                {% endfor %}
+            </table>
+            <hr>
+            </div> {% endcomment %}
+            <table>
+            {{ form.as_table }}
+            </table>
+            <input type='submit' name='save' value='save'>
+            <input type='submit' name='save-back' value='save and back to site'>
+        </form>
+    </div>
+</div>
+{% endblock %}

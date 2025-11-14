@@ -1,0 +1,10 @@
+{
+      "titulo" : "Participación de la generación de electricidad renovable con respecto a la demanda eléctrica total",
+      "valores" : ["Participación de la generación de electricidad", 2.06640491866464, 1.99224400785778, 2.00689966528266, 2.50045391972076,5.87000988062462, 9.46732371548922 ],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Participación de la generación de electricidad renovable (eólica, solar, de pequeños aprovechamientos hidroeléctricos de potencia menor a 50 MW, con biomasa, con biogás y con biodiesel) con respecto a la demanda eléctrica total.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>Meta PNAyMCC: Al 2025, se logra cumplir con la meta de la Ley Nº 27.191: 2.600 MW de nueva potencia renovable no convencional."],
+      "unidad" : "%",
+      "min" : 1.49,
+      "max" : 9.50,
+      "cantDecimales": 1
+}

@@ -1,0 +1,9 @@
+{
+      "titulo" : "Generación de todas las plantas de energía proveniente de biogás conectadas a la red",
+      "valores" : ["Generación de electricidad", 83603, 57510, 64054, 145308, 255528, 304116],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las plantas a biogás de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>En 2016, disminuyó significativamente la generación eléctrica de uno de los rellenos sanitarios.", "<br>En 2017, disminuyó sustancialmente la generación de otro  relleno, pero fue compensada parcialmente con el ingreso de nueva capacidad instalada."],
+      "min" : 49000,
+      "max" : 350000,
+      "unidad" : "MWh"
+}

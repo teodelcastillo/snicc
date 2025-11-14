@@ -1,0 +1,62 @@
+Installing a new major version of the SNIC platform
+
+Setup .env
+
+Copy dot.env to .env and edit the parameters.
+
+-   HOST_PORT is the open port of the server, for instance 80.
+
+-   all other parameters are for email authentification. Email is
+    automatically sent by the server for registering and login.
+
+Load data
+
+For a clean re-install, first stop the container and delete the
+database.
+
+    docker compose down
+    mv app/db.sqlite3 legacy.db
+
+Restart the container.
+
+    docker compose up -d
+    docker compose exec django bash
+    # build static files
+    python manage.py collectstatic
+    # install migrations in the database
+    python manage.py makemigrations
+    python manage.py migrate
+    # create superuser
+    python manage.py createsuperuser
+    # populate the db
+    python manage.py loaddata main_medidas
+    exit
+
+Load media files : unzip the media.zip archive in the app directory.
+Restart nginx :
+
+    docker compose restart nginx
+
+Setup users
+
+Log into the admin dashboard at the /admin/ path, for instance
+http://localhost/admin/ depending on your configuration.
+
+Create a user via the admin or let him/her registrate through the
+regular user process.
+
+-   For the user to be a editor, go to Editor Access below. Configure
+    the editing access as needed. The user will be able to edit post
+    and/or measures at the /editor/post/list url.
+
+    -   Idiomas means the user will only be able to edit specific
+        languages, or all if Todos los idiomas is checked
+    -   Puede eliminar means the user is able to delete unprotected
+        posts
+    -   Medidas means the user can also edit measures (but not create
+        new ones).
+
+-   For the user to be an administrator, check the is_superuser box. The
+    user will be able to login to the /admin/ interface and edit
+    anything there. You might want to also give editor access to this
+    user.

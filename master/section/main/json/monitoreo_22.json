@@ -1,0 +1,9 @@
+{
+      "titulo" : "Volumen de biodiésel vendido",
+      "valores" : ["Ventas de biodiésel", 1151089, 1174238, 1333290, 1248248, 1217002, 542641],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Ventas de biodiésel para corte.","<br><br>Fuente: Secretaría de Energía.", "<br><br>En 2018, disminuyó levemente el consumo interno de biodiésel.", "<br>Los datos del 2020 son provisorios y podrían estar afectados por el impacto de la pandemia (COVID-19)."],
+      "min" : 756000,
+      "max" : 1400000,
+      "unidad" : " m³"
+}

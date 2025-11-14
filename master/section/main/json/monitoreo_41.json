@@ -1,0 +1,9 @@
+{
+    "titulo" : "Capacidad instalada acumulada de todos los generadores de electricidad renovable distribuidos",
+    "valores" : ["Capacidad instalada", 0, 0, 0, 0,0.9,3.1],
+    "anio" : ["x", 2015, 2016, 2017, 2018,2019,2020],
+    "descripcion" : ["Capacidad instalada acumulada de todos los generadores de electricidad renovable distribuidos (MW).", "<br><br>Meta PNAyMCC: Al 2030, se instalan 1.000 MW de energía renovable distribuida."],
+    "max":3.5,
+    "min" : 0,
+    "unidad" : "MW"
+}

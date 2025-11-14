@@ -1,0 +1,162 @@
+
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+{% with user=request.user %}
+<!-- Account page -->
+<div class="account-content profile-content">
+
+<div class="post-row-mobile row">
+
+    <h1 class="post-title post-title-blue">{% ts 'Mi Perfil' lang %}</h1>
+
+    <div class="offset-2 col-lg-8 col-xl-8 col-account">
+
+        <div class="register-content">
+            {% for k, error in form.errors.items %}
+            <div class="is-invalid mb-4"></div>
+            <div class="invalid-feedback"><b>{{k}}:</b> {{error}}</div>
+            {% endfor %}
+
+            <!-- Ajouter la class invalid si invalide, sinon ajouter valid, après submit , ex: class="form-login valid"-->
+            <form name="formProfile" class="form-login" action="." method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Nombre" aria-label="Nombre" required value="{{user.first_name}}">
+                            <label for="name">{% ts 'Nombre' lang %}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Apellido" aria-label="Apellido" required value="{{user.last_name}}">
+                            <label for="lastname">{% ts 'Apellido' lang %}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <!-- Par defaut selectionné Argentine -->
+                            <select class="form-select form-black" id="country" name="country" aria-label="País" onchange="this.classList.add('form-black')" required>
+                                <option>{% ts 'País' lang %}</option>
+                                {% for c in countries %}
+                                <option value="{{c}}" {% if c == user.country %}selected{% endif %}>
+                                    {{c}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <label for="country">{% ts 'País' lang %}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating {% if user.country == 'Argentina'%}floating-enabled{% else %}floating-disabled{%endif %}" id="form_provence_select">
+                            <select class="form-select form-black" id="provence_select" aria-label="Provincia" 
+                                name="province" onchange="this.classList.add('form-black')" {% if user.country == 'Argentina'%}required{% endif %}>
+                                <option value="">{% ts 'Seleccionar la provincia' lang %}</option>
+                                {% for province in provinces %}
+                                <option value="{{province.gid}}" {% if user.province == province %}selected{% endif %}>                                    
+                                    {{province.name}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <label for="provence_select">{% ts 'Provincia' lang %}</label>
+                        </div>
+                            <script type="text/javascript">
+                                var countrySelect = document.getElementById('country');
+                                countrySelect.onchange = (event) => {
+                                    if(event.target.value != 'Argentina' ) {
+                                        document.getElementById('provence_select').removeAttribute('required');                                        
+                                        document.getElementById('form_provence_select').classList.remove('floating-enabled');
+                                        document.getElementById('form_provence_select').classList.add('floating-disabled');
+                                    } else {
+                                        document.getElementById('form_provence_select').classList.remove('floating-disabled');
+                                        document.getElementById('form_provence_select').classList.add('floating-enabled');
+                                        document.getElementById('provence_select').addAttribute('required');                                        
+                                    }
+                                }
+                            </script>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="city" name="city" placeholder="Ciudad" aria-label="Ciudad" required value="{{user.city}}">
+                            <label for="city">{% ts 'Ciudad' lang %}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select form-black" id="gender" aria-label="Género" name="gender" value="{{user.gender}}" onchange="this.classList.add('form-black')" required>
+                                <option>{% ts 'Género' lang %}</option>                                
+                                <option value="Varon" {% if user.gender == 'Varon'%}selected{% endif %}>{% ts 'Varon' lang %}</option>
+                                <option value="Mujer" {% if user.gender == 'Mujer'%}selected{% endif %}>{% ts 'Mujer' lang %}</option>
+                                <option value="No" {% if user.gender == 'No' %}selected{% endif %}>{% ts 'Prefiero no decirlo' lang %}</option>
+                                <option value="Otro" {% if user.gender == 'Otro' %}selected{% endif %}>{%ts 'Otro' lang %}</option>
+                            </select>
+                            <label for="gender">{% ts 'Género' lang %}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email" name="gender" placeholder="E-mail" aria-label="email" required value="{{user.email}}" disabled>
+                            <label for="country">{% ts 'E-mail' lang %}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Teléfono" name="phone" required value="{{user.phone}}">
+                            <label for="phone">{% ts 'Teléfono' lang %}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {% comment %} <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select form-black" id="lang" name="lang" aria-label="Idioma">                                
+                                <option>{% ts 'Idioma' lang %}</option>
+                                {% for language in languages %}                                
+                                <option value="{{language.code}}" {% if user.lang == language %}selected{% endif %}>{{language}}</option>
+                                {% endfor %}
+
+                            </select>
+                            <label for="lang">{% ts 'Idioma' lang %}</label>                        
+                        </div>
+                    </div> {% endcomment %}
+
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <select class="form-select form-black" id="profile" name="profile" aria-label="Perfil seleccionado">
+                                <!-- Si n'existe pas profile selectionné, ajouter: onload="this.classList.add('form-black')" et enlever la clase 'form-black'-->
+                                <option>{% ts 'Perfil seleccionado' lang %}</option>
+                                {% for profile in profiles %}                                
+                                <option value="{{profile.code}}" {% if user.profile == profile %}selected{% endif %}>{%ts profile.name lang %}</option>
+                                {% endfor %}
+
+                            </select>
+                            <label for="profile">{% ts 'Perfil seleccionado' lang %}</label>
+                            <div id="profileHelp" class="form-text">{% ts 'Podés cambiar el perfil las veces que quieras y orientar nuestro contenido.' lang %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="save" type="submit" class="btn btn-login">Guardar</button>
+            </form>
+
+
+        </div>
+
+    </div>
+    
+</div>
+
+
+</div>
+
+<!-- end post page -->
+
+{% endwith %}
+{% endblock %}

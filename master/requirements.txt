@@ -1,0 +1,14 @@
+Django>=5
+django-cors-headers
+sqlparse
+markdown
+ipython
+# one of these
+django-pagedown
+# django-mdeditor
+# martor
+pandas
+# pdf rendering
+django-renderpdf
+# pdf concat
+pypdf

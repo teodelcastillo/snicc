@@ -1,0 +1,19 @@
+{
+      "titulo" : "Participación de la generación de electricidad renovable con respecto a la demanda eléctrica total",
+      "valores1" : ["Participación de la generación renovable no convencional", 2.06640491866464],
+      "valores2" : ["Participación de la generación renovable no convencional", 1.99224400785778],
+      "valores3" : ["Participación de la generación renovable no convencional", 2.00689966528266],
+      "valores4" : ["Participación de la generación renovable no convencional", 2.50045391972076],
+      "valores5" : ["Participación de la generación renovable no convencional", 5.87],
+      "valores6" : ["Participación de la generación renovable no convencional", 9.47],
+      "resto1" : ["Resto de generación de electricidad",97.9335950813354],
+      "resto2" : ["Resto de generación de electricidad",98.0077559921422],
+      "resto3" : ["Resto de generación de electricidad",97.9931003347173],
+      "resto4" : ["Resto de generación de electricidad",97.4995460802792],
+      "resto5" : ["Resto de generación de electricidad",94.13],
+      "resto6" : ["Resto de generación de electricidad",90.53],
+      "anio" : ["x", 2015, 2016, 2017, 2018,2019,2020],
+      "descripcion" : ["Participación de la generación de electricidad renovable (eólica, solar, de pequeños aprovechamientos hidroeléctricos de potencia menor a 50 MW, con biomasa, con biogás y con biodiesel) con respecto a la demanda eléctrica total.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>Meta PNAyMCC: Al 2025, se logra cumplir con la meta de la Ley Nº 27.191: 2.600 MW de nueva potencia renovable no convencional."],
+      "unidad" : "%",
+      "cantDecimales": 2
+}

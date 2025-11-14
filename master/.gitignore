@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env 
+/static/
+app/media/
+app/static/
+data/
+simarcc/
+db.sqlite3
+app/*/migrations/[0-9]*py

@@ -1,0 +1,8 @@
+{
+      "titulo" : "Cantidad de pasajeros (Buenos Aires - Rosario)",
+      "valores" : ["Cantidad de pasajeros transportados", 53521, 78440, 91168, 134383, 204674, 68127],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Cantidad de pasajeros transportados en el ferrocarril Buenos Aires – Rosario.", "<br><br>El cambio en la tendencia observada en el año 2020 responde a los efectos de la pandemia de COVID-19", "<br><br>Fuente: Comisión Nacional de Regulación del Transporte (CNRT)."],
+      "unidad" : "Pasajeros",
+      "cantDecimales": 2
+}

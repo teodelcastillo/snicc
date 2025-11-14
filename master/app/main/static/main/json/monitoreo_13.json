@@ -1,0 +1,9 @@
+{
+      "titulo" : "Generación de todas las plantas de energía solar conectadas a la red",
+      "valores" : ["Generación de electricidad", 14671, 14263, 16405, 108116,799685,1344319],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las plantas solares de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "max":1400000,
+      "min" : 18000,
+      "unidad" : "MWh"
+}

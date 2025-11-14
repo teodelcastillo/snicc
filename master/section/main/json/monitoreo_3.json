@@ -1,0 +1,8 @@
+{
+    "titulo" : "Generación de todas las centrales hidroeléctricas de la red",
+    "valores" : ["Generación de electricidad", 39750982, 36073998, 39465329, 39855673, 35285803, 29010774],
+    "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+    "descripcion" : ["Generación de todas las centrales hidroeléctricas de la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>En 2016, la cuenca del Comahue  fue extra seca.", "<br><br>Los años 2016, 2019 y 2020 fueron afectados por sequías"],
+    "min" : 29860000,
+    "unidad" : "MWh"
+}

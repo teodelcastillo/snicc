@@ -1,0 +1,7 @@
+{
+      "titulo" : "Cantidad de corredores en uso",
+      "valores" : ["Cantidad de corredores", 6, 9, 13, 14, 18, 18],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" :  ["Cantidad de corredores de Buses de Tránsito Rápido en uso.", "<br><br>Fuente: Gobierno de CABA y Gobierno de la Nación.", "<br><br>El Plan Nacional de Adaptación y Mitigación al Cambio Climático define una meta para este indicador como parte de la medida MS-06: <i>'Al 2030, las 80 zonas urbanas más pobladas del país cuentan con un Plan de Movilidad Urbana Sostenible diseñado, aprobado y en etapa de implementación'"],
+       "cantDecimales": 1
+}

@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'dashboard/editor.css' %}">
+{% endblock%}
+{% block header %}
+{% endblock %}
+{% block staffclass %}content-staff{% endblock %}
+{% block headerstaff %}
+<div class="container my-4">
+    <a class="item" href="{% url 'mainv2:landing' %}">Volver al sitio</a> |
+    <a class="item" href="{% url 'dashboard:postlist' %}">Lista de publicaciones</a>
+    {% if request.user.access.measures %}
+    |
+    <a class="item" href="{% url 'dashboard:measure_list' %}">Lista de medidas</a>
+    {% endif %}
+</div>
+{% endblock %}

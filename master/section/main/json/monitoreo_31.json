@@ -1,0 +1,15 @@
+{
+      "titulo" : "Cantidad de pasajeros",
+      "valores1" : ["Roca", 128794388, 138621827, 151493597, 172678803, 175937595, 60785298],
+      "valores2" : ["Sarmiento", 55192852, 57592610, 60767606, 85946312, 96224332, 27574771],
+      "valores3" : ["San Martín", 47147305, 51095219, 52118071, 31105013, 32390135, 10761239],
+      "valores4" : ["Mitre", 41540365, 54659771, 60808777, 63344068, 58520497, 14915543 ],
+      "valores5" : ["Belgrano Norte", 26628631, 25631242, 26235803, 25059095, 28254064, 11352702],
+      "valores6" : ["Urquiza", 18528364, 20440782, 22472864, 28940219, 26634948, 8526317],
+      "valores7" : ["Belgrano Sur", 11836826, 9919049, 13484776, 16129012, 17490244, 7351218 ],
+      "valores8" : ["Tren de la costa", 438690, 733692, 838827, 981010, 814268, 211208 ],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "unidad" : "Pasajeros",
+      "descripcion" : ["Cantidad de pasajeros pagos por línea de ferrocarril del AMBA.", "<br><br>Fuente: Comisión Nacional de Regulación del Transporte (CNRT).", "<br><br>En 2018, la línea San Martín operó con servicio limitado debido a obras.",  "<br><br>El cambio en la tendencia observada en el año 2020 responde a los efectos de la pandemia de COVID-19."]
+      
+}

@@ -1,0 +1,10 @@
+{
+      "titulo" : "Capacidad instalada de fuentes no fósiles conectadas a la red",
+      "valores4" : ["Distribuida", 0, 0, 0, 0, 0.851, 3.145],
+      "valores3" : ["Renovable no convencional", 854.29, 854.29, 908.705, 1631.435, 2941.445, 4257.935],
+      "valores2" : ["Nuclear", 1730.3, 1755, 1755, 1755, 1755, 1755],
+      "valores1" : ["Hidroeléctrica", 10577.7, 10639.7, 10704.4, 10748.4, 10770.4, 10792.4],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las centrales “no fósiles” (hidroeléctricas, nucleares y renovables no convencionales) conectadas a la red.", "<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "unidad" : "MW"
+}

@@ -1,0 +1,33 @@
+{% load static snicc_i18n %}
+<ul class="list-inline">
+    <li>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{request.build_absolute_uri}}" target="_blank" rel="noopener noreferrer">
+            <span class="sr-only">{% ts 'Compartir en Facebook' lang %}</span>
+            <i class="icono-arg-facebook-f-" aria-hidden="true"></i>
+        </a>
+    </li>
+    <li>
+        <a href="https://twitter.com/share?url={{request.build_absolute_uri}}" target="_blank" rel="noopener noreferrer">
+            <span class="sr-only">{% ts 'Compartir en Twitter' lang %}</span>
+            <i class="icono-arg-twitter-pajaro" aria-hidden="true"></i>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{request.build_absolute_uri}}" target="_blank" rel="noopener noreferrer">
+            <span class="sr-only">{% ts 'Compartir en Linkedin' lang %}</span>
+            <i class="icono-arg-linkedin-in" aria-hidden="true"></i>
+        </a>
+    </li>
+    <li>
+        <a href="https://web.whatsapp.com/send?text={{request.build_absolute_uri}}" target="_blank" rel="noopener noreferrer">
+            <span class="sr-only">{% ts 'Compartir en Whatsapp' lang %}</span>
+            <i class="icono-arg-whatsapp-telefono" aria-hidden="true"></i>
+        </a>
+    </li>
+    <li>
+        <a href="https://t.me/share/url?url={{request.build_absolute_uri}}" target="_blank" rel="noopener noreferrer">
+            <span class="sr-only">{% ts 'Compartir en Telegram' lang %}</span>
+            <i class="icono-arg-telegram-avion" aria-hidden="true"></i>
+        </a>
+    </li>
+</ul>

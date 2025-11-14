@@ -1,0 +1,6 @@
+[tool.ruff]
+line-length = 140
+lint.ignore = ["F405", "F403", ]
+exclude = [
+    "tests.py"
+]

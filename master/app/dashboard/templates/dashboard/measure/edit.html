@@ -1,0 +1,34 @@
+{% extends 'dashboard/dashbase.html' %}
+
+{% block content %}
+<div class="content-edition">
+    <div class="container">
+        <div class="content-edition-title">
+        <h2>Editar "{{instance.name}}"</h2>
+        <a href="{% url 'dashboard:measure_preview' instance.id %}" class="btn btn-amarillo">cancelar</a>
+        <a href="{% url 'dashboard:measure_list' %}" class="btn btn-amarillo">volver a la lista</a>
+        </div>
+
+<p>Los artículos <span style="color:gray">en gris</span> no se publican.</p>
+
+<form action="." method="POST">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <th><label for="status">Estado de implementación</label></th>
+            <td><select name="status" id="status_id">
+                {% for s in instance.Status %}
+                <option value="{{s}}" {% if s == instance.status %}selected{% endif %}>{{s}}</option>
+                {% endfor %}
+            </select></td>
+        </tr>        
+        {% for key, value in fields.items %}
+        <tr {% if key in inactive %}style="color:gray;font-property:italic;"{% endif %}>
+        <th style="min-width:30%"><label for="{{key}}">{{key}}</label></th>
+        <td style="width:70%"><textarea name="{{key}}" id="{{key}}_id">{{value}}</textarea></td>
+        </tr>
+        {% endfor %}
+        <tr><th></th><td><input type="submit" value="submit"></td></tr>
+    </table>
+</form>
+{% endblock %}

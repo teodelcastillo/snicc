@@ -1,0 +1,9 @@
+{
+      "titulo" : "Generación de todas las plantas de energía proveniente de biomasa conectadas a la red",
+      "valores" : ["Generación de electricidad", 194984, 193217, 242600, 251702, 299158, 420956],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Generación de todas las plantas a biomasa de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA)."],
+      "min" : 167900,
+      "max" : 450000,
+      "unidad" : "MWh"
+}
