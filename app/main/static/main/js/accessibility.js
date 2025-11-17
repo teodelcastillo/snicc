@@ -5,45 +5,37 @@ $(document).ready(function() {
             if("true" == localStorage.getItem("activeGrayscale")) {
                 $("#grayscale").addClass("active");
                 $("body").addClass("grayscale");
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeCursorbig")) {
                 $("#cursorbig").addClass("active");
                 $("body").addClass("cursorbig");
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeDislexia")) {
                 $("#dislexia").addClass("active");
                 $("body").addClass("dislexia");
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeContrast")) {
                 $("#contrast").addClass("active");
                 $("body").addClass("contrast");
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeHighlight")) {
                 $("#highlight").addClass("active");
                 $("body").addClass("highlight");
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeScreenmask")) {
                 $("#screenmask").addClass("active");
                 $("body").addClass("screenmask");
                 addMask();
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeReadguide")) {
                 $("#readguide").addClass("active");
                 $("body").addClass("readguide");
                 addLine();
-                $("#reset_accessibility").removeClass("disabled");
             }
             if("true" == localStorage.getItem("activeAudio")) {
                 $("#audio").addClass("active");
                 $("body").addClass("audio");
                 activeAudio();
-                $("#reset_accessibility").removeClass("disabled");
             }
         } else {
             if("true" == localStorage.getItem("activeGrayscale")) {
@@ -69,19 +61,17 @@ $(document).ready(function() {
             if("true" == localStorage.getItem("activeScreenmask")) {
                 $("#screenmask").removeClass("active");
                 $("body").removeClass("screenmask");
-                removeMask();
+                addMask();
             }
             if("true" == localStorage.getItem("activeReadguide")) {
-                $("#readguide").removeClass("active");
-                $("body").removeClass("readguide");
-                removeLine();
+                $("#readline").removeClass("active");
+                $("body").removeClass("readline");
             }
             if("true" == localStorage.getItem("activeAudio")) {
                 $("#audio").removeClass("active");
                 $("body").removeClass("audio");
                 speechSynthesis.cancel();
             }
-            localStorage.clear();
         }
     }
     function activeAudio(){
@@ -147,7 +137,6 @@ $(document).ready(function() {
                 activeAudio();
             }
         }
-        $("#accesibility_buttons a.dropdown-item[id]").hasClass('active') ? $("#reset_accessibility").removeClass("disabled") : $("#reset_accessibility").addClass("disabled");
     }),
     $(document).on("mouseenter", "div, section>div,div>a>img, img, p, dd, dt, a, h1, h2, h3, h4,h5, h6, span, blockquote,div>h3, h4>a, input[placeholder]", function(e) {
         //var a = $(this).attr("src");
@@ -198,8 +187,7 @@ $(document).ready(function() {
             top: e.pageY + 10
         })
     }),
-    $("#reset_accessibility").on("click", function(e) {
-        $("#reset_accessibility").addClass("disabled");
+    $(".reset").on("click", function(e) {
         compareAccessibilityEnable(false);
     });
     /*

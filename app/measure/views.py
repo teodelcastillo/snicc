@@ -391,6 +391,90 @@ def measure_pdf_recalc(request):
     return redirect('admin:index')
 
 
+def mye_overview(request):
+    context = base_context(request)
+
+    # Total medidas activas
+    measures = Measure.active.all()
+    total_measures = measures.count()
+
+    # Conteos por estado
+    count_by_status = Counter(measures.values_list('status', flat=True))
+    avanzada = count_by_status.get(Measure.Status.avanzada, 0)
+    inicial = count_by_status.get(Measure.Status.inicial, 0)
+    exec_count = avanzada + inicial
+    percent_advanced = round((avanzada / total_measures) * 100) if total_measures > 0 else 0
+
+    # Pilar predominante
+    top_pilar = (Pilar.objects
+                 .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
+                 .order_by('-num')
+                 .first())
+    top_pilar_name = top_pilar.name if top_pilar else ""
+    top_pilar_count = top_pilar.num if top_pilar else 0
+
+    # Estado predominante (agrupado)
+    prog = count_by_status.get(Measure.Status.prog, 0)
+    indef = count_by_status.get(Measure.Status.adefinir, 0)
+    if exec_count >= prog and exec_count >= indef:
+        pred_status_name = "En Curso"
+        pred_status_count = exec_count
+    elif prog >= indef:
+        pred_status_name = "En programación"
+        pred_status_count = prog
+    else:
+        pred_status_name = "A definir"
+        pred_status_count = indef
+
+    context.update({
+        'total_measures': total_measures,
+        'percent_advanced': percent_advanced,
+        'execution_count': exec_count,
+        'top_pilar_name': top_pilar_name,
+        'top_pilar_count': top_pilar_count,
+        'pred_status_name': pred_status_name,
+        'pred_status_count': pred_status_count,
+    })
+
+    return render(request, 'mainv2/mye.html', context)
+
+def measure_list_json(request):
+    """
+    Devuelve un listado simple de medidas activas con los campos principales,
+    usado por el módulo MyE (mye.html) para renderizar las cards dinámicamente.
+    """
+    measures = Measure.active.all().values(
+        "id",
+        "name",
+        "status",
+        "description",
+        "pilares__name",
+        "action__line__name",
+    )
+
+    data = []
+    for m in measures:
+        # Si el campo 'fields' existe, buscamos la autoridad de aplicación
+        measure_obj = Measure.objects.get(id=m["id"])
+        responsable = ""
+        if measure_obj.fields:
+            responsable = measure_obj.fields.get("Autoridad de aplicación", "")
+
+        data.append({
+            "id": m["id"],
+            "name": m["name"],
+            "status": m["status"],
+            "description": m["description"],
+            "pilar": m["pilares__name"],
+            "linea": m["action__line__name"],
+            "responsable": responsable,
+        })
+
+    return JsonResponse({"measures": data})
+
+
+
+
 
 app_name='measure'
 urlpatterns = [
@@ -399,9 +483,12 @@ urlpatterns = [
     path('<int:id>/', measure_fields, name='details'),
     path('filter.json', measure_filter_json, name='filter'),
     path('details.json', filter_details, name='details'),
+    path('filter-simple.json', measure_list_json, name='filter_simple'),
     path('lines.json', line_details, name='line_details'),
     path('export.pdf', many_measures_pdf, name='concat-pdf-export'),
     path('export.csv', many_measures_csv, name='csv-export'),
     path('action/<int:id>/', action_details, name='action_details'),
     path('recalc/', measure_pdf_recalc, name='recalc'),
+    path('mye/', mye_overview, name='mye'),
+
 ]

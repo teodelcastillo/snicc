@@ -11,7 +11,6 @@ var prevStatusFilter = [];
 var prevYearFilter = [];
 var graphExclude = '';
 var graphExcludeSelect = '';
-var exceedFilter = false;
 
 var jsonDataFilter = null;
 var statsLines = {
@@ -62,8 +61,6 @@ var ingeiPopup = new bootstrap.Modal(document.getElementById('ingei_popup'), {
 
 var contentDetailsJson = null;
 
-var urlLocal = '';
-
 /* Grafico lineas y enfoques */
 async function loadGraphStatsLines() {   
     const isNoEmpty =  Object.keys(statsLines.data).some(function(d){
@@ -109,27 +106,23 @@ async function loadGraphStatsLines() {
                 
                 if(!isObjectEmpty(categoryFilter)) {
                     if(linesFilter.length != 1 || linesFilter.length == 0) {
-                        if((graphExclude == 'pilares' || graphExclude == 'status') && linesFilter.length > 0) {
-                            event.stopPropagation();
-                        } else {
-                            await chartLines.hide();
-                            const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
-                            linesFilter = [...newArray];
-                            linesFilter.push(['line', linesInputs.indexOf(d.id)+1]);
-                            await chartLines?.show(d.id);
 
-                            $('#select_cat_' + categoryFilter.cat).selectpicker('val', [d.id]);
-                            $('#select_cat_' + categoryFilter.cat).selectpicker('refresh');
-                            $(`.content-slice.first .legend-html [data-id="${d.id}"]`).addClass("selected");
-                            
-                            graphExclude = 'lines';
-                            await updateData('filter');
-                            $('.filter-lineas').removeClass('d-none');
-                        }
+                        await chartLines.hide();
+                        const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
+                        linesFilter = [...newArray];
+                        linesFilter.push(['line', linesInputs.indexOf(d.id)+1]);
+                        await chartLines?.show(d.id);
+
+                        $('#select_cat_' + categoryFilter.cat).selectpicker('val', [d.id]);
+                        $('#select_cat_' + categoryFilter.cat).selectpicker('refresh');
+                        $(`.content-slice.first .legend-html [data-id="${d.id}"]`).addClass("selected");
+                        
+                        graphExclude = 'lines';
+                        await updateData('filter');
 
                     } else if(linesFilter.length == 1) {
-                        await quitarFiltro('lineas');
-                        /*await chartLines.hide();
+
+                        await chartLines.hide();
                         const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
                         linesFilter = [...newArray];
                         await chartLines?.show(statsLines.keys);
@@ -139,10 +132,9 @@ async function loadGraphStatsLines() {
                         $(`.content-slice.first .legend-html .selected`).removeClass("selected");
 
                         graphExclude = '';
-                        await updateData('filter');*/
+                        await updateData('filter');
                     }
                 } else {
-                    $('.filter-lineas').addClass('d-none');
                     categoryFilter['cat'] = categoriesInputs.indexOf(d.id);
                     $('#selectpicker_title_bar').selectpicker('val', d.id);
                     $('#selectpicker_select_label').selectpicker('val', d.id);
@@ -226,7 +218,6 @@ function addLegendGraphLines() {
             $('[data-title-offcanvas-graph="'+idTarget+'"], [data-text-offcanvas-graph="'+idTarget+'"]').show();
             e.stopPropagation();
         });
-
     })
     .on('mouseover', function (id) {
         if($('.content-slice.first .legend-html .selected').length == 0 || $(`.content-slice.first [data-id="${id}"]`).hasClass('selected')) chartLines.focus(id);
@@ -235,7 +226,6 @@ function addLegendGraphLines() {
         if($('.content-slice.first .legend-html .selected').length == 0 || $(`.content-slice.first [data-id="${id}"]`).hasClass('selected')) chartLines.revert();
     })
     .on('click', async function (id) {
-        
         if(isObjectEmpty(categoryFilter)) {
             categoryFilter['cat'] = categoriesInputs.indexOf(id);
             $('#selectpicker_title_bar').selectpicker('val', id);
@@ -249,71 +239,75 @@ function addLegendGraphLines() {
             await updateData('filter');
         } else {
             if(!$(this).hasClass('disabled')) {
-                if((graphExclude == 'status' || graphExclude == 'pilares') && linesFilter.length > 0) {
-                    event.stopPropagation();
+
+                var arrSelectpicker =  [];
+                var selectpickerVal = $('#select_cat_'+categoryFilter.cat).selectpicker('val');
+                arrSelectpicker = [...selectpickerVal];
+
+
+                if($(`[data-id="${id}"]`).hasClass("selected")) {
+                    const index = arrSelectpicker.indexOf(id);
+                    if (index > -1) {
+                        arrSelectpicker.splice(index, 1);
+                    }
                 } else {
-
-                    var arrSelectpicker =  [];
-                    var selectpickerVal = $('#select_cat_'+categoryFilter.cat).selectpicker('val');
-                    arrSelectpicker = [...selectpickerVal];
-
-
-                    if($(`[data-id="${id}"]`).hasClass("selected")) {
-                        const index = arrSelectpicker.indexOf(id);
-                        if (index > -1) {
-                            arrSelectpicker.splice(index, 1);
-                        }
-                    } else {
-                        arrSelectpicker.push(id);
-                    }
-
-                    await chartLines.hide();
-
-                    if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsLines.keys.length) {
-                        const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
-                        linesFilter = [...newArray];
-                        await chartLines?.show(statsLines.keys);
-                        $(`.content-slice.first .legend-html .selected`).removeClass("selected");
-                        $('#select_cat_' + categoryFilter.cat).selectpicker('val', []);
-                        $('.filter-lineas').addClass('d-none');
-                    } else {
-                        var indexLineFilter = null;
-                        const val = ['line', linesInputs.indexOf(id)+1];
-                        if($(`[data-id="${id}"]`).hasClass("selected")) {
-                            for (const item of linesFilter) {
-                                if (item.toString() == val.toString()) {
-                                    indexLineFilter = linesFilter.indexOf(item);
-                                }
-                            }
-                            if (indexLineFilter > -1) linesFilter.splice(indexLineFilter, 1);
-                            $(`[data-id="${id}"]`).removeClass("selected");
-                        } else {
-                            linesFilter.push(val);
-                            $(`[data-id="${id}"]`).addClass("selected");
-                        } 
-                        await chartLines.show(arrSelectpicker);
-                        $('#select_cat_' + categoryFilter.cat).selectpicker('val', arrSelectpicker);
-                        $('.filter-lineas').removeClass('d-none');
-                    }
-                    $('#select_cat_' + categoryFilter.cat).selectpicker('refresh');
-
-                    $('#chart_lineas_enfoques .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-
-                    graphExclude = 'lines';
-                    updateData('filter');
+                    arrSelectpicker.push(id);
                 }
+
+                await chartLines.hide();
+
+                if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsLines.keys.length) {
+                    const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
+                    linesFilter = [...newArray];
+                    await chartLines?.show(statsLines.keys);
+                    $(`.content-slice.first .legend-html .selected`).removeClass("selected");
+                    $('#select_cat_' + categoryFilter.cat).selectpicker('val', []);
+                } else {
+                    var indexLineFilter = null;
+                    const val = ['line', linesInputs.indexOf(id)+1];
+                    if($(`[data-id="${id}"]`).hasClass("selected")) {
+                        for (const item of linesFilter) {
+                            if (item.toString() == val.toString()) {
+                                indexLineFilter = linesFilter.indexOf(item);
+                            }
+                        }
+                        if (indexLineFilter > -1) linesFilter.splice(indexLineFilter, 1);
+                        $(`[data-id="${id}"]`).removeClass("selected");
+                    } else {
+                        linesFilter.push(val);
+                        $(`[data-id="${id}"]`).addClass("selected");
+                    } 
+                    await chartLines.show(arrSelectpicker);
+                    $('#select_cat_' + categoryFilter.cat).selectpicker('val', arrSelectpicker);
+                }
+                $('#select_cat_' + categoryFilter.cat).selectpicker('refresh');
+
+                $('#chart_lineas_enfoques .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+
+                graphExclude = 'lines';
+                updateData('filter');
             }
                 
         }
     });
 
-    for (const [key, value] of Object.entries(statsLines.data)) {
-        if(value == null) {
-            $(`[data-id="${key}"]`).addClass("disabled")
+    if(!Object.keys(statsLines.data).some(function(d){return statsLines.data[d] !== null})) {
+        statsLines.keys.forEach((id) => {
+            $(`[data-id="${id}"]`).addClass("disabled")
             .attr('data-bs-toggle', 'tooltip')
             .attr('data-bs-title', 'No hay medidas')
-            .attr('data-bs-placement', 'top');
-        }
+            .attr('data-bs-placement', 'left');
+        });
+    } else {
+        d3.selectAll("#chart_lineas_enfoques .c3-chart-texts text.c3-text-0")[0].forEach((el, i) => {
+            if(el.__data__.value == null) {
+                $(`[data-id="${el.__data__.id}"]`).addClass("disabled")
+                .attr('data-bs-toggle', 'tooltip')
+                .attr('data-bs-title', 'No hay medidas')
+                .attr('data-bs-placement', 'left');
+                $(el).css('opacity', '0');
+            }
+        });
     }
 
 }
@@ -357,26 +351,34 @@ function loadGraphStatsPilares() {
             order: 'null',
             onclick: async function (d, i) {
                 if(pilaresFilter.length != 1 || pilaresFilter.length == 0) {
-                    if((graphExclude == 'status' || graphExclude == 'lineas') && pilaresFilter.length > 0) {
-                        event.stopPropagation();
-                    } else {
-                        await chartPilares.hide();
-                        const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
-                        pilaresFilter = [...newArray];
-                        pilaresFilter.push(['pilar', pilaresInputs.indexOf(d.id)+1]);
-                        await chartPilares.show(d.id);
-    
-                        $('#select_pilares').selectpicker('val', [d.id]);
-                        $('#select_pilares').selectpicker('refresh');
-                        $(`.content-slice.second .legend-html [data-id="${d.id}"]`).addClass("selected");
-    
-                        graphExclude = 'pilares';
-                        await updateData('filter');
-                        $('.filter-pilares').removeClass('d-none');
-                    }
+
+                    await chartPilares.hide();
+                    const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                    pilaresFilter = [...newArray];
+                    pilaresFilter.push(['pilar', pilaresInputs.indexOf(d.id)+1]);
+                    await chartPilares.show(d.id);
+
+                    $('#select_pilares').selectpicker('val', [d.id]);
+                    $('#select_pilares').selectpicker('refresh');
+                    $(`.content-slice.second .legend-html [data-id="${d.id}"]`).addClass("selected");
+
+                    graphExclude = 'pilares';
+                    await updateData('filter');
 
                 } else if(pilaresFilter.length == 1) {
-                    await quitarFiltro('pilares');
+
+                    await chartPilares.hide();
+                    const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                    pilaresFilter = [...newArray];
+                    await chartPilares.show(statsPilares.keys);
+
+                    $('#select_pilares').selectpicker('val', []);
+                    $('#select_pilares').selectpicker('refresh');
+                    $(`.content-slice.second .legend-html .selected`).removeClass("selected");
+
+                    graphExclude = '';
+                    await updateData('filter');
+
                 }
 
             }
@@ -427,7 +429,7 @@ function loadGraphStatsPilares() {
         },
         legend: {
             show: false
-        }
+        }    
     });
 
 }
@@ -441,7 +443,6 @@ function addLegendGraphPilares() {
     .enter()
     .append('div')
     .attr('data-id', function (id) { return id; })
-    .attr('class', function (id) { return $('#select_pilares').selectpicker('val').includes(id) ? 'selected': '';})
     .each(function (id) {
         d3.select(this).html(function (id, index) { return `<span class="color-legend" style="background-color:${chartPilares.color(id)}"></span><span class="text-legend">${id}${id == 'Adaptación' || id == 'Mitigación' || id == 'Pérdidas y daños'? '<i class="bi bi-info-circle graph-circle-info" data-bs-toggle="offcanvas" data-bs-target="#graphiquesInfo" aria-controls="graphiquesInfo" data-graph-info="'+id+'"></i>':''}</span>`; });
         $(".content-slice.second .graph-circle-info").click(function(e) {
@@ -459,67 +460,57 @@ function addLegendGraphPilares() {
     })
     .on('click', async function (id) {
 
-        /*if(graphExclude == 'status' && selectpickerVal.length > 0) {
-            event.stopPropagation();
-        }*/
-        
+
         if(!$(this).hasClass('disabled')) {
-            if((graphExclude == 'status' || graphExclude == 'lineas') && pilaresFilter.length > 0) {
-                event.stopPropagation();
+
+            var arrSelectpicker =  [];
+            var selectpickerVal = $('#select_pilares').selectpicker('val');
+            arrSelectpicker = [...selectpickerVal];
+
+
+            if($(`[data-id="${id}"]`).hasClass("selected")) {
+                const index = arrSelectpicker.indexOf(id);
+                if (index > -1) {
+                    arrSelectpicker.splice(index, 1);
+                }
             } else {
-                var selectpickerVal = $('#select_pilares').selectpicker('val');
-                var arrSelectpicker =  [];
-                arrSelectpicker = [...selectpickerVal];
-    
-    
-                if($(`[data-id="${id}"]`).hasClass("selected")) {
-                    const index = arrSelectpicker.indexOf(id);
-                    if (index > -1) {
-                        arrSelectpicker.splice(index, 1);
-                    }
-                } else {
-                    arrSelectpicker.push(id);
-                }
-    
-                await chartPilares.hide();
-                
-                if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsPilares.keys.length) {
-                    const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
-                    pilaresFilter = [...newArray];
-                    await chartPilares?.show(statsPilares.keys);
-                    await $(`.content-slice.second .legend-html .selected`).removeClass("selected");
-                    await $(`#stacked_bar_chart_legends .legend-left .legend-html .selected`).removeClass("selected");
-                    $('#select_pilares').selectpicker('val', []);
-                    $('.filter-pilares').addClass('d-none');
-                } else {
-                    var indexPilarFilter = null;
-                    const val = ['pilar', pilaresInputs.indexOf(id)+1];
-                    if($(`[data-id="${id}"]`).hasClass("selected")) {
-                        for (const item of pilaresFilter) {
-                            if (item.toString() == val.toString()) {
-                                indexPilarFilter = pilaresFilter.indexOf(item);
-                            }
-                        }
-                        if (indexPilarFilter > -1) pilaresFilter.splice(indexPilarFilter, 1);
-                        $(`[data-id="${id}"]`).removeClass("selected");
-                        $(`[data-id-sbc="${id}"]`).removeClass("selected");
-                    } else {
-                        pilaresFilter.push(val);
-                        $(`[data-id="${id}"]`).addClass("selected");
-                        $(`[data-id-sbc="${id}"]`).addClass("selected");
-                    } 
-                    await chartPilares.show(arrSelectpicker);
-                    $('#select_pilares').selectpicker('val', arrSelectpicker);
-                    $('.filter-pilares').removeClass('d-none');
-                }
-                $('#select_pilares').selectpicker('refresh');
-    
-                $('#chart_pilares .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-    
-                graphExclude = 'pilares';
-                updateData('filter');
+                arrSelectpicker.push(id);
             }
+
+            await chartPilares.hide();
             
+            if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsPilares.keys.length) {
+                const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                pilaresFilter = [...newArray];
+                await chartPilares?.show(statsPilares.keys);
+                $(`.content-slice.second .legend-html .selected`).removeClass("selected");
+                $('#select_pilares').selectpicker('val', []);
+            } else {
+                var indexPilarFilter = null;
+                const val = ['pilar', pilaresInputs.indexOf(id)+1];
+                if($(`[data-id="${id}"]`).hasClass("selected")) {
+                    for (const item of pilaresFilter) {
+                        if (item.toString() == val.toString()) {
+                            indexPilarFilter = pilaresFilter.indexOf(item);
+                        }
+                    }
+                    if (indexPilarFilter > -1) pilaresFilter.splice(indexPilarFilter, 1);
+                    $(`[data-id="${id}"]`).removeClass("selected");
+                    $(`[data-id-sbc="${id}"]`).removeClass("selected");
+                } else {
+                    pilaresFilter.push(val);
+                    $(`[data-id="${id}"]`).addClass("selected");
+                    $(`[data-id-sbc="${id}"]`).addClass("selected");
+                } 
+                await chartPilares.show(arrSelectpicker);
+                $('#select_pilares').selectpicker('val', arrSelectpicker);
+            }
+            $('#select_pilares').selectpicker('refresh');
+
+            $('#chart_pilares .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+
+            graphExclude = 'pilares';
+            updateData('filter');
         }
     });
     
@@ -532,23 +523,6 @@ function addLegendGraphPilares() {
             chartPilares.unload(el.__data__.id);
         }
     });
-    
-    /*const statsPilaresDataRequired = Object.fromEntries(Object.entries(statsPilares.data).filter(([key, value]) => key !== "Mitigación y Pérdidas y daños"));
-    console.log(statsPilaresDataRequired);
-    if(Object.keys(statsPilaresDataRequired).some(function(d){return statsPilaresDataRequired[d] == null})) {
-        console.log('statsPilaresDataRequired some equal null');
-        $(".content-slice.second .content-graphs .legend-html").append(
-            $('<div/>', { 
-                'text': "new",
-                'class': 'something',
-                'id': 'btnHome'
-            }).on({
-                'click': function() { 
-                    alert ("clicked") 
-                }
-            })
-        );
-    }*/
 }
 
 /*  Grafico estado implementacion */
@@ -595,27 +569,34 @@ function loadGraphStatsStatus() {
             order: 'null',
             onclick: async function (d, i) {
                 if(statusFilter.length != 1 || statusFilter.length == 0) {
-                    if((graphExclude == 'pilares' || graphExclude == 'lineas') && statusFilter.length > 0) {
-                        event.stopPropagation();
-                    } else {
-                        await chartStatus.hide();
-                        const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
-                        statusFilter = [...newArray];
-                        statusFilter.push(['status', d.id]);
-                        await chartStatus.show(d.id);
 
-                        $('#select_estado').selectpicker('val', [d.id]);
-                        $('#select_estado').selectpicker('refresh');
-                        $(`.content-slice.third .legend-html [data-id="${d.id}"]`).addClass("selected");
+                    await chartStatus.hide();
+                    const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                    statusFilter = [...newArray];
+                    statusFilter.push(['status', d.id]);
+                    await chartStatus.show(d.id);
 
-                        graphExclude = 'status';
-                        await updateData('filter');
+                    $('#select_estado').selectpicker('val', [d.id]);
+                    $('#select_estado').selectpicker('refresh');
+                    $(`.content-slice.third .legend-html [data-id="${d.id}"]`).addClass("selected");
 
-                        $('.filter-status').removeClass('d-none');
-                    }
+                    graphExclude = 'status';
+                    await updateData('filter');
              
                 } else if(statusFilter.length == 1) {
-                    await quitarFiltro('status');
+                    
+                    await chartStatus.hide();
+                    const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                    statusFilter = [...newArray];
+                    await chartStatus.show(statsStatus.keys);
+
+                    $('#select_estado').selectpicker('val', []);
+                    $('#select_estado').selectpicker('refresh');
+                    $(`.content-slice.third .legend-html .selected`).removeClass("selected");
+
+                    graphExclude = '';
+                    await updateData('filter');
+                    
                 }
 
             },
@@ -648,7 +629,6 @@ function addLegendGraphStatus() {
     .enter()
     .append('div')
     .attr('data-id', function (id) { return id; })
-    .attr('class', function (id) { return $('#select_estado').selectpicker('val').includes(id) ? 'selected': '';})
     .each(function (id) {
         d3.select(this).html(function (id, index) { return `<span class="color-legend" style="background-color:${chartStatus.color(id)}"></span><span class="text-legend">${(id == 'En implementación avanzada' ? 'Avanzada': id == 'En implementación inicial' ? 'Inicial' : id)}</span>`; });
     })
@@ -662,61 +642,54 @@ function addLegendGraphStatus() {
 
         if(!$(this).hasClass('disabled')) {
 
-            if((graphExclude == 'pilares' || graphExclude == 'lineas') && statusFilter.length > 0) {
-                event.stopPropagation();
+            var arrSelectpicker =  [];
+            var selectpickerVal = $('#select_estado').selectpicker('val');
+            arrSelectpicker = [...selectpickerVal];
+
+
+            if($(`[data-id="${id}"]`).hasClass("selected")) {
+                const index = arrSelectpicker.indexOf(id);
+                if (index > -1) {
+                    arrSelectpicker.splice(index, 1);
+                }
             } else {
-                var arrSelectpicker =  [];
-                var selectpickerVal = $('#select_estado').selectpicker('val');
-                arrSelectpicker = [...selectpickerVal];
-    
-    
-                if($(`[data-id="${id}"]`).hasClass("selected")) {
-                    const index = arrSelectpicker.indexOf(id);
-                    if (index > -1) {
-                        arrSelectpicker.splice(index, 1);
-                    }
-                } else {
-                    arrSelectpicker.push(id);
-                }
-    
-                await chartStatus.hide();
-    
-                if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsStatus.keys.length) {
-                    const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
-                    statusFilter = [...newArray];
-                    await chartStatus?.show(statsStatus.keys);
-                    await $(`.content-slice.third .legend-html .selected`).removeClass("selected");
-                    await $(`#stacked_bar_chart_legends .legend-right .legend-html .selected`).removeClass("selected");
-                    await $('#select_estado').selectpicker('val', []);
-                    $('.filter-status').addClass('d-none');
-                } else {
-                    var indexStatusFilter = null;
-                    const val = ['status', id];
-                    if($(`[data-id="${id}"]`).hasClass("selected")) {
-                        for (const item of statusFilter) {
-                            if (item.toString() == val.toString()) {
-                                indexStatusFilter = statusFilter.indexOf(item);
-                            }
-                        }
-                        if (indexStatusFilter > -1) statusFilter.splice(indexStatusFilter, 1);
-                        $(`[data-id="${id}"]`).removeClass("selected");
-                        $(`[data-id-sbc="${id}"]`).removeClass("selected");
-                    } else {
-                        statusFilter.push(val);
-                        $(`[data-id="${id}"]`).addClass("selected");
-                        $(`[data-id-sbc="${id}"]`).addClass("selected");
-                    } 
-                    await chartStatus.show(arrSelectpicker);
-                    await $('#select_estado').selectpicker('val', arrSelectpicker);
-                    $('.filter-status').removeClass('d-none');
-                }
-                await $('#select_estado').selectpicker('refresh');
-    
-                await $('#chart_semaforo .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-    
-                graphExclude = 'status';
-                await updateData('filter');   
+                arrSelectpicker.push(id);
             }
+
+            await chartStatus.hide();
+
+            if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsStatus.keys.length) {
+                const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                statusFilter = [...newArray];
+                await chartStatus?.show(statsStatus.keys);
+                await $(`.content-slice.third .legend-html .selected`).removeClass("selected");
+                await $('#select_estado').selectpicker('val', []);
+            } else {
+                var indexStatusFilter = null;
+                const val = ['status', id];
+                if($(`[data-id="${id}"]`).hasClass("selected")) {
+                    for (const item of statusFilter) {
+                        if (item.toString() == val.toString()) {
+                            indexStatusFilter = statusFilter.indexOf(item);
+                        }
+                    }
+                    if (indexStatusFilter > -1) statusFilter.splice(indexStatusFilter, 1);
+                    $(`[data-id="${id}"]`).removeClass("selected");
+                    $(`[data-id-sbc="${id}"]`).removeClass("selected");
+                } else {
+                    statusFilter.push(val);
+                    $(`[data-id="${id}"]`).addClass("selected");
+                    $(`[data-id-sbc="${id}"]`).addClass("selected");
+                } 
+                await chartStatus.show(arrSelectpicker);
+                await $('#select_estado').selectpicker('val', arrSelectpicker);
+            }
+            await $('#select_estado').selectpicker('refresh');
+
+            await $('#chart_semaforo .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+
+            graphExclude = 'status';
+            await updateData('filter');
         } 
 
     });
@@ -887,60 +860,71 @@ function loadGraphStatsStackedBar() {
                 if(statsStackedbar.groups[0].some(v => d.id.includes(v))) {
                     // Pilares
                     if(pilaresFilter.length != 1 || pilaresFilter.length == 0) {
-                        if((graphExclude == 'status' || graphExclude == 'lineas') && pilaresFilter.length > 0) {
-                            event.stopPropagation();
-                        } else {
-                            await chartPilares.hide();
-                            const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
-                            pilaresFilter = [...newArray];
-                            pilaresFilter.push(['pilar', pilaresInputs.indexOf(d.id)+1]);
+                        await chartPilares.hide();
+                        const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                        pilaresFilter = [...newArray];
+                        pilaresFilter.push(['pilar', pilaresInputs.indexOf(d.id)+1]);
+
+                        await chartPilares.show(d.id);
     
-                            await chartPilares.show(d.id);
-        
-                            $('#select_pilares').selectpicker('val', [d.id]);
-                            $('#select_pilares').selectpicker('refresh');
-                            $(`#stacked_bar_chart_legends .legend-html [data-id-sbc="${d.id}"]`).addClass("selected");
-                            $(`.content-slice.second .legend-html [data-id="${d.id}"]`).addClass("selected");
-        
-                            graphExclude = 'pilares';
-                            await updateData('filter');
-                            $('.filter-pilares').removeClass('d-none');
-                        }
+                        $('#select_pilares').selectpicker('val', [d.id]);
+                        $('#select_pilares').selectpicker('refresh');
+                        $(`#stacked_bar_chart_legends .legend-html [data-id-sbc="${d.id}"]`).addClass("selected");
+                        $(`.content-slice.second .legend-html [data-id="${d.id}"]`).addClass("selected");
+    
+                        graphExclude = 'pilares';
+                        await updateData('filter');
     
                     } else if(pilaresFilter.length == 1) {
-                        if((graphExclude == 'pilares' || graphExclude == 'lineas') && statusFilter.length > 0) {
-                            event.stopPropagation();
-                        } else {
-                            await quitarFiltro('pilares');
-                        }
+    
+                        await chartPilares.hide();
+                        const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                        pilaresFilter = [...newArray];
+
+                        await chartPilares.show(statsPilares.keys);
+    
+                        $('#select_pilares').selectpicker('val', []);
+                        $('#select_pilares').selectpicker('refresh');
+                        $(`#stacked_bar_chart_legends .legend-left .legend-html .selected`).addClass("selected");
+                        $(`.content-slice.second .legend-html .selected`).removeClass("selected");
+    
+                        graphExclude = '';
+                        await updateData('filter');
+    
                     }
 
                 } else if (statsStackedbar.groups[1].some(v => d.id.includes(v))) {
                     // Status
                     if(statusFilter.length != 1 || statusFilter.length == 0) {
-                        if((graphExclude == 'pilares' || graphExclude == 'lineas') && statusFilter.length > 0) {
-                            event.stopPropagation();
-                        } else {
-                            await chartStatus.hide();
-                            const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
-                            statusFilter = [...newArray];
-                            statusFilter.push(['status', d.id]);
-        
-                            await chartStatus.show(d.id);
-        
-                            $('#select_estado').selectpicker('val', [d.id]);
-                            $('#select_estado').selectpicker('refresh');
-                            $(`#stacked_bar_chart_legends .legend-html [data-id-sbc="${d.id}"]`).addClass("selected");
-                            $(`.content-slice.third .legend-html [data-id="${d.id}"]`).addClass("selected");
+                        await chartStatus.hide();
+                        const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                        statusFilter = [...newArray];
+                        statusFilter.push(['status', d.id]);
     
-                            graphExclude = 'status';
-                            await updateData('filter');
+                        await chartStatus.show(d.id);
     
-                            $('.filter-status').removeClass('d-none');
-                        }
+                        $('#select_estado').selectpicker('val', [d.id]);
+                        $('#select_estado').selectpicker('refresh');
+                        $(`#stacked_bar_chart_legends .legend-html [data-id-sbc="${d.id}"]`).addClass("selected");
+                        $(`.content-slice.third .legend-html [data-id="${d.id}"]`).addClass("selected");
+
+                        graphExclude = 'status';
+                        await updateData('filter');
                  
                     } else if(statusFilter.length == 1) {
-                        await quitarFiltro('status');
+                        await chartStatus.hide();
+                        const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                        statusFilter = [...newArray];
+                        await chartStatus.show(statsStatus.keys);
+    
+                        $('#select_estado').selectpicker('val', []);
+                        $('#select_estado').selectpicker('refresh');
+                        $(`#stacked_bar_chart_legends .legend-right .legend-html .selected`).removeClass("selected");
+                        $(`.content-slice.third .legend-html .selected`).removeClass("selected");
+
+                        graphExclude = '';
+                        await updateData('filter');
+                        
                     }
 
                 }
@@ -1012,7 +996,7 @@ function addLegendGraphStackedbar() {
     .enter()
     .append('div')
     .attr('data-id-sbc', function (id) { return id; })
-    .attr('class', function (id) { return $('#select_pilares').selectpicker('val').includes(id) ? 'selected': '';})// && graphExclude == 'pilares'
+    .attr('class', function (id) { return $('#select_pilares').selectpicker('val').includes(id) ? 'selected': '';})
     .each(function (id) {
         d3.select(this).html(function (id, index) { return `<span class="color-legend" style="background-color:${chartStackedbar.color(id)}"></span><span class="text-legend"${id.length > 22 ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${id}"`:''}>${id}${id == 'Adaptación' || id == 'Mitigación' || id == 'Pérdidas y daños'? '<i class="bi bi-info-circle graph-circle-info" data-bs-toggle="offcanvas" data-bs-target="#graphiquesInfo" aria-controls="graphiquesInfo" data-graph-info="'+id+'"></i>':''}</span>`; });
         $("#stacked_bar_chart_legends .graph-circle-info").click(function(e) {
@@ -1031,65 +1015,60 @@ function addLegendGraphStackedbar() {
     .on('click', async function (id) {
 
         if(!$(this).hasClass('disabled')) {
-            if((graphExclude == 'status' || graphExclude == 'lineas') && pilaresFilter.length > 0) {
-                event.stopPropagation();
+
+            var arrSelectpicker =  [];
+            var selectpickerVal = $('#select_pilares').selectpicker('val');
+            arrSelectpicker = [...selectpickerVal];
+
+
+            if($(`[data-id="${id}"]`).hasClass("selected")) {
+                const index = arrSelectpicker.indexOf(id);
+                if (index > -1) {
+                    arrSelectpicker.splice(index, 1);
+                }
             } else {
-                var arrSelectpicker =  [];
-                var selectpickerVal = $('#select_pilares').selectpicker('val');
-                arrSelectpicker = [...selectpickerVal];
-
-
-                if($(`[data-id="${id}"]`).hasClass("selected")) {
-                    const index = arrSelectpicker.indexOf(id);
-                    if (index > -1) {
-                        arrSelectpicker.splice(index, 1);
-                    }
-                } else {
-                    arrSelectpicker.push(id);
-                }
-
-                await chartPilares.hide();
-                await chartStackedbar.hide(statsStackedbar.groups[0]);
-                
-                if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsPilares.keys.length) {
-                    const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
-                    pilaresFilter = [...newArray];
-                    await chartPilares?.show(statsPilares.keys);
-                    await chartStackedbar?.show(statsPilares.keys);
-                    $(`.content-slice.second .legend-html .selected`).removeClass("selected");
-                    $(`#stacked_bar_chart_legends .legend-left .legend-html .selected`).removeClass("selected");
-                    $('#select_pilares').selectpicker('val', []);
-                    $('.filter-pilares').addClass('d-none');
-                } else {
-                    var indexPilarFilter = null;
-                    const val = ['pilar', pilaresInputs.indexOf(id)+1];
-                    if($(`[data-id="${id}"]`).hasClass("selected")) {
-                        for (const item of pilaresFilter) {
-                            if (item.toString() == val.toString()) {
-                                indexPilarFilter = pilaresFilter.indexOf(item);
-                            }
-                        }
-                        if (indexPilarFilter > -1) pilaresFilter.splice(indexPilarFilter, 1);
-                        $(`[data-id="${id}"]`).removeClass("selected");
-                        $(`[data-id-sbc="${id}"]`).removeClass("selected");
-                    } else {
-                        pilaresFilter.push(val);
-                        $(`[data-id="${id}"]`).addClass("selected");
-                        $(`[data-id-sbc="${id}"]`).addClass("selected");
-                    } 
-                    await chartPilares.show(arrSelectpicker);
-                    await chartStackedbar.show(arrSelectpicker);
-                    $('#select_pilares').selectpicker('val', arrSelectpicker);
-                    $('.filter-pilares').removeClass('d-none');
-                }
-                await $('#select_pilares').selectpicker('refresh');
-
-                await $('#chart_pilares .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-                await $('#stacked_bar_chart .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-
-                graphExclude = 'pilares';
-                updateData('filter');
+                arrSelectpicker.push(id);
             }
+
+            await chartPilares.hide();
+            await chartStackedbar.hide(statsStackedbar.groups[0]);
+            
+            if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsPilares.keys.length) {
+                const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
+                pilaresFilter = [...newArray];
+                await chartPilares?.show(statsPilares.keys);
+                await chartStackedbar?.show(statsPilares.keys);
+                $(`.content-slice.second .legend-html .selected`).removeClass("selected");
+                $(`#stacked_bar_chart_legends .legend-left .legend-html .selected`).removeClass("selected");
+                $('#select_pilares').selectpicker('val', []);
+            } else {
+                var indexPilarFilter = null;
+                const val = ['pilar', pilaresInputs.indexOf(id)+1];
+                if($(`[data-id="${id}"]`).hasClass("selected")) {
+                    for (const item of pilaresFilter) {
+                        if (item.toString() == val.toString()) {
+                            indexPilarFilter = pilaresFilter.indexOf(item);
+                        }
+                    }
+                    if (indexPilarFilter > -1) pilaresFilter.splice(indexPilarFilter, 1);
+                    $(`[data-id="${id}"]`).removeClass("selected");
+                    $(`[data-id-sbc="${id}"]`).removeClass("selected");
+                } else {
+                    pilaresFilter.push(val);
+                    $(`[data-id="${id}"]`).addClass("selected");
+                    $(`[data-id-sbc="${id}"]`).addClass("selected");
+                } 
+                await chartPilares.show(arrSelectpicker);
+                await chartStackedbar.show(arrSelectpicker);
+                $('#select_pilares').selectpicker('val', arrSelectpicker);
+            }
+            await $('#select_pilares').selectpicker('refresh');
+
+            await $('#chart_pilares .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+            await $('#stacked_bar_chart .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+
+            graphExclude = 'pilares';
+            updateData('filter');
         }
     });
 
@@ -1101,7 +1080,7 @@ function addLegendGraphStackedbar() {
     .enter()
     .append('div')
     .attr('data-id-sbc', function (id) { return id; })
-    .attr('class', function (id) { return $('#select_estado').selectpicker('val').includes(id) ? 'selected': '';})//  && graphExclude == 'status'
+    .attr('class', function (id) { return $('#select_estado').selectpicker('val').includes(id) ? 'selected': '';})
     .each(function (id) {
         d3.select(this).html(function (id, index) { return `<span class="color-legend" style="background-color:${chartStackedbar.color(id)}"></span><span class="text-legend">${(id == 'En implementación avanzada' ? 'Avanzada': id == 'En implementación inicial' ? 'Inicial' : id)}</span>`; });
     })
@@ -1114,63 +1093,58 @@ function addLegendGraphStackedbar() {
     .on('click', async function (id) {
 
         if(!$(this).hasClass('disabled')) {
-            if((graphExclude == 'pilares' || graphExclude == 'lineas') && statusFilter.length > 0) {
-                event.stopPropagation();
+
+            var arrSelectpicker =  [];
+            var selectpickerVal = $('#select_estado').selectpicker('val');
+            arrSelectpicker = [...selectpickerVal];
+
+
+            if($(`[data-id="${id}"]`).hasClass("selected")) {
+                const index = arrSelectpicker.indexOf(id);
+                if (index > -1) {
+                    arrSelectpicker.splice(index, 1);
+                }
             } else {
-                var arrSelectpicker =  [];
-                var selectpickerVal = $('#select_estado').selectpicker('val');
-                arrSelectpicker = [...selectpickerVal];
-
-
-                if($(`[data-id="${id}"]`).hasClass("selected")) {
-                    const index = arrSelectpicker.indexOf(id);
-                    if (index > -1) {
-                        arrSelectpicker.splice(index, 1);
-                    }
-                } else {
-                    arrSelectpicker.push(id);
-                }
-
-                await chartStatus.hide();
-                await chartStackedbar.hide(statsStackedbar.groups[1]);
-
-                if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsStatus.keys.length) {
-                    const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
-                    statusFilter = [...newArray];
-                    await chartStatus?.show(statsStatus.keys);
-                    await $(`.content-slice.third .legend-html .selected`).removeClass("selected");
-                    await $(`#stacked_bar_chart_legends .legend-right .legend-html .selected`).removeClass("selected");
-                    await $('#select_estado').selectpicker('val', []);
-                    $('.filter-status').addClass('d-none');
-                } else {
-                    var indexStatusFilter = null;
-                    const val = ['status', id];
-                    if($(`[data-id="${id}"]`).hasClass("selected")) {
-                        for (const item of statusFilter) {
-                            if (item.toString() == val.toString()) {
-                                indexStatusFilter = statusFilter.indexOf(item);
-                            }
-                        }
-                        if (indexStatusFilter > -1) statusFilter.splice(indexStatusFilter, 1);
-                        $(`[data-id="${id}"]`).removeClass("selected");
-                        $(`[data-id-sbc="${id}"]`).removeClass("selected");
-                    } else {
-                        statusFilter.push(val);
-                        $(`[data-id="${id}"]`).addClass("selected");
-                        $(`[data-id-sbc="${id}"]`).addClass("selected");
-                    } 
-                    await chartStatus.show(arrSelectpicker);
-                    await chartStackedbar.show(arrSelectpicker);
-                    await $('#select_estado').selectpicker('val', arrSelectpicker);
-                    $('.filter-status').removeClass('d-none');
-                }
-                await $('#select_estado').selectpicker('refresh');
-
-                await $('#stacked_bar_chart .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
-
-                graphExclude = 'status';
-                await updateData('filter');
+                arrSelectpicker.push(id);
             }
+
+            await chartStatus.hide();
+            await chartStackedbar.hide(statsStackedbar.groups[1]);
+
+            if(arrSelectpicker.length == 0 || arrSelectpicker.length == statsStatus.keys.length) {
+                const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
+                statusFilter = [...newArray];
+                await chartStatus?.show(statsStatus.keys);
+                await $(`.content-slice.third .legend-html .selected`).removeClass("selected");
+                $(`#stacked_bar_chart_legends .legend-right .legend-html .selected`).removeClass("selected");
+                await $('#select_estado').selectpicker('val', []);
+            } else {
+                var indexStatusFilter = null;
+                const val = ['status', id];
+                if($(`[data-id="${id}"]`).hasClass("selected")) {
+                    for (const item of statusFilter) {
+                        if (item.toString() == val.toString()) {
+                            indexStatusFilter = statusFilter.indexOf(item);
+                        }
+                    }
+                    if (indexStatusFilter > -1) statusFilter.splice(indexStatusFilter, 1);
+                    $(`[data-id="${id}"]`).removeClass("selected");
+                    $(`[data-id-sbc="${id}"]`).removeClass("selected");
+                } else {
+                    statusFilter.push(val);
+                    $(`[data-id="${id}"]`).addClass("selected");
+                    $(`[data-id-sbc="${id}"]`).addClass("selected");
+                } 
+                await chartStatus.show(arrSelectpicker);
+                await chartStackedbar.show(arrSelectpicker);
+                await $('#select_estado').selectpicker('val', arrSelectpicker);
+            }
+            await $('#select_estado').selectpicker('refresh');
+
+            await $('#stacked_bar_chart .c3-chart-bars .c3-defocused').removeClass("c3-defocused");
+
+            graphExclude = 'status';
+            await updateData('filter');
         } 
 
     });
@@ -1350,8 +1324,6 @@ async function resizeStatusDetailsGraph() {
         chartStatusDetails.resize({height: 288,width: 288});
     } else if(document.body.clientWidth <= 1280) {
         chartStatusDetails.resize({height: widthTabContent*0.85,width: widthTabContent*0.85});
-    } else if(document.body.clientWidth <= 1500) {
-        chartStatusDetails.resize({height: widthTabContent*0.75,width: widthTabContent*0.75});
     } else {
         chartStatusDetails.resize({height: widthTabContent*0.6,width: widthTabContent*0.6});
     }
@@ -1535,7 +1507,7 @@ async function loadActionCards()  {
         contentHtml +=          `    <div class="btn-option-action" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></div>`;
         contentHtml +=          `    <ul class="dropdown-menu dropdown-menu-end">`;
         contentHtml +=          `        <li><div class="btn btn-primary btn-dpd-action" onclick="window.event.cancelBubble = true;openDetailPopup(['${encodeURI(JSON.stringify(action))}']);" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')"><i class="bi bi-file-earmark"></i>Detalles</div></li>`;
-        contentHtml +=          `        <li><a class="btn btn-primary btn-dpd-action" href="${urlLocal}/measure/export.pdf?${urlOptions}&action=${action.id}" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')" target="_blank"><i class="bi bi-download"></i>Descargar </a></li>`;
+        contentHtml +=          `        <li><a class="btn btn-primary btn-dpd-action" href="/measure/export.pdf?${urlOptions}&action=${action.id}" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')" target="_blank"><i class="bi bi-download"></i>Descargar </a></li>`;
 
         if(actions_html_ingei.hasOwnProperty(action.name)) {
             contentHtml +=                `<li><div class="btn btn-primary btn-dpd-action" onclick="window.event.cancelBubble = true;openINGEIPopup('${action.name}');" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')"><i class="bi bi-clipboard-pulse"></i>INGEI</div></li>`;
@@ -1591,7 +1563,7 @@ async function loadActionCards()  {
         contentHtml +=                `<div class="card-body">`;
         
         action.measures.forEach(function (measure) {
-            contentHtml += `<a class="card-text" href="${urlLocal}/measure/${measure.id}/pdf" data-measure-id="${measure.id}" target="_blank" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="${measure.name}">`;
+            contentHtml += `<a class="card-text" href="/measure/${measure.id}/pdf" data-measure-id="${measure.id}" target="_blank" onmouseover="mouseOverLinks('card_${action.id}')" onmouseout="mouseOutLinks('card_${action.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="${measure.name}">`;
             contentHtml += `   <span class="circle-color" style="background-color:${jsonDataActions.status.colors[measure.status]}"></span>`;
             contentHtml += `   <span>${measure.code}</span>`;
             contentHtml += `   <span class="measure-name">${measure.name}</span>`;
@@ -1648,7 +1620,7 @@ async function saveDetailPDF() {
     if($('#body_detail').length != undefined) {
         await $('#body_detail .accordion-collapse').addClass('show');
         await $('#body_detail .collapsed').removeClass('collapsed');
-        $('#measures_detail_content').printThis();
+        $('#measures_detail_content').printElement({printMode: 'window'});
     }
    
 }
@@ -1702,7 +1674,7 @@ async function openDetailPopup(actions, forPrint = false) {
 
     contentHtml +=   `    </div>`;
     contentHtml +=   `    <div class="legends-status-popup">`;
-    contentHtml +=   `        <div class="legend-html me-4">`;
+    contentHtml +=   `        <div class="legend-html">`;
     contentDetailsJson.status.keys.forEach(async function (statusName) {
     contentHtml +=   `            <div data-id-status="${statusName}"><span class="color-legend" style="background-color:${statusColors[statusName]}"></span><span class="text-legend">${statusName == 'En implementación inicial' ? 'Inicial':statusName == "En implementación avanzada"? 'Avanzada': statusName}</span></div>`;
     });
@@ -1724,14 +1696,14 @@ async function openDetailPopup(actions, forPrint = false) {
         if(lineaEnfoque.actions.length) {
     contentHtml +=   `        <div class="accordion-item">`;
     contentHtml +=   `            <h2 class="accordion-header">`;
-    contentHtml +=   `                <button class="accordion-button line collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#linea_enfoque_collapse_${indexLine}" aria-expanded="true" aria-controls="linea_enfoque_collapse_${indexLine}">`;
+    contentHtml +=   `                <button class="accordion-button line" type="button" data-bs-toggle="collapse" data-bs-target="#linea_enfoque_collapse_${indexLine}" aria-expanded="true" aria-controls="linea_enfoque_collapse_${indexLine}">`;
     contentHtml +=   `                    <div class="accordion-line-content">`;
     contentHtml +=   `                        <h4>${lineaEnfoque.name}</h4>`;
     contentHtml +=   `                        <p>${lineaEnfoque.description}</p>`;
     contentHtml +=   `                    </div>`;
     contentHtml +=   `                </button>`;
     contentHtml +=   `            </h2>`;
-    contentHtml +=   `            <div id="linea_enfoque_collapse_${indexLine}" class="accordion-collapse collapse">`;
+    contentHtml +=   `            <div id="linea_enfoque_collapse_${indexLine}" class="accordion-collapse collapse show">`;
     contentHtml +=   `                <div class="accordion-body">`;
     contentHtml +=   `                    <div class="accordion">`;
 
@@ -1739,11 +1711,11 @@ async function openDetailPopup(actions, forPrint = false) {
                     lineaEnfoque.actions.forEach(async function (actionDetail, indexAction) {
                         contentHtml +=   `<div class="accordion-item">`;
                         contentHtml +=   `    <h2 class="accordion-header">`;
-                        contentHtml +=   `        <button class="accordion-button action collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#linea-action-collapse-${indexLine}" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">`;
+                        contentHtml +=   `        <button class="accordion-button action" type="button" data-bs-toggle="collapse" data-bs-target="#linea-action-collapse-${indexLine}" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">`;
                         contentHtml +=               actionDetail.name;
                         contentHtml +=   `        </button>`;
                         contentHtml +=   `    </h2>`;
-                        contentHtml +=   `    <div id="linea-action-collapse-${indexLine}" class="accordion-collapse collapse">`;
+                        contentHtml +=   `    <div id="linea-action-collapse-${indexLine}" class="accordion-collapse collapse show">`;
                         contentHtml +=   `        <div class="accordion-body">`;
                         contentHtml +=   `            <div class="paragraph-accordion">`;
                         contentHtml +=                  actionDetail.description;
@@ -1805,8 +1777,8 @@ async function openDetailPopup(actions, forPrint = false) {
                                         contentHtml +=   widthWindow <= 768 && forPrint == false ? '':`                </div>`;
                                         contentHtml +=   widthWindow <= 768 && forPrint == false ? '':`                    </div></td>`;
                                         contentHtml +=   `                    <td class="col-pilares"><div class="td-pilares">`;
-                                                                pilaresColorsDisunity[measureDetail.pilares].forEach( pilaresObject => {
-                                                                    contentHtml +=   `<span class="circle-color" style="background-color:${pilaresObject.color}" data-bs-toggle="tooltip" data-bs-placement="top" title="${pilaresObject.text}"></span>`;
+                                                                pilaresColorsDisunity[measureDetail.pilares].forEach( color => {
+                                                                    contentHtml +=   `<span class="circle-color" style="background-color:${color}"></span>`;
                                                                 });
                                                                                 
                                         contentHtml +=   `                    </div></td>`;
@@ -1837,10 +1809,6 @@ async function openDetailPopup(actions, forPrint = false) {
 
     contentPopup.innerHTML = contentHtml;
     if(!forPrint ) {
-        var tooltipTriggerPilaresTooltips = [].slice.call(document.querySelectorAll('span.circle-color'))
-        var tooltipPilares = tooltipTriggerPilaresTooltips.map(function (tooltipTriggerElem) {
-            return new bootstrap.Tooltip(tooltipTriggerElem);
-        });
         actionDetailPopup.show();
     } else {
         saveDetailPDF();
@@ -1858,54 +1826,6 @@ async function openINGEIPopup(actionName) {
     } else {
         alert('No se encontraron graficos para : ' + actionName);
     }
-}
-
-async function quitarFiltro(filter) {
-    if(filter == 'lineas') {
-        //await chartLines.hide();
-        const newArray = linesFilter.filter(dat => !dat.find(value => value === 'line'));
-        linesFilter = [...newArray];
-        await chartLines?.show(statsLines.keys);
-
-        $('#select_cat_' + categoryFilter.cat).selectpicker('val', []);
-        $('#select_cat_' + categoryFilter.cat).selectpicker('refresh');
-        $(`.content-slice.first .legend-html .selected`).removeClass("selected");
-
-        graphExclude = '';
-        await updateData('filter');
-        $('.filter-lineas').addClass('d-none');
-    } else if(filter == 'pilares') {
-        //await chartPilares.hide();
-        const newArray = pilaresFilter.filter(dat => !dat.find(value => value === 'pilar'));
-        pilaresFilter = [...newArray];
-        await chartPilares.show(statsPilares.keys);
-
-        $('#select_pilares').selectpicker('val', []);
-        $('#select_pilares').selectpicker('refresh');
-        $(`#stacked_bar_chart_legends .legend-left .legend-html .selected`).removeClass("selected");
-        $(`.content-slice.second .legend-html .selected`).removeClass("selected");
-
-        graphExclude = '';
-        await updateData('filter');
-        $('.filter-pilares').addClass('d-none');
-    } else if('status') {
-        //await chartStatus.hide();
-        const newArray = statusFilter.filter(dat => !dat.find(value => value === 'status'));
-        statusFilter = [...newArray];
-        await chartStatus.show(statsStatus.keys);
-
-        $('#select_estado').selectpicker('val', []);
-        $('#select_estado').selectpicker('refresh');
-        $(`#stacked_bar_chart_legends .legend-right .legend-html .selected`).removeClass("selected");
-        $(`.content-slice.third .legend-html .selected`).removeClass("selected");
-
-        graphExclude = '';
-        await updateData('filter');
-
-        $('.filter-status').addClass('d-none');
-    }
-
-
 }
 
 function addListenerINGEI() {
@@ -1980,8 +1900,8 @@ function addListenerINGEI() {
 
     // RADIO BUTTONS
     $("#nav").on("click", "label.sec", function () {
-        $("#nav label.sec").removeClass("activo");
-        $(this).addClass("activo");
+    $("#nav label.sec").removeClass("activo");
+    $(this).addClass("activo");
     });
 }
 
@@ -1990,7 +1910,7 @@ async function getData(jsonTypeTab, isStatusOnly = false) {
     console.log("urlOptions");
     console.log(urlOptions);
     loading.show();
-    const url = `${urlLocal}/measure/${jsonTypeTab}.json?${urlOptions}`;
+    const url = `/measure/${jsonTypeTab}.json?${urlOptions}`;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -2018,19 +1938,19 @@ async function getData(jsonTypeTab, isStatusOnly = false) {
                 Object.keys(newPilaresJsonColors).forEach(function(key) {
                     switch (key) {
                         case 'Adaptación y Mitigación':
-                            pilaresColorsDisunity[key] = [{"text": "Adaptación", "color": newPilaresJsonColors['Adaptación']}, {"text": "Mitigación", "color": newPilaresJsonColors['Mitigación']}];
+                            pilaresColorsDisunity[key] = [newPilaresJsonColors['Adaptación'], newPilaresJsonColors['Mitigación']];
                             break;
                         case 'Adaptación y Pérdidas y daños':
-                            pilaresColorsDisunity[key] = [{"text": "Adaptación", "color": newPilaresJsonColors['Adaptación']}, {"text": "Pérdidas y daños", "color": newPilaresJsonColors['Pérdidas y daños']}];
+                            pilaresColorsDisunity[key] = [newPilaresJsonColors['Adaptación'], newPilaresJsonColors['Pérdidas y daños']];
                             break;
                         case 'Mitigación y Pérdidas y daños':
-                            pilaresColorsDisunity[key] = [{"text": "Mitigación", "color": newPilaresJsonColors['Mitigación']}, {"text": "Pérdidas y daños", "color": newPilaresJsonColors['Pérdidas y daños']}];
+                            pilaresColorsDisunity[key] = [newPilaresJsonColors['Mitigación'], newPilaresJsonColors['Pérdidas y daños']];
                             break;
                         case 'Adaptación, Mitigación y Pérdidas y daños':
-                            pilaresColorsDisunity[key] = [{"text": "Adaptación", "color": newPilaresJsonColors['Adaptación']}, {"text": "Mitigación", "color": newPilaresJsonColors['Mitigación']}, {"text": "Pérdidas y daños", "color": newPilaresJsonColors['Pérdidas y daños']}];
+                            pilaresColorsDisunity[key] = [newPilaresJsonColors['Adaptación'], newPilaresJsonColors['Mitigación'], newPilaresJsonColors['Pérdidas y daños']];
                             break;
                         default:
-                            pilaresColorsDisunity[key] = [{"text": key, "color": newPilaresJsonColors[key]}];
+                            pilaresColorsDisunity[key] = [newPilaresJsonColors[key]];
                     }
                 }); 
             }
@@ -2053,7 +1973,6 @@ async function getData(jsonTypeTab, isStatusOnly = false) {
         loading.hide();
         alert('Error en la consulta');
     }
-    if($('#action_detail_popup').hasClass('show')) openDetailPopup(actionsSelecteds.length == 1 ? actionsSelecteds[0]:actionsSelecteds)
 }
 
 async function getLinesActionJSON(actionsFilter, forPrint = false) {
@@ -2061,7 +1980,7 @@ async function getLinesActionJSON(actionsFilter, forPrint = false) {
     console.log("getLinesActionJSON urlOptions");
     console.log(urlOptions);
     loading.show();
-    const url = `${urlLocal}/measure/lines.json?${!forPrint?urlOptions:''}`;
+    const url = `/measure/lines.json?${!forPrint?urlOptions:''}`;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -2199,7 +2118,6 @@ function addListenerSelects() {
 
     $('.selectpickers-lineas').on('changed.bs.select', async function (e, clickedIndex, isSelected, previousValue) {
         if(e.target.value != null) {
-
             const selectpickerValues = $(this).selectpicker('val');
             if(isSelected == true || isSelected == false) {
                 var indexLine = 0;
@@ -2250,7 +2168,6 @@ function addListenerSelects() {
     $('.selectpickers').on('changed.bs.select', async function (e, clickedIndex, isSelected, previousValue) {
         if(e.target.value != null) {
             if($(this).is("#select_pilares")) {
-
                 const selectpickerValues = $(this).selectpicker('val');
                 if(isSelected == true || isSelected == false) {
                     var indexPilar = 0;
@@ -2276,8 +2193,6 @@ function addListenerSelects() {
                 if(selectpickerValues.length == statsPilares.keys.length || selectpickerValues.length == 0) {
                     await chartPilares?.show(statsPilares.keys);
                     $(".content-slice.second .legend-html .selected").removeClass('selected');
-                    $('.filter-pilares').addClass('d-none');
-                    $('#label_pilares').addClass('d-none');
                 } else {
                     const arrayHide = statsPilares.keys.filter(x => !selectpickerValues.includes(x));
                     var arrayShow = statsPilares.keys.filter(function(val) {
@@ -2291,8 +2206,6 @@ function addListenerSelects() {
                     arrayShow.forEach(function (item) {
                         $(`[data-id="${item}"]`).addClass('selected');
                     });
-                    $('.filter-pilares').removeClass('d-none');
-                    $('#label_pilares').removeClass('d-none');
                 }
                 
                 if($("#nav-general-tab").hasClass('active')) {
@@ -2301,7 +2214,6 @@ function addListenerSelects() {
                     await updateData('details');
                 }
             } else if($(this).is("#select_estado")) {
-
                 const selectpickerValues = $(this).selectpicker('val');
                 if(isSelected == true || isSelected == false) {
                     if(isSelected) {
@@ -2324,8 +2236,6 @@ function addListenerSelects() {
                 if(selectpickerValues.length == statsStatus.keys.length || selectpickerValues.length == 0) {
                     chartStatus.show();
                     $(".content-slice.third .legend-html .selected").removeClass('selected');
-                    $('.filter-status').addClass('d-none');
-                    $('#label_estado').addClass('d-none');
                 } else {
                     const arrayHide = statsStatus.keys.filter(x => !selectpickerValues.includes(x));
                     var arrayShow = statsStatus.keys.filter(function(val) {
@@ -2339,8 +2249,6 @@ function addListenerSelects() {
                     arrayShow.forEach(function (item) {
                         $(`[data-id="${item}"]`).addClass('selected');
                     });
-                    $('.filter-status').removeClass('d-none');
-                    $('#label_estado').removeClass('d-none');
                 }
 
                 if($("#nav-general-tab").hasClass('active')) {
@@ -2363,11 +2271,6 @@ function addListenerSelects() {
                     const newArray = yearFilter.filter(el => !el.find(value => value === 'year'));
                     yearFilter = [...newArray];
                 }
-                if(selectpickerValues.length) {
-                    $('#label_ano_cumplimiento').removeClass('d-none');
-                } else {
-                    $('#label_ano_cumplimiento').addClass('d-none');
-                }
                 graphExclude = '';
                 if($("#nav-general-tab").hasClass('active')) {
                     await updateData('filter');
@@ -2379,35 +2282,6 @@ function addListenerSelects() {
             }
         }
         
-    });
-
-    $('.selectpickers').on('refreshed.bs.select', async function (e) {
-        const selectpickerValues = $(this).selectpicker('val');
-        console.log(selectpickerValues);
-        if($(this).is("#select_pilares")) {
-            console.log('select_pilares');
-            if(selectpickerValues.length) {
-                $('#label_pilares').removeClass('d-none');
-            } else {
-                $('#label_pilares').addClass('d-none');
-            }
-        } else if($(this).is("#select_estado")) {
-            console.log('select_estado');
-            if(selectpickerValues.length) {
-                $('#label_estado').removeClass('d-none');
-            } else {
-                $('#label_estado').addClass('d-none');
-            }
-        } else if($(this).is("#select_ano_cumplimiento")) {
-            console.log('select_ano_cumplimiento');
-            if(selectpickerValues.length) {
-                $('#label_ano_cumplimiento').removeClass('d-none');
-            } else {
-                $('#label_ano_cumplimiento').addClass('d-none');
-            }
-        } else {
-            console.log('error selectpickers')
-        }
     });
 }
 
@@ -2446,7 +2320,6 @@ async function selectGroupPilar(pilar) {
                 $(`[data-id="${item}"]`).addClass('selected');
             });
             
-            $('.filter-pilares').removeClass('d-none');
         }
            
     }
@@ -2462,7 +2335,7 @@ $(async function () {
     }
     addListenerSelects();
     $('#download_selecteds_actions').click(async function(e) {
-        if(actionsSelecteds.length > 8 || actionsSelecteds.length == 0) {
+        if(actionsSelecteds.length > 8) {
             $('#download_pdf').click();
         } else {
             var actionParam = [];
@@ -2470,17 +2343,17 @@ $(async function () {
                 actionParam.push(['action',action.id]);
             });
             const urlOptions = new URLSearchParams(categoryFilter).toString() + (linesFilter.length ? '&' + new URLSearchParams(linesFilter).toString() :'') + (pilaresFilter.length ? '&' + new URLSearchParams(pilaresFilter).toString():'') + (statusFilter.length ? '&' + new URLSearchParams(statusFilter).toString():'') + (yearFilter.length ? '&' + new URLSearchParams(yearFilter).toString():'') + '&' + new URLSearchParams(actionParam).toString();
-            window.open(`${urlLocal}/measure/export.pdf?${urlOptions}`, '_blank');
+            window.open('/measure/export.pdf?'+urlOptions, '_blank');
         }
     });
     $('#download_pdf').click(function(e) {
         e.preventDefault();
-        window.open(`${urlLocal}/measure/export.pdf?cat=1`);
-        window.open(`${urlLocal}/measure/export.pdf?cat=2`);
-        window.open(`${urlLocal}/measure/export.pdf?line=7`);
-        window.open(`${urlLocal}/measure/export.pdf?line=8&line=9`);
-        window.open(`${urlLocal}/measure/export.pdf?line=10&line=12`);
-        window.open(`${urlLocal}/measure/export.pdf?line=11`);
+        window.open('/measure/export.pdf?cat=1');
+        window.open('/measure/export.pdf?cat=2');
+        window.open('/measure/export.pdf?line=7');
+        window.open('/measure/export.pdf?line=8&line=9');
+        window.open('/measure/export.pdf?line=10&line=12');
+        window.open('/measure/export.pdf?line=11');
     });
     // Gestion scroll
     $("main").on('scroll', function() {

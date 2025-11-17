@@ -98,19 +98,7 @@ class Tag(Named):
         verbose_name = 'etiqueta'
         verbose_name_plural = 'etiquetas'
 
-# Post categories.
-# There are actually two systems. The first (Category) is used for filtering and visualization. 
-# The second, CategoryExtended, is the actual category system used by objects (Post, Book...) below.
-#
-# To add a new category :
-# - add its name to Category
-# - add lines to CategoryExtended with the following syntax :
-#     <code> = <actual category>, <admin visible text>
-# where
-# - <code> is not relevant (no space, just characters)
-# - <admin visible text> is just the text shown to admins, no problem here
-# - <actual category> is a list of Category separated by ", " (watch the space !!)
-# Add a line for every possible combination.
+# post categories
 
 class Category(models.TextChoices):
     adaptacion = 'Adaptación'
@@ -201,7 +189,7 @@ class Post(models.Model, Versioned):
 
 class PostVersion(LanguageVersion):
     """Language and date version of the Post."""
-    title = models.CharField(max_length=200, verbose_name='título')
+    title = models.CharField(max_length=100, verbose_name='título')
     body = models.TextField(verbose_name='texto', blank=True, null=True) 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='versions')
     date = models.DateTimeField(auto_now=True)
@@ -305,7 +293,7 @@ class Book(models.Model, VersionedNoDate):
     year = models.IntegerField(default=2025)
     category = models.CharField(choices=CategoryExtended, max_length=50, default=CategoryExtended.ampyd)
     date = models.DateTimeField(auto_now=True)
-    url = models.URLField(null=True, blank=True,max_length=300)
+    url = models.URLField(null=True, blank=True)
     # title = models.CharField(max_length=100)
     # description = models.TextField(null=True)
     authors = models.ManyToManyField(Author, blank=True)
@@ -318,7 +306,7 @@ class Book(models.Model, VersionedNoDate):
 
 class BookVersion(LanguageVersion):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='versions')
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     class Meta:
         unique_together = ('lang', 'book')
@@ -345,7 +333,7 @@ class InternalLink(models.Model, VersionedNoDate):
     # not an UrlField
     view = models.CharField(max_length=50, null=True, blank=True, help_text='Exactly one of this or "url" must be set.')
     viewargs = models.CharField(max_length=50, null=True, blank=True)
-    url = models.URLField(null=True, blank=True, help_text='Exactly one of this or "view" must be set.',max_length=300)
+    url = models.URLField(null=True, blank=True, help_text='Exactly one of this or "view" must be set.')
 
     def __str__(self):
         if self.view:
@@ -353,8 +341,8 @@ class InternalLink(models.Model, VersionedNoDate):
         return f'{self.parent} -> {self.url}'
 
 class InternalLinkVersion(LanguageVersion):
-    link = models.ForeignKey(InternalLink, on_delete=models.CASCADE, related_name='versions',max_length=300)
-    title = models.CharField(max_length=200, verbose_name='titulo')    
+    link = models.ForeignKey(InternalLink, on_delete=models.CASCADE, related_name='versions')
+    title = models.CharField(max_length=100, verbose_name='titulo')    
     description = models.TextField(null=True, blank=True, verbose_name='texto de la tarjeta', help_text='Descripción breve, 500 caracteres como máximo')
     class Meta:
         unique_together = ('lang', 'link')
@@ -424,3 +412,32 @@ class StaticTransVersion(models.Model):
 
     class Meta:
         unique_together = ('lang', 'es')
+
+
+from django.contrib import admin
+from .models import Post, PostVersion, Language, Profile
+
+# --- Posts y versiones ---
+
+class PostVersionInline(admin.TabularInline):
+    model = PostVersion
+    extra = 1
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'slug', 'status', 'type', 'category', 'date')
+    list_filter = ('status', 'type', 'category')
+    search_fields = ('slug',)
+    # prepopulated_fields = {'slug': ('content',)}  # ❌ eliminar o comentar esta línea
+    inlines = [PostVersionInline]
+
+
+# --- Otros modelos útiles ---
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'order')
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'hidden')

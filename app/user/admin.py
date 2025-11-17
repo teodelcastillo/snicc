@@ -24,5 +24,5 @@ class SniccUserAdmin(UserAdmin):
     )
     
 admin.site.register(User, SniccUserAdmin)
-admin.site.register(Profile)
+# admin.site.register(Profile)
 admin.site.register(Provincia)

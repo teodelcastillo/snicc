@@ -871,7 +871,6 @@
 .content-slice .content-graphs {
     display: flex;
     flex-direction: row;
-    position: relative;
 }
 .content-slice .content-graphs > .empty-graph + .legend-html {
     display: none;
@@ -1067,7 +1066,6 @@
     height: auto;
     float: left;
     min-height: 18rem;
-    position: relative;
 }
 
 #stacked_bar_chart_legends .c3-title {
@@ -1091,9 +1089,6 @@
 }
 #stacked_bar_chart_legends .legend-html {
     flex-direction: column;
-}
-#stacked_bar_chart_legends .legend-right .legend-html {
-    flex-direction: column-reverse;
 }
 #stacked_bar_chart_legends .legend-html > div > .color-legend {
     margin-left: 0;
@@ -1666,7 +1661,7 @@
 }
 .header-detail-popup .legends-status-popup {
     display: inline-flex;
-    justify-content: left;
+    justify-content: normal;
     width: 100%;
     margin: 0.5rem 0;
     height: 1.5rem;
@@ -1674,7 +1669,6 @@
 .header-detail-popup .legends-status-popup .legend-html {
     flex-direction: row;
     max-width: max-content;
-    justify-content: left;
 }
 .header-detail-popup .legends-status-popup .legend-html:last-child {
     margin-right: 1rem;
@@ -2385,46 +2379,6 @@ animation:         scroll_pop 0.3s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /
     background-repeat: no-repeat;
 }
 
-/* Last changes */
-.legend-html > div[data-id="Mitigación y Pérdidas y daños"],
-.legend-html > div[data-id-sbc="Mitigación y Pérdidas y daños"] {
-    display: none;
-}
-.remove-filter {
-    position: absolute;
-    cursor: pointer;
-}
-.remove-filter .bi-filter {
-    font-size: 1.5rem;
-}
-.remove-filter .bi-x {
-    font-size: 1.15rem;
-    position: absolute;
-    left: 14px;
-    top: 10px;
-}
-.remove-filter .bi::before {
-    font-weight: 600 !important;
-}
-.content-slice .content-graphs .remove-filter {
-    top: 0;
-    right: 0;
-}
-#stacked_bar_chart_legends div .remove-filter {
-    margin-top: -0.5rem;
-    right: 0;
-    cursor: pointer;
-    position: absolute;
-}
-.offcanvas-text .form-group label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    margin: 0.25rem 0;
-}
-
-
-
 /* Media queries */
 @media (min-width: 1024px) {
     #nav-details:not(.view-cards) #content_actions_graphs > * {
@@ -2955,18 +2909,11 @@ only screen and (                max-resolution: 2dppx)  and (max-width: 1024px)
         size: A4 landscape;
         margin: 0.3in 0.3in 0.3in 0.3in !important
     }
-    html,
-    body {
-        overflow:visible;
-        height: 100%;
-    }
     .no-print { display: none; }
     #measures_detail_content { 
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-family: 'Montserrat', sans-serif;
-        overflow:visible;
-        height: 100%;
     }
     #measures_detail_content h4,
     #measures_detail_content h2 {
@@ -2974,11 +2921,7 @@ only screen and (                max-resolution: 2dppx)  and (max-width: 1024px)
         font-weight: 600;
         font-size: 1.15rem;
     }
-    .header-detail-popup .legends-status-popup {
-        display: inline-flex;
-        justify-content: left;
-        width: 100%; 
-    }
+
     .header-detail-popup .legends-status-popup .legend-html {
         position: relative;
         top: auto;
@@ -2986,7 +2929,6 @@ only screen and (                max-resolution: 2dppx)  and (max-width: 1024px)
         flex-direction: row;
         width: auto;
         margin-right: 0.5rem;
-        justify-content: left;
     }
     .header-detail-popup .legends-status-popup .legend-html > div > .text-legend {
         font-size: 0.75rem;
@@ -3009,11 +2951,6 @@ only screen and (                max-resolution: 2dppx)  and (max-width: 1024px)
     }
     .header-detail-popup .legends-status-popup .legend-html + .legend-html {
         margin-right: 0;
-    }
-
-    #action_detail_popup .body-detail-popup {
-        overflow:visible;
-        height: 100%;
     }
 
     .body-detail-popup {

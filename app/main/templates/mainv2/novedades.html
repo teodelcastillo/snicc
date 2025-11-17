@@ -16,7 +16,7 @@
                                     <span>{% ts k.capitalize lang %}</span> 
                                     <span class="badge text-bg-secondary">{{v}}</span>
                                 </a>
-                                {% endif %}{% endfor %}  
+                                {% endif %}{% endfor %}
                             </div>
                             <div class="dropdown dropdown-categories">
                                 <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,7 +41,9 @@
                                     {% for n in news %}{% with content=n|translate:lang %}
                                     <div class="col">
                                         <a class="card" href="{% url 'mainv2:post' n.slug %}">
-                                            <img src="{{n.image.url}}" class="card-img-top" alt="{{content.title}}">
+                                            <img 
+                                                style="height: 172px; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px;"
+                                                src="{{n.image.url}}" class="card-img-top" alt="{{content.title}}">
                                             <div class="card-body">
                                                 <h5 class="card-title">
                                                     {{content.title}}

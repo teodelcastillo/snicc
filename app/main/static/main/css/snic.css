@@ -1111,6 +1111,18 @@ main {
     border-radius: 30px;
     aspect-ratio: 1;
 }
+
+.row-suscribite {
+    color: var(--Text-Colour-2, #2B2B2B);
+    leading-trim: both;
+    text-edge: cap;
+    font-family: Lora;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 47px; /* 146.875% */
+}
+
 .section-banner-home .banner-home-images .rows-images img {
     height: 50%;
     margin-bottom: 7.5%;
@@ -2529,7 +2541,7 @@ body.readguide .separator {
 }
 @media (max-width: 1280px) {
     .container-logo:not(.snic-home-logo) {
-        display: inline-block;
+        display: block;
     }
     .btn.btn-texto {
         font-size: 0.85rem;
@@ -2624,7 +2636,7 @@ body.readguide .separator {
 
 @media (max-width: 1024px) {
     .container-logo.container.snic-home-logo {
-        display: inline-block;
+        display: block;
         max-width: 80%;
         padding: 0 1rem;
     }
