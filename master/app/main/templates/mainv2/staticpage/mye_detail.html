@@ -1,0 +1,169 @@
+{% extends 'mainv2/base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'main/css/mye.css' %}">
+<style>
+  .mye-detail-hero {
+    background: linear-gradient(135deg, rgba(38,44,81,0.08), rgba(38,44,81,0.01));
+    border-radius: 24px;
+    padding: 32px;
+  }
+  .mye-chip {
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    background-color: rgba(38,44,81,0.08);
+    color: #262C51;
+  }
+  .mye-section-card {
+    border: 1px solid rgba(38,44,81,0.12);
+    border-radius: 18px;
+  }
+  .mye-section-card h5 {
+    color: #262C51;
+  }
+  .mye-section-card .section-content {
+    color: #4f546c;
+  }
+  .badge-gradient {
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-md-5">
+  <a href="{% url 'measure:mye' %}" class="btn btn-link text-decoration-none ps-0 mb-3" style="color:#262C51;">
+    <i class="bi bi-arrow-left"></i> Volver al módulo MyE
+  </a>
+
+  <div class="mye-detail-hero shadow-sm mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
+      <div>
+        <span class="badge-gradient mb-3" style="background-color: {{ status_color }};">
+          {{ measure.status }}
+        </span>
+        <h1 class="fw-semibold" style="color:#262C51;">{{ measure.name }}</h1>
+        <p class="text-muted mb-2">Código: <strong>{{ measure.code }}</strong></p>
+        <div class="d-flex flex-wrap gap-3 text-muted small">
+          {% if measure.action %}
+            <div><i class="bi bi-diagram-2"></i> Línea de acción: <strong>{{ measure.action.name }}</strong></div>
+          {% endif %}
+          {% if measure.action.line %}
+            <div><i class="bi bi-layers"></i> Línea/enfoque: <strong>{{ measure.action.line.name }}</strong></div>
+          {% endif %}
+          {% if measure.action.line.category %}
+            <div><i class="bi bi-segmented-nav"></i> Categoría: <strong>{{ measure.action.line.category.name }}</strong></div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="text-lg-end">
+        <div class="mb-3">
+          {% for label in labels %}
+            <span class="mye-chip">{{ label }}</span>
+          {% empty %}
+            <span class="text-muted">Sin etiquetas adicionales</span>
+          {% endfor %}
+        </div>
+        <a href="{% url 'measure:pdf-export' measure.id %}" class="btn btn-primary" style="background-color:#262C51;border:none;">
+          <i class="bi bi-file-earmark-arrow-down"></i> Descargar ficha (PDF)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% for section in field_sections %}
+        <div class="card mye-section-card mb-4">
+          <div class="card-body">
+            <h5 class="fw-semibold mb-3">{{ section.name }}</h5>
+            <div class="section-content">{{ section.value|safe }}</div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="card mye-section-card">
+          <div class="card-body text-muted">
+            Aún no se registraron detalles adicionales para esta medida.
+          </div>
+        </div>
+      {% endfor %}
+
+      {% for section in extra_sections %}
+        <div class="card mye-section-card mb-4">
+          <div class="card-body">
+            <h5 class="fw-semibold mb-3">{{ section.name }}</h5>
+            <div class="section-content">{{ section.value|safe }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card mye-section-card mb-4">
+        <div class="card-body">
+          <h5 class="fw-semibold mb-3">Información general</h5>
+          <ul class="list-unstyled text-muted mb-0">
+            {% if measure.pilares %}
+              <li class="mb-2"><strong class="text-dark d-block">Pilar</strong>{{ measure.pilares.name }}</li>
+            {% endif %}
+            <li class="mb-2"><strong class="text-dark d-block">Nivel de avance</strong>{{ measure.get_status_display }}</li>
+            <li class="mb-2"><strong class="text-dark d-block">Alcance</strong>{{ measure.get_scope_display }}</li>
+            <li class="mb-2"><strong class="text-dark d-block">Meta / Año</strong>{{ measure.year }}</li>
+            {% if responsable %}
+              <li class="mb-2"><strong class="text-dark d-block">Responsable</strong>{{ responsable }}</li>
+            {% endif %}
+            {% if execution_period %}
+              <li class="mb-2"><strong class="text-dark d-block">Período de ejecución</strong>{{ execution_period }}</li>
+            {% endif %}
+            <li><strong class="text-dark d-block">Última actualización</strong>{{ measure.last_modified|date:"d/m/Y" }}</li>
+          </ul>
+        </div>
+      </div>
+
+      {% if national_objectives %}
+        <div class="card mye-section-card mb-4">
+          <div class="card-body">
+            <h5 class="fw-semibold mb-3">Metas nacionales vinculadas</h5>
+            <ul class="list-unstyled mb-0 text-muted">
+              {% for objective in national_objectives %}
+                <li class="mb-2">
+                  <strong class="text-dark d-block">{{ objective.full_name }}</strong>
+                  {% if objective.meta_1 %}
+                    <small>{{ objective.meta_1.full_name }}</small>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if related_measures %}
+        <div class="card mye-section-card">
+          <div class="card-body">
+            <h5 class="fw-semibold mb-3">Medidas relacionadas</h5>
+            <ul class="list-unstyled mb-0">
+              {% for item in related_measures %}
+                <li class="mb-3">
+                  <a href="{% url 'measure:detail_view' item.id %}" class="text-decoration-none">
+                    <span class="d-block fw-semibold" style="color:#262C51;">{{ item.name }}</span>
+                    <small class="text-muted">{{ item.get_status_display }}</small>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

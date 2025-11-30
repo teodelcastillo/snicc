@@ -1,9 +1,10 @@
 from django.db.models import Count, Q
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from django.urls import path
 from django.http import JsonResponse, HttpResponse, HttpRequest
 from main.views import base_context
+from main.viewsv2 import default_context
 from collections import Counter
 import pandas as pd
 import numpy as np
@@ -392,20 +393,22 @@ def measure_pdf_recalc(request):
 
 
 def mye_overview(request):
-    context = base_context(request)
+    """
+    Vista principal del módulo MyE en la versión mainv2.
+    Renderiza la página con información agregada para los
+    contadores iniciales (el detalle dinámico se completa vía JS).
+    """
+    context = default_context(request)
 
-    # Total medidas activas
-    measures = Measure.active.all()
+    measures = Measure.active.select_related('pilares', 'action__line').all()
     total_measures = measures.count()
 
-    # Conteos por estado
     count_by_status = Counter(measures.values_list('status', flat=True))
     avanzada = count_by_status.get(Measure.Status.avanzada, 0)
     inicial = count_by_status.get(Measure.Status.inicial, 0)
     exec_count = avanzada + inicial
     percent_advanced = round((avanzada / total_measures) * 100) if total_measures > 0 else 0
 
-    # Pilar predominante
     top_pilar = (Pilar.objects
                  .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
                  .order_by('-num')
@@ -413,11 +416,10 @@ def mye_overview(request):
     top_pilar_name = top_pilar.name if top_pilar else ""
     top_pilar_count = top_pilar.num if top_pilar else 0
 
-    # Estado predominante (agrupado)
     prog = count_by_status.get(Measure.Status.prog, 0)
     indef = count_by_status.get(Measure.Status.adefinir, 0)
     if exec_count >= prog and exec_count >= indef:
-        pred_status_name = "En Curso"
+        pred_status_name = "En curso"
         pred_status_count = exec_count
     elif prog >= indef:
         pred_status_name = "En programación"
@@ -436,51 +438,109 @@ def mye_overview(request):
         'pred_status_count': pred_status_count,
     })
 
-    return render(request, 'mainv2/mye.html', context)
+    return render(request, 'mainv2/staticpage/mye.html', context)
 
 def measure_list_json(request):
     """
     Devuelve un listado simple de medidas activas con los campos principales,
     usado por el módulo MyE (mye.html) para renderizar las cards dinámicamente.
+
+    Incluye información de pilares, línea, categoría y descripción corta.
     """
-    measures = Measure.active.all().values(
-        "id",
-        "name",
-        "status",
-        "description",
-        "pilares__name",
-        "action__line__name",
+    measures = (
+        Measure.active
+        .select_related('pilares', 'action__line__category')
+        .prefetch_related('labels')
+        .all()
     )
 
     data = []
-    for m in measures:
-        # Si el campo 'fields' existe, buscamos la autoridad de aplicación
-        measure_obj = Measure.objects.get(id=m["id"])
-        responsable = ""
-        if measure_obj.fields:
-            responsable = measure_obj.fields.get("Autoridad de aplicación", "")
+    for measure in measures:
+        fields = measure.fields or {}
+        description = fields.get('Descripción', '')
+        responsable = fields.get('Autoridad de aplicación', '')
+        labels = list(measure.labels.values_list('name', flat=True))
+        pilar_name = measure.pilares.name if measure.pilares else ", ".join(labels)
+        line_name = measure.action.line.name if measure.action and measure.action.line else ''
+        line_category = measure.action.line.category.name if measure.action and measure.action.line and measure.action.line.category else ''
 
         data.append({
-            "id": m["id"],
-            "name": m["name"],
-            "status": m["status"],
-            "description": m["description"],
-            "pilar": m["pilares__name"],
-            "linea": m["action__line__name"],
+            "id": measure.id,
+            "name": measure.name,
+            "status": measure.status,
+            "description": description,
+            "pilar": pilar_name,
+            "linea": line_name,
+            "linea_categoria": line_category,
             "responsable": responsable,
         })
 
     return JsonResponse({"measures": data})
 
 
+def _measure_field_sections(measure: Measure):
+    """Return ordered sections for detail view."""
+    field_values = measure.fields or {}
+    ordered_keys = list(MeasureField.active.namelist())
 
+    sections = [
+        {'name': key, 'value': field_values.get(key)}
+        for key in ordered_keys
+        if field_values.get(key)
+    ]
+
+    extra_sections = [
+        {'name': key, 'value': value}
+        for key, value in field_values.items()
+        if value and key not in ordered_keys
+    ]
+    return sections, extra_sections
+
+
+def measure_detail_view(request, id):
+    """
+    Página de detalle de una medida activa.
+    """
+    measure = get_object_or_404(
+        Measure.active.select_related(
+            'pilares',
+            'action__line__category',
+        ),
+        pk=id,
+    )
+
+    sections, extra_sections = _measure_field_sections(measure)
+    field_values = measure.fields or {}
+    labels = list(measure.labels.values_list('name', flat=True))
+    related_measures = list(
+        Measure.active
+        .filter(action=measure.action)
+        .exclude(id=measure.id)
+        .only('id', 'name', 'status')[:6]
+    )
+
+    context = default_context(request)
+    context.update({
+        'measure': measure,
+        'status_color': Measure.MEASURE_COLOR.get(measure.status, '#262C51'),
+        'field_sections': sections,
+        'extra_sections': extra_sections,
+        'labels': labels,
+        'national_objectives': measure.national_objectives.select_related('meta_1__meta_0'),
+        'related_measures': related_measures,
+        'responsable': field_values.get('Autoridad de aplicación'),
+        'execution_period': field_values.get('Período de ejecución'),
+    })
+
+    return render(request, 'mainv2/staticpage/mye_detail.html', context)
 
 
 app_name='measure'
 urlpatterns = [
     path('list/', measure_list, name='list'),
     path('<int:id>/pdf', one_measure_pdf, name='pdf-export'),
-    path('<int:id>/', measure_fields, name='details'),
+    path('<int:id>/data.json', measure_fields, name='detail_fields'),
+    path('<int:id>/', measure_detail_view, name='detail_view'),
     path('filter.json', measure_filter_json, name='filter'),
     path('details.json', filter_details, name='details'),
     path('filter-simple.json', measure_list_json, name='filter_simple'),
