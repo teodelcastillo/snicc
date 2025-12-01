@@ -62,7 +62,7 @@ class Line(LongNamed, Colored):
         verbose_name_plural = 'líneas/enfoques'
 
     def measure_count(self):
-        return Measure.objects.filter(action__line=self).count()
+        return self.measures.count()
 
 class Action(LongNamed, Colored):
     description = models.TextField(default='', blank=True, verbose_name='descripción', help_text='HTML permitido')    
@@ -159,7 +159,15 @@ class Measure(LongNamed):
         verbose_name = 'medida'
 
     is_active = models.BooleanField(default=False, blank=True, verbose_name='activa')
-    action = models.ForeignKey(Action, on_delete=models.CASCADE, verbose_name = 'línea de acción')
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='measures', verbose_name='línea/enfoque')
+    action = models.ForeignKey(
+        Action,
+        on_delete=models.SET_NULL,
+        related_name='measure_set',
+        null=True,
+        blank=True,
+        verbose_name='línea de acción'
+    )
     code = models.CharField(max_length=6, verbose_name='codigo') # e.g. "GR-10"
     labels = models.ManyToManyField(Label, verbose_name='pilares', blank=True)
     pilares = models.ForeignKey(Pilar, null=True, on_delete=models.SET_NULL)

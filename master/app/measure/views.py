@@ -68,8 +68,8 @@ def stacked_bar(qset):
     statuses = list(STATUS_DICT.keys())
     pilstatset = set(pilares).union(statuses)
 
-    vals = Counter(qset.values_list('pilares__name', 'action__line__name'))
-    vals.update(Counter(qset.values_list('status', 'action__line__name')))
+    vals = Counter(qset.values_list('pilares__name', 'line__name'))
+    vals.update(Counter(qset.values_list('status', 'line__name')))
     # make and pivot the dataframe
     if vals:
         df = pd.DataFrame(vals.values(), index=vals.keys()).unstack().droplevel(0,axis=1)
@@ -120,7 +120,7 @@ def qset_builder(request):
     cat_id = request.GET.get('cat')
     if cat_id:
         lineqset = lineqset.filter(category_id=cat_id)
-        fil['action__line__category_id'] = cat_id
+        fil['line__category_id'] = cat_id
 
     pil = request.GET.getlist('pilar')
     if pil:
@@ -140,8 +140,7 @@ def qset_builder(request):
 
     lines = request.GET.getlist('line')
     if lines:
-        # lineqset = lineqset.filter(id__in=lines)
-        fil['action__line__in'] = lines
+        fil['line_id__in'] = lines
 
     qset = qset.filter(**fil)
     return qset, lineqset, fil
@@ -214,8 +213,8 @@ def measure_filter(request):
     if 'cat' in request.GET:
         # lines
         linecolors = {line.name:line.color for line in lineqset.all()}
-        linestat = {line:None for line in linecolors.keys()}    
-        linestat.update(Counter(qset.values_list('action__line__name', flat=True)))
+        linestat = {line:None for line in linecolors.keys()}
+        linestat.update(Counter(qset.values_list('line__name', flat=True)))
         res = {'stats': {'lines': {
             'data': linestat,
             'colors':linecolors,
@@ -225,7 +224,7 @@ def measure_filter(request):
         # categories
         catcolors = {cat.name:cat.color for cat in LineCategory.objects.all()}
         catstats = {cat:None for cat in catcolors.keys()}    
-        catstats.update(Counter(qset.values_list('action__line__category__name', flat=True)))
+        catstats.update(Counter(qset.values_list('line__category__name', flat=True)))
         res = {'stats': {'lines': { # it's lines, but it will work anyway
             'data': catstats,
             'colors':catcolors,
@@ -257,8 +256,8 @@ def measure_filter(request):
 def filter_details(request):
     qset, lineqset, fil = qset_builder(request)
     # remove empty lines
-    tmpfil = { 'action__measure__'+k:v for k,v in fil.items()}
-    lineqset = lineqset.annotate(mcount=Count('action__measure', filter=Q(**tmpfil))).filter(mcount__gt=0)
+    tmpfil = {'measures__' + k: v for k, v in fil.items()}
+    lineqset = lineqset.annotate(mcount=Count('measures', filter=Q(**tmpfil))).filter(mcount__gt=0)
 
     lineres, actionres = [], []
     for line in lineqset:
@@ -376,11 +375,11 @@ def many_measures_csv(request):
     res = HttpResponse(content_type="text/csv")
     writer = csv.writer(res)
     writer.writerow(['Línea o enfoque', 'Línea de acción', 'Nombre', 'Estado de implementación', 'Pilares', 'Autoridad de aplicación',])
-    for m in qset.order_by('action__line__name', 'action__name'):
+    for m in qset.order_by('line__name', 'action__name'):
         if m.fields:
-            writer.writerow([m.action.line, m.action, m.name, m.status, m.pilares, m.fields.get('Autoridad de aplicación', ''),])
+            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, m.fields.get('Autoridad de aplicación', ''),])
         else:
-            writer.writerow([m.action.line, m.action, m.name, m.status, m.pilares, '',])
+            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, '',])
     return res
 
 # recalc
@@ -401,7 +400,7 @@ def mye_overview(request):
     """
     context = default_context(request)
 
-    measures = Measure.active.select_related('pilares', 'action__line').all()
+    measures = Measure.active.select_related('pilares', 'line').all()
     total_measures = measures.count()
 
     count_by_status = Counter(measures.values_list('status', flat=True))
@@ -451,7 +450,7 @@ def measure_list_json(request):
     """
     measures = (
         Measure.active
-        .select_related('pilares', 'action__line__category')
+        .select_related('pilares', 'line__category')
         .prefetch_related('labels')
         .all()
     )
@@ -463,9 +462,9 @@ def measure_list_json(request):
         responsable = fields.get('Autoridad de aplicación', '')
         label_names = list(measure.labels.values_list('name', flat=True))
         pilar_name = measure.pilares.name if measure.pilares else ", ".join(label_names)
-        line_name = measure.action.line.name if measure.action and measure.action.line else ''
-        line_category = measure.action.line.category.name if measure.action and measure.action.line and measure.action.line.category else ''
-        line_id = measure.action.line.id if measure.action and measure.action.line else None
+        line_name = measure.line.name if measure.line else ''
+        line_category = measure.line.category.name if measure.line and measure.line.category else ''
+        line_id = measure.line.id if measure.line else None
 
         data.append({
             "id": measure.id,
@@ -541,7 +540,7 @@ def measure_detail_view(request, id):
     measure = get_object_or_404(
         Measure.active.select_related(
             'pilares',
-            'action__line__category',
+            'line__category',
         ),
         pk=id,
     )
@@ -551,7 +550,7 @@ def measure_detail_view(request, id):
     labels = list(measure.labels.values_list('name', flat=True))
     related_measures = list(
         Measure.active
-        .filter(action=measure.action)
+        .filter(line=measure.line)
         .exclude(id=measure.id)
         .only('id', 'name', 'status')[:6]
     )

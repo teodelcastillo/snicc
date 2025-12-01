@@ -26,13 +26,13 @@ class LineAdmin(admin.ModelAdmin):
 
 class MeasureAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'status', 'is_active')
-    list_filter = ('is_active', 'action__line', 'labels')
+    list_filter = ('is_active', 'line', 'labels')
     search_fields = ('name','code')
     actions = [set_active, set_inactive, set_status_adef, set_status_inic, set_status_avan, set_status_prog]
 
     fieldsets = (
         (None, {"fields": ('code', 'name', 'is_active', 'year', 'status', 'scope')}),
-        ('Relaciones', {"fields": ('action', 'pilares', 'national_objectives')}),
+        ('Relaciones', {"fields": ('line', 'action', 'pilares', 'national_objectives')}),
         # ('Datos', {"fields": ('fields',)})
     )
 

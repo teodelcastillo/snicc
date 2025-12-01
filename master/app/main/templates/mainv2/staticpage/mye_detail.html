@@ -55,14 +55,14 @@
         <h1 class="fw-semibold" style="color:#262C51;">{{ measure.name }}</h1>
         <p class="text-muted mb-3">{{ description|default:"Sin descripción disponible" }}</p>
         <div class="d-flex flex-wrap gap-3 text-muted small">
+          {% if measure.line %}
+            <div><i class="bi bi-layers"></i> Línea/enfoque: <strong>{{ measure.line.name }}</strong></div>
+          {% endif %}
+          {% if measure.line.category %}
+            <div><i class="bi bi-segmented-nav"></i> Categoría: <strong>{{ measure.line.category.name }}</strong></div>
+          {% endif %}
           {% if measure.action %}
             <div><i class="bi bi-diagram-2"></i> Línea de acción: <strong>{{ measure.action.name }}</strong></div>
-          {% endif %}
-          {% if measure.action.line %}
-            <div><i class="bi bi-layers"></i> Línea/enfoque: <strong>{{ measure.action.line.name }}</strong></div>
-          {% endif %}
-          {% if measure.action.line.category %}
-            <div><i class="bi bi-segmented-nav"></i> Categoría: <strong>{{ measure.action.line.category.name }}</strong></div>
           {% endif %}
         </div>
       </div>
@@ -137,11 +137,11 @@
         <div class="col-md-6 mt-4 mt-md-0">
           <p class="text-muted mb-2">Líneas y enfoques</p>
           <div class="d-flex flex-wrap gap-2">
-            {% if measure.action.line %}
-              <span class="badge rounded-pill bg-info text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ measure.action.line.name }}</span>
+            {% if measure.line %}
+              <span class="badge rounded-pill bg-info text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ measure.line.name }}</span>
             {% endif %}
-            {% if measure.action.line.category %}
-              <span class="badge rounded-pill bg-secondary"><i class="bi bi-grid-3x3-gap me-1"></i>{{ measure.action.line.category.name }}</span>
+            {% if measure.line.category %}
+              <span class="badge rounded-pill bg-secondary"><i class="bi bi-grid-3x3-gap me-1"></i>{{ measure.line.category.name }}</span>
             {% endif %}
           </div>
         </div>
