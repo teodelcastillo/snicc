@@ -164,16 +164,16 @@
 
           {% for b in books %}
             {% with content=b|translate:lang %}
-              <div class="card mb-3 border-0 border-bottom pb-3">
-                <div class="d-flex">
-                  <div class="flex-shrink-0">
+              <div class="card mb-3 border-0 border-bottom pb-3" style="border-bottom:1px solid #E1E1E1;">
+                <div class="d-flex" style="display:flex; align-items:flex-start; gap:18px; flex-wrap:nowrap; width:100%;">
+                  <div class="flex-shrink-0" style="flex-shrink:0;">
                     {% if b.image %}
-                      <img src="{{ b.image.url }}" alt="" class="rounded" style="width:90px;height:auto;object-fit:cover;">
+                      <img src="{{ b.image.url }}" alt="" class="rounded" style="width:90px;height:90px;object-fit:cover;">
                     {% else %}
-                      <img src="{% static 'main/images/library/image.png' %}" alt="" class="rounded" style="width:90px;height:auto;object-fit:cover;">
+                      <img src="{% static 'main/images/library/image.png' %}" alt="" class="rounded" style="width:90px;height:90px;object-fit:cover;">
                     {% endif %}
                   </div>
-                  <div class="flex-grow-1 ms-3">
+                  <div class="flex-grow-1" style="flex:1 1 auto; min-width:0;">
                     <a href="{{ b.url|default:'#' }}" target="_blank" style="text-decoration:none;">
                       <h5 class="mb-1" style="color:#262C51;">{{ content.title }}</h5>
                     </a>
