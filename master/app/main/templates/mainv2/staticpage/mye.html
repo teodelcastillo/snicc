@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroNivel = document.getElementById("filtro_nivel");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
+  const chartTypology = document.getElementById("chart_tipo_medidas");
+  const chartStatus = document.getElementById("chart_estado_general");
 
   let measures = [];
 
@@ -45,6 +47,82 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Error cargando medidas:", err);
       listContainer.innerHTML = `<p class="text-danger text-center py-4">No se pudieron cargar las medidas.</p>`;
     }
+  }
+
+  async function loadDashboardCharts() {
+    if (!chartTypology && !chartStatus) {
+      return;
+    }
+    try {
+      const response = await fetch("/measure/filter.json");
+      const payload = await response.json();
+      const stats = payload.stats || {};
+
+      if (chartTypology) {
+        renderTypologyChart(stats.pilares);
+      }
+      if (chartStatus) {
+        renderStatusChart(stats.status);
+      }
+    } catch (error) {
+      console.error("Error cargando estadísticas de MyE:", error);
+    }
+  }
+
+  function renderTypologyChart(pilaresStats = {}) {
+    const keys = pilaresStats.keys || [];
+    if (!keys.length) {
+      chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
+
+    const columns = keys.map((key) => [
+      key || "Sin dato",
+      (pilaresStats.data && pilaresStats.data[key]) || 0,
+    ]);
+
+    c3.generate({
+      bindto: "#chart_tipo_medidas",
+      size: { height: 360 },
+      data: {
+        columns,
+        type: "donut",
+        colors: pilaresStats.colors || {},
+      },
+      donut: {
+        width: 45,
+        title: "Pilares",
+      },
+      legend: {
+        position: "right",
+      },
+    });
+  }
+
+  function renderStatusChart(statusStats = {}) {
+    const keys = statusStats.keys || [];
+    if (!keys.length) {
+      chartStatus.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
+
+    const columns = keys.map((key) => [
+      key || "Sin dato",
+      (statusStats.data && statusStats.data[key]) || 0,
+    ]);
+
+    c3.generate({
+      bindto: "#chart_estado_general",
+      size: { height: 360 },
+      data: {
+        columns,
+        type: "pie",
+        colors: statusStats.colors || {},
+      },
+      legend: {
+        position: "right",
+      },
+    });
   }
 
   // 2️⃣ Renderizar cards dinámicamente
@@ -132,6 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5️⃣ Iniciar carga
   await loadMeasures();
+  await loadDashboardCharts();
 });
 
 function verDetalle(id) {
