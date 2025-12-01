@@ -70,31 +70,68 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderTypologyChart(pilaresStats = {}) {
-    const keys = pilaresStats.keys || [];
-    if (!keys.length) {
+    const desiredOrder = [
+      "Adaptación",
+      "Mitigación",
+      "Adaptación + Mitigación",
+      "Adaptación + Pérdidas y Daños",
+      "Adaptación + Mitigación + Pérdidas y Daños",
+    ];
+
+    if (!pilaresStats || !pilaresStats.data) {
       chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
       return;
     }
 
-    const columns = keys.map((key) => [
-      key || "Sin dato",
-      (pilaresStats.data && pilaresStats.data[key]) || 0,
-    ]);
+    const categories = desiredOrder;
+    const values = categories.map((key) => pilaresStats.data[key] || 0);
+    const hasData = values.some((val) => val > 0);
+
+    if (!hasData) {
+      chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
 
     c3.generate({
       bindto: "#chart_tipo_medidas",
-      size: { height: 360 },
+      size: { height: 380 },
       data: {
-        columns,
-        type: "donut",
-        colors: pilaresStats.colors || {},
+        columns: [["value", ...values]],
+        type: "bar",
+        color: function (color, d) {
+          const key = categories[d.index];
+          return (pilaresStats.colors && pilaresStats.colors[key]) || "#262C51";
+        },
       },
-      donut: {
-        width: 45,
-        title: "Pilares",
+      axis: {
+        rotated: true,
+        x: {
+          type: "category",
+          categories,
+          tick: {
+            multiline: false,
+          },
+        },
+        y: {
+          tick: {
+            format: d3.format("d"),
+          },
+        },
+      },
+      bar: {
+        width: {
+          ratio: 0.45,
+        },
       },
       legend: {
-        position: "right",
+        show: false,
+      },
+      tooltip: {
+        format: {
+          value: function (value) {
+            return value + " medidas";
+          },
+        },
       },
     });
   }
@@ -113,14 +150,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     c3.generate({
       bindto: "#chart_estado_general",
-      size: { height: 360 },
+      size: { height: 380 },
       data: {
         columns,
-        type: "pie",
+        type: "donut",
         colors: statusStats.colors || {},
+      },
+      donut: {
+        width: 50,
+        title: "Estados",
       },
       legend: {
         position: "right",
+      },
+      tooltip: {
+        format: {
+          value: function (value) {
+            return value + " medidas";
+          },
+        },
       },
     });
   }
@@ -322,14 +370,13 @@ function verDetalle(id) {
       <h2 class="fw-semibold mb-1" style="color:#262C51;">Vista General del Sistema</h2>
       <p class="text-muted mb-0">Análisis estadístico y estado de todas las medidas del plan</p>
     </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
+    <button class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style="background-color:#262C51; border:none;">
       <i class="bi bi-download"></i> Descargar Reporte General
     </button>
   </div>
 
-<!-- Tarjetas resumen -->
-<div class="row g-4 mb-5">
-
+  <!-- Tarjetas resumen -->
+  <div class="row g-4 mb-5">
   <!-- 🟣 Total de Medidas -->
   <div class="col-md-4">
     <div class="card border shadow-md position-relative overflow-hidden"
@@ -354,7 +401,6 @@ function verDetalle(id) {
     </div>
   </div>
 
-  <!-- 🟢 Progreso Avanzado -->
   <div class="col-md-4">
     <div class="card border shadow-md position-relative overflow-hidden"
          style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
@@ -375,8 +421,6 @@ function verDetalle(id) {
       </div>
     </div>
   </div>
-
-  <!-- 🔵 En Ejecución -->
   <div class="col-md-4">
     <div class="card border shadow-md position-relative overflow-hidden"
          style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
@@ -398,66 +442,33 @@ function verDetalle(id) {
 
     </div>
   </div>
-</div>
+  </div>
 
-
-<!-- Gráficos principales -->
-<div class="row g-4 mb-5">
-
-  <!-- 🟣 Gráfico Tipología de Medidas -->
-  <div class="col-lg-6">
-    <div class="card border shadow-md h-100 overflow-hidden position-relative"
-         style="transition: all 0.3s ease; border-color: rgba(38,44,81,0.15);">
-      
-      <!-- Overlay hover -->
-      <div class="position-absolute top-0 start-0 w-100 h-100"
-           style="background:linear-gradient(to bottom right, rgba(38,44,81,0.1), transparent);
-                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
-
-      <!-- Header con estilo principal oscuro -->
-      <div class="card-header border-bottom flex-column justify-content-center"
-          style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
-                  border-color:#bbdefb; color:#0d6efd; text-align:left;">
-        <h5 class="fw-semibold mb-1" style="margin:0;">Tipología de Medidas</h5>
-        <small class="text-muted" style="margin:0;">Clasificación según adaptación, mitigación y pérdidas y daños</small>
+  <!-- Gráficos principales -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card h-100 border shadow-lg overflow-hidden">
+        <div class="card-header border-bottom bg-gradient" style="background:linear-gradient(to right, rgba(38,44,81,0.08), rgba(38,44,81,0.02));">
+          <h5 class="fw-semibold mb-1" style="color:#262C51;">Tipología de Medidas</h5>
+          <p class="text-muted mb-0">Clasificación según adaptación, mitigación y pérdidas y daños</p>
+        </div>
+        <div class="card-body" style="height:420px;">
+          <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
+        </div>
       </div>
-
-
-
-      <!-- Body -->
-      <div class="card-body position-relative" style="height:400px; z-index:2;">
-        <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100 border shadow-lg overflow-hidden">
+        <div class="card-header border-bottom bg-gradient" style="background:linear-gradient(to right, rgba(38,44,81,0.08), rgba(38,44,81,0.02));">
+          <h5 class="fw-semibold mb-1" style="color:#262C51;">Estado de Avance General</h5>
+          <p class="text-muted mb-0">Distribución de medidas según su nivel de progreso</p>
+        </div>
+        <div class="card-body" style="height:420px;">
+          <div id="chart_estado_general" style="height:100%; width:100%;"></div>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- 🔵 Gráfico Estado de Avance General -->
-  <div class="col-lg-6">
-    <div class="card border shadow-md h-100 overflow-hidden position-relative"
-         style="transition: all 0.3s ease; border-color:#bbdefb;">
-      
-      <!-- Overlay hover -->
-      <div class="position-absolute top-0 start-0 w-100 h-100"
-           style="background:linear-gradient(to bottom right, #e3f2fd, transparent);
-                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
-
-      <!-- Header con estilo azul claro -->
-      <div class="card-header border-bottom flex-column justify-content-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <h5 class="fw-semibold mb-1">Estado de Avance General</h5>
-        <small class="text-muted">
-          Distribución de medidas según su nivel de progreso
-        </small>
-      </div>
-
-      <!-- Body -->
-      <div class="card-body position-relative" style="height:400px; z-index:2;">
-        <div id="chart_estado_general" style="height:100%; width:100%;"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
 
 
 
