@@ -26,6 +26,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnClear = document.getElementById("clear_filters");
   const chartTypology = document.getElementById("chart_tipo_medidas");
   const chartStatus = document.getElementById("chart_estado_general");
+  const totalCardValue = document.getElementById("total_measures_value");
+  const advancedCardValue = document.getElementById("advanced_measures_value");
+  const advancedPercentValue = document.getElementById("advanced_percent_value");
+  const executionCardValue = document.getElementById("execution_measures_value");
+
+  const TYPOLOGY_CATEGORIES = [
+    { key: "adaptacion", label: "Adaptación", color: "#6157FF" },
+    { key: "mitigacion", label: "Mitigación", color: "#0D6EFD" },
+    { key: "adaptacion_mitigacion", label: "Adaptación + Mitigación", color: "#16A34A" },
+    { key: "adaptacion_perdidas", label: "Adaptación + Pérdidas y Daños", color: "#DC2626" },
+    { key: "adaptacion_mitigacion_perdidas", label: "Adaptación + Mitigación + Pérdidas y Daños", color: "#F97316" },
+  ];
+
+  const STATUS_ORDER = [
+    "En implementación avanzada",
+    "En implementación inicial",
+    "En programación",
+    "A definir",
+  ];
+
+  const STATUS_COLORS = {
+    "En implementación avanzada": "#65AD9D",
+    "En implementación inicial": "#D21685",
+    "En programación": "#F9E297",
+    "A definir": "#3A3669",
+  };
 
   let measures = [];
 
@@ -42,6 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("/measure/filter-simple.json");
       const data = await res.json();
       measures = data.measures || data.data || [];
+      populateLineFilterOptions(measures);
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -49,44 +76,131 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function loadDashboardCharts() {
-    if (!chartTypology && !chartStatus) {
+  function normalizeText(value = "") {
+    return value
+      .toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function detectTypologyKey(measure = {}) {
+    const tags = [];
+    if (Array.isArray(measure.labels) && measure.labels.length) {
+      tags.push(...measure.labels);
+    } else if (measure.pilar) {
+      tags.push(measure.pilar);
+    }
+    if (!tags.length) {
+      return null;
+    }
+
+    const normalizedTags = tags.map((tag) => normalizeText(tag));
+    const hasAdaptacion = normalizedTags.some((tag) => tag.includes("adapt"));
+    const hasMitigacion = normalizedTags.some((tag) => tag.includes("mitig"));
+    const hasPerdidas = normalizedTags.some((tag) => tag.includes("perd") || tag.includes("dan"));
+
+    if (hasAdaptacion && hasMitigacion && hasPerdidas) {
+      return "adaptacion_mitigacion_perdidas";
+    }
+    if (hasAdaptacion && hasMitigacion) {
+      return "adaptacion_mitigacion";
+    }
+    if (hasAdaptacion && hasPerdidas) {
+      return "adaptacion_perdidas";
+    }
+    if (hasAdaptacion) {
+      return "adaptacion";
+    }
+    if (hasMitigacion) {
+      return "mitigacion";
+    }
+    return null;
+  }
+
+  function buildTypologyStats(data = []) {
+    const stats = {};
+    const colors = {};
+
+    TYPOLOGY_CATEGORIES.forEach((cat) => {
+      stats[cat.label] = 0;
+      colors[cat.label] = cat.color;
+    });
+
+    data.forEach((measure) => {
+      const key = detectTypologyKey(measure);
+      if (!key) return;
+      const cat = TYPOLOGY_CATEGORIES.find((item) => item.key === key);
+      if (cat) {
+        stats[cat.label] += 1;
+      }
+    });
+
+    return {
+      categories: TYPOLOGY_CATEGORIES.map((cat) => cat.label),
+      data: stats,
+      colors,
+    };
+  }
+
+  function buildStatusStats(data = []) {
+    const stats = {};
+    STATUS_ORDER.forEach((status) => {
+      stats[status] = 0;
+    });
+
+    data.forEach((measure) => {
+      const status = measure.status || "";
+      if (stats.hasOwnProperty(status)) {
+        stats[status] += 1;
+      }
+    });
+
+    return {
+      keys: STATUS_ORDER,
+      data: stats,
+      colors: STATUS_COLORS,
+    };
+  }
+
+  function updateSummaryStats(data = []) {
+    if (!totalCardValue || !advancedCardValue || !advancedPercentValue || !executionCardValue) {
       return;
     }
-    try {
-      const response = await fetch("/measure/filter.json");
-      const payload = await response.json();
-      const stats = payload.stats || {};
 
-      if (chartTypology) {
-        renderTypologyChart(stats.pilares);
-      }
-      if (chartStatus) {
-        renderStatusChart(stats.status);
-      }
-    } catch (error) {
-      console.error("Error cargando estadísticas de MyE:", error);
-    }
+    const totals = data.reduce(
+      (acc, measure) => {
+        if (measure.status?.toLowerCase().includes("avanz")) {
+          acc.advanced += 1;
+          acc.execution += 1;
+        } else if (measure.status?.toLowerCase().includes("inicial")) {
+          acc.execution += 1;
+        }
+        acc.total += 1;
+        return acc;
+      },
+      { total: 0, advanced: 0, execution: 0 }
+    );
+
+    const advancedPercent = totals.total ? Math.round((totals.advanced / totals.total) * 100) : 0;
+
+    totalCardValue.textContent = totals.total;
+    advancedCardValue.textContent = totals.advanced;
+    advancedPercentValue.textContent = `${advancedPercent}%`;
+    executionCardValue.textContent = totals.execution;
   }
 
   function renderTypologyChart(pilaresStats = {}) {
-    const desiredOrder = [
-      "Adaptación",
-      "Mitigación",
-      "Adaptación + Mitigación",
-      "Adaptación + Pérdidas y Daños",
-      "Adaptación + Mitigación + Pérdidas y Daños",
-    ];
+    if (!chartTypology) return;
 
-    if (!pilaresStats || !pilaresStats.data) {
+    const categories = pilaresStats.categories || [];
+    if (!categories.length) {
       chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
       return;
     }
 
-    const categories = desiredOrder;
-    const values = categories.map((key) => pilaresStats.data[key] || 0);
-    const hasData = values.some((val) => val > 0);
-
+    const values = categories.map((key) => (pilaresStats.data && pilaresStats.data[key]) || 0);
+    const hasData = values.some((value) => value > 0);
     if (!hasData) {
       chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
       return;
@@ -110,6 +224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           categories,
           tick: {
             multiline: false,
+            fit: true,
           },
         },
         y: {
@@ -120,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       bar: {
         width: {
-          ratio: 0.45,
+          ratio: 0.5,
         },
       },
       legend: {
@@ -137,6 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderStatusChart(statusStats = {}) {
+    if (!chartStatus) return;
     const keys = statusStats.keys || [];
     if (!keys.length) {
       chartStatus.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
@@ -170,6 +286,33 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         },
       },
+    });
+  }
+
+  function renderPanoramaSections(data = []) {
+    updateSummaryStats(data);
+    const typologyStats = buildTypologyStats(data);
+    renderTypologyChart(typologyStats);
+    const statusStats = buildStatusStats(data);
+    renderStatusChart(statusStats);
+  }
+
+  function populateLineFilterOptions(data = []) {
+    if (!filtroLinea) return;
+    const lines = Array.from(
+      new Map(
+        data
+          .filter((m) => m.linea && m.linea_id)
+          .map((m) => [m.linea_id, m.linea])
+      ).entries()
+    ).sort((a, b) => a[1].localeCompare(b[1]));
+
+    filtroLinea.innerHTML = '<option value="">Todas</option>';
+    lines.forEach(([id, name]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = name;
+      filtroLinea.appendChild(option);
     });
   }
 
@@ -232,7 +375,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         m.responsable?.toLowerCase().includes(searchTerm);
 
       const matchesTipo = !tipo || (m.pilar && m.pilar.includes(tipo));
-      const matchesLinea = !linea || (m.linea && m.linea.includes(linea));
+    const matchesLinea =
+      !linea ||
+      (m.linea_id && String(m.linea_id) === String(linea));
       const matchesNivel =
         nivel === "all" || (m.status && m.status.toLowerCase().includes(nivel.toLowerCase()));
 
@@ -258,7 +403,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5️⃣ Iniciar carga
   await loadMeasures();
-  await loadDashboardCharts();
+  renderPanoramaSections(measures);
 });
 
 function verDetalle(id) {
@@ -395,7 +540,7 @@ function verDetalle(id) {
       <!-- Body -->
       <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
           style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ total_measures }}</h3>
+        <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="total_measures_value">{{ total_measures }}</h3>
         <p class="text-muted mb-0">Acciones en monitoreo</p>
       </div>
     </div>
@@ -416,8 +561,8 @@ function verDetalle(id) {
 
       <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
           style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold">{{ percent_advanced }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado</p>
+        <h3 class="text-success mb-1 fw-semibold" id="advanced_measures_value">{{ advanced_count }}</h3>
+        <p class="text-muted mb-0">Medidas con progreso avanzado (<span id="advanced_percent_value">{{ percent_advanced }}%</span>)</p>
       </div>
     </div>
   </div>
@@ -436,7 +581,7 @@ function verDetalle(id) {
 
       <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
           style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_count }}</h3>
+        <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="execution_measures_value">{{ execution_count }}</h3>
         <p class="text-muted mb-0">Acciones en monitoreo</p>
       </div>
 
@@ -502,29 +647,30 @@ function verDetalle(id) {
   <!-- Tarjetas de estadísticas -->
 <div class="row g-4 mb-5">
 
-  <!-- 🟣 Total de Medidas -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
-      
-      <!-- Header (40px alto, 24px padding, centrado) -->
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; ">
-        <span class="fw-semibold">Total de Medidas</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
-          <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
+  <div class="row g-4 mb-5">
+    <!-- 🟣 Total de Medidas -->
+    <div class="col-md-4">
+      <div class="card border shadow-md position-relative overflow-hidden"
+           style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
+        
+        <!-- Header (40px alto, 24px padding, centrado) -->
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
+             style="height:90px; padding:24px; ">
+          <span class="fw-semibold">Total de Medidas</span>
+          <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+               style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
+            <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+  
+        <!-- Body -->
+        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
+            style="height:calc(220px - 40px); padding-left:24px;">
+          <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="total_measures_value">{{ total_measures }}</h3>
+          <p class="text-muted mb-0">Acciones en monitoreo</p>
         </div>
       </div>
-
-      <!-- Body -->
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ total_measures }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
     </div>
-  </div>
 
   <!-- 🟢 Progreso Avanzado -->
   <div class="col-md-4">
@@ -542,8 +688,8 @@ function verDetalle(id) {
 
       <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
           style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold">{{ percent_advanced }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado</p>
+        <h3 class="text-success mb-1 fw-semibold" id="advanced_measures_value">{{ advanced_count }}</h3>
+        <p class="text-muted mb-0">Medidas con progreso avanzado (<span id="advanced_percent_value">{{ percent_advanced }}%</span>)</p>
       </div>
     </div>
   </div>

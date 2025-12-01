@@ -431,6 +431,7 @@ def mye_overview(request):
 
     context.update({
         'total_measures': total_measures,
+        'advanced_count': avanzada,
         'percent_advanced': percent_advanced,
         'execution_count': exec_count,
         'top_pilar_name': top_pilar_name,
@@ -460,10 +461,11 @@ def measure_list_json(request):
         fields = measure.fields or {}
         description = fields.get('Descripción', '')
         responsable = fields.get('Autoridad de aplicación', '')
-        labels = list(measure.labels.values_list('name', flat=True))
-        pilar_name = measure.pilares.name if measure.pilares else ", ".join(labels)
+        label_names = list(measure.labels.values_list('name', flat=True))
+        pilar_name = measure.pilares.name if measure.pilares else ", ".join(label_names)
         line_name = measure.action.line.name if measure.action and measure.action.line else ''
         line_category = measure.action.line.category.name if measure.action and measure.action.line and measure.action.line.category else ''
+        line_id = measure.action.line.id if measure.action and measure.action.line else None
 
         data.append({
             "id": measure.id,
@@ -472,8 +474,10 @@ def measure_list_json(request):
             "description": description,
             "pilar": pilar_name,
             "linea": line_name,
+            "linea_id": line_id,
             "linea_categoria": line_category,
             "responsable": responsable,
+            "labels": label_names,
         })
 
     return JsonResponse({"measures": data})
