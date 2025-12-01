@@ -6,6 +6,7 @@ from django.http import JsonResponse, HttpResponse, HttpRequest
 from main.views import base_context
 from main.viewsv2 import default_context
 from collections import Counter
+import re
 import pandas as pd
 import numpy as np
 import math
@@ -497,6 +498,38 @@ def _measure_field_sections(measure: Measure):
     return sections, extra_sections
 
 
+def _split_multiline(value):
+    if not value:
+        return []
+    parts = re.split(r'[\r\n;]+', value)
+    cleaned = [part.strip("•- \t") for part in parts if part.strip("•- \t")]
+    return cleaned
+
+
+PROGRESS_STYLE = {
+    Measure.Status.avanzada: {
+        'badge_class': 'bg-success text-white',
+        'dot_class': 'bg-success',
+        'text_class': 'text-success',
+    },
+    Measure.Status.inicial: {
+        'badge_class': 'bg-warning text-dark',
+        'dot_class': 'bg-warning',
+        'text_class': 'text-warning',
+    },
+    Measure.Status.prog: {
+        'badge_class': 'bg-info text-dark',
+        'dot_class': 'bg-info',
+        'text_class': 'text-info',
+    },
+    Measure.Status.adefinir: {
+        'badge_class': 'bg-secondary',
+        'dot_class': 'bg-secondary',
+        'text_class': 'text-secondary',
+    },
+}
+
+
 def measure_detail_view(request, id):
     """
     Página de detalle de una medida activa.
@@ -519,17 +552,47 @@ def measure_detail_view(request, id):
         .only('id', 'name', 'status')[:6]
     )
 
+    metas = _split_multiline(field_values.get('Metas'))
+    financiamiento = _split_multiline(field_values.get('Financiamiento'))
+    instrumentos = _split_multiline(field_values.get('Instrumentos y herramientas de implementación'))
+    necesidades = _split_multiline(field_values.get('Necesidades y barreras'))
+    indicadores = _split_multiline(field_values.get('Indicadores para el monitoreo'))
+    resultados = _split_multiline(field_values.get('Resultados esperados'))
+    seguimiento_extra = _split_multiline(field_values.get('Seguimiento'))
+
+    progress_style = PROGRESS_STYLE.get(measure.status, PROGRESS_STYLE[Measure.Status.adefinir])
+
     context = default_context(request)
     context.update({
         'measure': measure,
         'status_color': Measure.MEASURE_COLOR.get(measure.status, '#262C51'),
-        'field_sections': sections,
-        'extra_sections': extra_sections,
         'labels': labels,
         'national_objectives': measure.national_objectives.select_related('meta_1__meta_0'),
         'related_measures': related_measures,
         'responsable': field_values.get('Autoridad de aplicación'),
         'execution_period': field_values.get('Período de ejecución'),
+        'description': field_values.get('Descripción'),
+        'metas': metas,
+        'alcance_geografico': field_values.get('Alcance geográfico o poblacional'),
+        'riesgos_climaticos': field_values.get('Riesgos climáticos asociados'),
+        'reduccion_emisiones': field_values.get('Reducción estimada de emisiones al 2030 (MtCO2e)'),
+        'estimacion_gastos': field_values.get('Estimación de gastos al 2030'),
+        'financiamiento': financiamiento,
+        'instrumentos': instrumentos,
+        'necesidades': necesidades,
+        'indicadores': indicadores,
+        'analisis_genero': field_values.get('Análisis enfoque de género y diversidad'),
+        'analisis_riesgo': field_values.get('Análisis enfoque de gestión integral del riesgo'),
+        'analisis_salud': field_values.get('Análisis enfoque de salud'),
+        'analisis_transicion': field_values.get('Análisis enfoque de transición justa'),
+        'cobeneficios': field_values.get('Cobeneficios entre adaptación y mitigación'),
+        'relacion_ley': field_values.get('Relación con la Ley 27.520'),
+        'objetivo_general': field_values.get('Objetivo general'),
+        'resultados_esperados': resultados,
+        'seguimiento_extra': seguimiento_extra,
+        'field_sections': sections,
+        'extra_sections': extra_sections,
+        'progress_style': progress_style,
     })
 
     return render(request, 'mainv2/staticpage/mye_detail.html', context)

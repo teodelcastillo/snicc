@@ -34,6 +34,9 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+  .tab-card-title {
+    color: #262C51;
+  }
 </style>
 {% endblock %}
 
@@ -46,11 +49,11 @@
   <div class="mye-detail-hero shadow-sm mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
       <div>
-        <span class="badge-gradient mb-3" style="background-color: {{ status_color }};">
-          {{ measure.status }}
-        </span>
+        {% if measure.code %}
+          <div class="text-primary fw-semibold text-uppercase small mb-2">{{ measure.code }}</div>
+        {% endif %}
         <h1 class="fw-semibold" style="color:#262C51;">{{ measure.name }}</h1>
-        <p class="text-muted mb-2">Código: <strong>{{ measure.code }}</strong></p>
+        <p class="text-muted mb-3">{{ description|default:"Sin descripción disponible" }}</p>
         <div class="d-flex flex-wrap gap-3 text-muted small">
           {% if measure.action %}
             <div><i class="bi bi-diagram-2"></i> Línea de acción: <strong>{{ measure.action.name }}</strong></div>
@@ -64,11 +67,15 @@
         </div>
       </div>
       <div class="text-lg-end">
-        <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-lg-end gap-2 mb-3">
+          <span class="rounded-circle d-inline-block" style="width:14px;height:14px;background-color:{{ status_color }};"></span>
+          <span class="badge {{ progress_style.badge_class }}">{{ measure.get_status_display }}</span>
+        </div>
+        <div class="mb-3 d-flex flex-wrap gap-2 justify-content-lg-end">
           {% for label in labels %}
             <span class="mye-chip">{{ label }}</span>
           {% empty %}
-            <span class="text-muted">Sin etiquetas adicionales</span>
+            <span class="text-muted small">Sin etiquetas adicionales</span>
           {% endfor %}
         </div>
         <a href="{% url 'measure:pdf-export' measure.id %}" class="btn btn-primary" style="background-color:#262C51;border:none;">
@@ -78,35 +85,363 @@
     </div>
   </div>
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-      {% for section in field_sections %}
-        <div class="card mye-section-card mb-4">
-          <div class="card-body">
-            <h5 class="fw-semibold mb-3">{{ section.name }}</h5>
-            <div class="section-content">{{ section.value|safe }}</div>
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
+            <i class="bi bi-building"></i> Autoridad de aplicación
           </div>
+          <p class="mb-0 fw-semibold" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
         </div>
-      {% empty %}
-        <div class="card mye-section-card">
-          <div class="card-body text-muted">
-            Aún no se registraron detalles adicionales para esta medida.
-          </div>
-        </div>
-      {% endfor %}
-
-      {% for section in extra_sections %}
-        <div class="card mye-section-card mb-4">
-          <div class="card-body">
-            <h5 class="fw-semibold mb-3">{{ section.name }}</h5>
-            <div class="section-content">{{ section.value|safe }}</div>
-          </div>
-        </div>
-      {% endfor %}
+      </div>
     </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
+            <i class="bi bi-geo-alt"></i> Alcance y estado
+          </div>
+          <p class="mb-1 fw-semibold" style="color:#262C51;">{{ measure.get_scope_display }}</p>
+          <small class="text-muted">Actualizado {{ measure.last_modified|date:"d/m/Y" }}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
+            <i class="bi bi-calendar-week"></i> Período / Meta
+          </div>
+          <p class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
+          <small class="text-muted">Meta {{ measure.year }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="col-lg-4">
-      <div class="card mye-section-card mb-4">
+  <div class="card shadow-sm border-0 mb-5">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <p class="text-muted mb-2">Pilares / Tipos</p>
+          <div class="d-flex flex-wrap gap-2">
+            {% if measure.pilares %}
+              <span class="badge rounded-pill text-white" style="background-color:{{ measure.pilares.color }};">{{ measure.pilares.name }}</span>
+            {% endif %}
+            {% for label in labels %}
+              <span class="badge rounded-pill bg-light text-dark border">{{ label }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-md-6 mt-4 mt-md-0">
+          <p class="text-muted mb-2">Líneas y enfoques</p>
+          <div class="d-flex flex-wrap gap-2">
+            {% if measure.action.line %}
+              <span class="badge rounded-pill bg-info text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ measure.action.line.name }}</span>
+            {% endif %}
+            {% if measure.action.line.category %}
+              <span class="badge rounded-pill bg-secondary"><i class="bi bi-grid-3x3-gap me-1"></i>{{ measure.action.line.category.name }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-top border-2 mb-4" style="border-color: rgba(38,44,81,0.1) !important;"></div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <ul class="nav nav-pills mb-3" id="measureDetailTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-general-tab" data-bs-toggle="tab" data-bs-target="#tab-general" type="button" role="tab">General</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-implementacion-tab" data-bs-toggle="tab" data-bs-target="#tab-implementacion" type="button" role="tab">Implementación</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-analisis-tab" data-bs-toggle="tab" data-bs-target="#tab-analisis" type="button" role="tab">Análisis</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-seguimiento-tab" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">Seguimiento</button>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-4" id="measureDetailTabsContent">
+        <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
+          {% if metas %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for meta in metas %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-check-circle text-success"></i>
+                      <span>{{ meta }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="row g-4 mb-4">
+            {% if alcance_geografico %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
+                  </div>
+                  <div class="card-body">
+                    <p class="mb-0">{{ alcance_geografico|safe }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if estimacion_gastos %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-cash-coin me-2"></i>Estimación de gastos al 2030</h5>
+                  </div>
+                  <div class="card-body">
+                    <p class="mb-0">{{ estimacion_gastos|safe }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if riesgos_climaticos %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
+              </div>
+              <div class="card-body">
+                {{ riesgos_climaticos|safe }}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if reduccion_emisiones %}
+            <div class="card mye-section-card">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
+              </div>
+              <div class="card-body">
+                {{ reduccion_emisiones|safe }}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="tab-implementacion" role="tabpanel">
+          {% if financiamiento %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-currency-exchange me-2"></i>Financiamiento</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in financiamiento %}
+                    <li class="d-flex gap-2 mb-2">
+                      <span class="badge rounded-circle bg-primary" style="width:10px;height:10px;"></span>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if instrumentos %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-tools me-2"></i>Instrumentos y herramientas</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in instrumentos %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-wrench-adjustable text-primary"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if necesidades %}
+            <div class="card mye-section-card">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-lightning-charge me-2"></i>Necesidades y barreras</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in necesidades %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-exclamation-circle text-warning"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="tab-analisis" role="tabpanel">
+          <div class="row g-4 mb-4">
+            {% if analisis_genero %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-people me-2"></i>Enfoque de género y diversidad</h5>
+                  </div>
+                  <div class="card-body">
+                    {{ analisis_genero|safe }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if analisis_riesgo %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-shield-check me-2"></i>Gestión integral del riesgo</h5>
+                  </div>
+                  <div class="card-body">
+                    {{ analisis_riesgo|safe }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if analisis_salud %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-heart-pulse me-2"></i>Enfoque de salud</h5>
+                  </div>
+                  <div class="card-body">
+                    {{ analisis_salud|safe }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if analisis_transicion %}
+              <div class="col-md-6">
+                <div class="card mye-section-card h-100">
+                  <div class="card-header bg-transparent border-0">
+                    <h5 class="tab-card-title mb-0"><i class="bi bi-briefcase me-2"></i>Transición justa</h5>
+                  </div>
+                  <div class="card-body">
+                    {{ analisis_transicion|safe }}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if cobeneficios %}
+            <div class="card mye-section-card">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-star me-2"></i>Cobeneficios entre adaptación y mitigación</h5>
+              </div>
+              <div class="card-body">
+                {{ cobeneficios|safe }}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
+          {% if indicadores %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-clipboard-check me-2"></i>Indicadores para el monitoreo</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in indicadores %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-check2-square text-success"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if relacion_ley %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-balance-scale me-2"></i>Relación con la Ley 27.520</h5>
+              </div>
+              <div class="card-body">
+                {{ relacion_ley|safe }}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if objetivo_general %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Objetivo general</h5>
+              </div>
+              <div class="card-body">
+                {{ objetivo_general|safe }}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if resultados_esperados %}
+            <div class="card mye-section-card mb-4">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-award me-2"></i>Resultados esperados</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in resultados_esperados %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-check-circle text-primary"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if seguimiento_extra %}
+            <div class="card mye-section-card">
+              <div class="card-header bg-transparent border-0">
+                <h5 class="tab-card-title mb-0"><i class="bi bi-journal-text me-2"></i>Notas de seguimiento</h5>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in seguimiento_extra %}
+                    <li class="d-flex gap-2 mb-2">
+                      <i class="bi bi-dot"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card mye-section-card h-100">
         <div class="card-body">
           <h5 class="fw-semibold mb-3">Información general</h5>
           <ul class="list-unstyled text-muted mb-0">
@@ -126,7 +461,9 @@
           </ul>
         </div>
       </div>
+    </div>
 
+    <div class="col-lg-6">
       {% if national_objectives %}
         <div class="card mye-section-card mb-4">
           <div class="card-body">
@@ -164,6 +501,22 @@
       {% endif %}
     </div>
   </div>
+
+  {% if extra_sections %}
+    <div class="card mye-section-card mt-4">
+      <div class="card-body">
+        <h5 class="fw-semibold mb-3">Información adicional</h5>
+        <div class="row g-4">
+          {% for section in extra_sections %}
+            <div class="col-md-6">
+              <h6 class="text-uppercase small text-muted">{{ section.name }}</h6>
+              <div class="section-content">{{ section.value|safe }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 
