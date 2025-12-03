@@ -730,7 +730,7 @@ function verDetalle(id) {
     color: white;
     padding: clamp(2.5rem, 5vw, 4.25rem) 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     border-radius: 0 0 32px 32px;
     box-shadow: 0 25px 60px rgba(9, 13, 29, 0.35);
   }
@@ -742,6 +742,7 @@ function verDetalle(id) {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.08);
     filter: blur(0);
+    pointer-events: none;
   }
 
   .mye-header::before {
@@ -792,7 +793,7 @@ function verDetalle(id) {
 
   .mye-header__title-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
   }
@@ -805,9 +806,16 @@ function verDetalle(id) {
     line-height: 1.15;
   }
 
+  .mye-title-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
   .mye-info-trigger {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.12);
@@ -816,6 +824,8 @@ function verDetalle(id) {
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    font-size: 0.9rem;
+    padding: 0;
   }
 
   .mye-info-trigger:hover {
@@ -1282,6 +1292,47 @@ function verDetalle(id) {
     color: #5f667e;
   }
 
+  .mye-quick-dropdown {
+    position: relative;
+  }
+
+  .mye-quick-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.4rem;
+    border-radius: 14px;
+    background: white;
+    color: #1f2750;
+    font-weight: 600;
+    border: 1px solid rgba(31, 39, 80, 0.15);
+    box-shadow: 0 10px 30px rgba(22, 28, 58, 0.15);
+    transition: all 0.25s ease;
+  }
+
+  .mye-quick-trigger i {
+    font-size: 1rem;
+    color: #1f2750;
+  }
+
+  .mye-quick-trigger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(22, 28, 58, 0.22);
+  }
+
+  .mye-quick-dropdown .dropdown-menu {
+    border-radius: 18px;
+    border: 1px solid rgba(31, 39, 80, 0.08);
+    box-shadow: 0 20px 45px rgba(18, 23, 52, 0.18);
+  }
+
+  .mye-quick-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 1.2rem;
+  }
+
   /* Responsive adjustments */
   @media (max-width: 992px) {
     .mye-header__inner {
@@ -1318,6 +1369,11 @@ function verDetalle(id) {
     .nav-tabs .nav-link i {
       font-size: 1.2rem;
     }
+
+    .mye-quick-trigger {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
 
@@ -1327,15 +1383,19 @@ function verDetalle(id) {
                     <div class="mye-header__info">
 
                         <div class="mye-header__title-row">
-                            <h1 id="mye-title">Monitoreo de Medidas Climáticas</h1>
-                            <button
-                                class="mye-info-trigger"
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#drawerRightInfo"
-                                aria-label="Ver información sobre el módulo">
-                                <i class="bi bi-info-lg"></i>
-                            </button>
+                          <h1 id="mye-title">
+                            <span class="mye-title-text">
+                              Monitoreo de Medidas Climáticas
+                              <button
+                                  class="mye-info-trigger"
+                                  type="button"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#drawerRightInfo"
+                                  aria-label="Ver información sobre el módulo">
+                                  <i class="bi bi-info-lg"></i>
+                              </button>
+                            </span>
+                          </h1>
                         </div>
 
                         <p class="mye-header__subtitle">
@@ -1345,24 +1405,23 @@ function verDetalle(id) {
                     </div>
 
                         <div class="mye-actions">
-                            <div class="dropdown mye-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
-                                <button
-                                    class="mye-action secondary dropdown-toggle"
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <i class="bi bi-cloud-arrow-down-fill"></i>
-                                    Descarga
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="/measure/export.csv"><i class="bi bi-list-check"></i>Lista completa (CSV)</a></li>
-                                    <li><div class="dropdown-item" id="download_pdf"><i class="bi bi-files"></i>Fichas resumidas (PDF)</div></li>
-                                    <li><div class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</div></li>
-                                </ul>
-                            </div>
+
+                            <div class="dropdown mye-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Reporte de Progreso">
+                              <button
+                                  class="mye-action secondary dropdown-toggle"
+                                  type="button"
+                                  data-bs-toggle="dropdown"
+                                  aria-expanded="false">
+                                  <i class="bi bi-cloud-arrow-down-fill"></i>
+                                  Reporte de Progreso
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                  <li><div class="dropdown-item" id="download_pdf"><i class="bi bi-files"></i>Reporte de Progreso 2024 (PDF)</div></li>
+                              </ul>
+                          </div>
                             <a class="mye-action secondary" href="/editor/measure/">
                                 <i class="bi bi-sliders"></i>
-                                Administrar MyE
+                                Administrar Modulo
                             </a>
                         </div>
                 </div>
@@ -1433,10 +1492,25 @@ function verDetalle(id) {
       <div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
         
         <!-- Header con título y botón mejorados -->
-        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
           <div>
             <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Vista General del Sistema</h2>
             <p class="text-muted mb-0">Estado de todas las medidas del plan</p>
+          </div>
+          <div class="dropdown mye-quick-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar documentos del panorama">
+            <button
+              class="mye-quick-trigger dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <i class="bi bi-arrow-down-circle"></i>
+              Descargar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/measure/export.csv"><i class="bi bi-list-check"></i>Lista completa (CSV)</a></li>
+              <li><button type="button" class="dropdown-item" onclick="document.getElementById('download_pdf').click()"><i class="bi bi-files"></i>Fichas resumidas (PDF)</button></li>
+              <li><button type="button" class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</button></li>
+            </ul>
           </div>
         </div>
 
