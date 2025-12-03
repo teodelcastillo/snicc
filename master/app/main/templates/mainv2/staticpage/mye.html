@@ -851,6 +851,11 @@ function verDetalle(id) {
     border-color: #c8e6c9;
   }
 
+  .stat-card-warning .card-header {
+    background: linear-gradient(to right, #fff3cd, #fff9e6);
+    border-color: #fce7b2;
+  }
+
   .stat-card-info .card-header {
     background: linear-gradient(to right, #e3f2fd, #f9fcff);
     border-color: #bbdefb;
@@ -859,6 +864,11 @@ function verDetalle(id) {
   .stat-card-purple .card-header {
     background: linear-gradient(to right, #e8eaf6, #f3e5f5);
     border-color: #c5cae9;
+  }
+
+  .stat-card-neutral .card-header {
+    background: linear-gradient(to right, rgba(38, 44, 81, 0.12), rgba(38, 44, 81, 0.02));
+    border-color: rgba(38, 44, 81, 0.15);
   }
 
   /* Buscador mejorado */
@@ -1189,7 +1199,7 @@ function verDetalle(id) {
         <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
         <div class="row g-4 mb-5">
           <div class="col-md-6 col-lg-3">
-            <div class="card border shadow-md h-100" style="border-color: rgba(38,44,81,0.2);">
+            <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
@@ -1205,7 +1215,7 @@ function verDetalle(id) {
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <div class="card border shadow-md h-100" style="border-color:#fce7b2;">
+            <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#b88200;">En Programación</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
@@ -1221,7 +1231,7 @@ function verDetalle(id) {
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <div class="card border shadow-md h-100" style="border-color:#bbdefb;">
+            <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#0d6efd;">En Implementación</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
@@ -1237,7 +1247,7 @@ function verDetalle(id) {
           </div>
 
           <div class="col-md-6 col-lg-3">
-            <div class="card border shadow-md h-100" style="border-color:#c8e6c9;">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#198754;">Completadas</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
@@ -1247,7 +1257,7 @@ function verDetalle(id) {
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
                 <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
-                <p class="text-muted mb-0">Medidas con implementación avanzada</p>
+                <p class="text-muted mb-0">Medidas completadas.</p>
               </div>
             </div>
           </div>
