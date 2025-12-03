@@ -476,35 +476,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     noResults.style.display = "none";
 
     filtered.forEach((m) => {
-      const statusColor = m.status ? m.status.toLowerCase() : "";
-      const statusBadgeClass = statusColor.includes("complet")
-        ? "bg-success text-white"
-        : statusColor.includes("avanz")
-          ? "bg-success text-white"
-          : statusColor.includes("inicial")
-            ? "bg-warning text-dark"
-            : statusColor.includes("program")
-              ? "bg-info text-dark"
-              : "bg-secondary text-white";
+      const statusColor = normalizeText(m.status);
+      let statusVariant = "default";
+      if (statusColor.includes("complet")) {
+        statusVariant = "completed";
+      } else if (statusColor.includes("program")) {
+        statusVariant = "programming";
+      } else if (statusColor.includes("avanz") || statusColor.includes("inicial")) {
+        statusVariant = "implementation";
+      }
 
       const statusBadge = m.status
-        ? `<span class="badge ${statusBadgeClass}">${m.status}</span>`
+        ? `<span class="badge-chip badge-status badge-status-${statusVariant}">${m.status}</span>`
         : "";
 
       const typeLabel = Array.isArray(m.labels) && m.labels.length
         ? m.labels.join(" · ")
         : (m.pilar || "");
       const typeBadge = typeLabel
-        ? `<span class="badge bg-info text-dark">${typeLabel}</span>`
+        ? `<span class="badge-chip badge-type">${typeLabel}</span>`
         : "";
 
       const lineBadge = m.linea
-        ? `<span class="badge text-dark border" style="background-color: rgba(38,44,81,0.05);">${m.linea}</span>`
+        ? `<span class="badge-chip badge-line">${m.linea}</span>`
         : "";
 
       const scopeLabel = m.scope_label || m.scope;
       const scopeBadge = scopeLabel
-        ? `<span class="badge text-dark border" style="background-color: rgba(38,44,81,0.05);">${scopeLabel}</span>`
+        ? `<span class="badge-chip badge-scope">${scopeLabel}</span>`
         : "";
 
       const badges = [statusBadge, typeBadge, lineBadge, scopeBadge]
@@ -869,6 +868,63 @@ function verDetalle(id) {
   .stat-card-neutral .card-header {
     background: linear-gradient(to right, rgba(38, 44, 81, 0.12), rgba(38, 44, 81, 0.02));
     border-color: rgba(38, 44, 81, 0.15);
+  }
+
+  .badge-chip {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .badge-status {
+    font-size: 0.82rem;
+  }
+
+  .badge-status-programming {
+    background-color: #fff3cd;
+    color: #b88200;
+    border-color: #fce7b2;
+  }
+
+  .badge-status-implementation {
+    background-color: #d7efff;
+    color: #0d6efd;
+    border-color: #bbdefb;
+  }
+
+  .badge-status-completed {
+    background-color: #d1fadf;
+    color: #198754;
+    border-color: #c8e6c9;
+  }
+
+  .badge-status-default {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #dfe3e7;
+  }
+
+  .badge-type {
+    background-color: #2c6694;
+    color: #ffffff;
+    border-color: #1f4a6a;
+  }
+
+  .badge-line {
+    background-color: rgba(38, 44, 81, 0.08);
+    color: #262C51;
+    border-color: rgba(38, 44, 81, 0.15);
+  }
+
+  .badge-scope {
+    background-color: rgba(25, 135, 84, 0.08);
+    color: #198754;
+    border-color: rgba(25, 135, 84, 0.2);
   }
 
   /* Buscador mejorado */
