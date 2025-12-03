@@ -301,10 +301,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const columns = keys.map((key) => [
-      key || "Sin dato",
-      (statusStats.data && statusStats.data[key]) || 0,
-    ]);
+    const columns = keys.map((key) => {
+      const label = key || "Sin dato";
+      return [label, (statusStats.data && statusStats.data[key]) || 0];
+    });
+    const colorMap = keys.reduce((acc, key) => {
+      const label = key || "Sin dato";
+      acc[label] = statusStats.colors?.[key] || "#262C51";
+      return acc;
+    }, {});
+    const totalMeasures = columns.reduce((acc, [, value]) => acc + (value || 0), 0);
 
     c3.generate({
       bindto: "#chart_estado_general",
@@ -312,14 +318,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       data: {
         columns,
         type: "donut",
-        colors: statusStats.colors || {},
-      },
-      donut: {
-        width: 50,
-        title: "250 Medidas"
+        colors: colorMap,
       },
       legend: {
         position: "right",
+      },
+      donut: {
+        width: 50,
+        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        label: {
+          format: function (value) {
+            return value > 0 ? value : "";
+          },
+        },
       },
       tooltip: {
         format: {
@@ -1189,6 +1200,11 @@ function verDetalle(id) {
               </div>
               <div class="card-body" style="height:420px;">
                 <div id="chart_estado_general" style="height:100%; width:100%;"></div>
+              </div>
+              <div class="card-footer bg-light border-top">
+                <p class="text-muted small mb-0 text-center">
+                  Cada segmento circular corresponde a un estado de avance de la medida (En programación, en implementación inicial, en implementación avanzada, completada).
+                </p>
               </div>
             </div>
           </div>
