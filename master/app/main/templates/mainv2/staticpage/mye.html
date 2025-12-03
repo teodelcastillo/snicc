@@ -27,16 +27,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const chartTypology = document.getElementById("chart_tipo_medidas");
   const chartStatus = document.getElementById("chart_estado_general");
   const totalCardValue = document.getElementById("total_measures_value");
-  const advancedCardValue = document.getElementById("advanced_measures_value");
-  const advancedPercentValue = document.getElementById("advanced_percent_value");
-  const executionCardValue = document.getElementById("execution_measures_value");
+  const implementationCardValue = document.getElementById("implementation_measures_value");
+  const implementationPercentValue = document.getElementById("implementation_percent_value");
+  const programmingCardValue = document.getElementById("programming_measures_value");
 
-  const TYPOLOGY_CATEGORIES = [
-    { key: "adaptacion", label: "Adaptación", color: "#6157FF" },
-    { key: "mitigacion", label: "Mitigación", color: "#0D6EFD" },
-    { key: "adaptacion_mitigacion", label: "Adaptación + Mitigación", color: "#16A34A" },
-    { key: "adaptacion_perdidas", label: "Adaptación + Pérdidas y Daños", color: "#DC2626" },
-    { key: "adaptacion_mitigacion_perdidas", label: "Adaptación + Mitigación + Pérdidas y Daños", color: "#F97316" },
+  const BASE_TYPOLOGY_COLORS = {
+    adaptacion: "#6157FF",
+    mitigacion: "#0D6EFD",
+    perdidas: "#DC2626",
+  };
+  const TYPOLOGY_TYPES = [
+    { key: "solo_adaptacion", label: "Adaptación", base: "adaptacion", shade: 0 },
+    { key: "solo_mitigacion", label: "Mitigación", base: "mitigacion", shade: 0 },
+    { key: "solo_perdidas", label: "Pérdidas y Daños", base: "perdidas", shade: 0 },
+    { key: "adaptacion_mitigacion", label: "Adaptación + Mitigación", base: "adaptacion", shade: 0.25 },
+    { key: "adaptacion_perdidas", label: "Adaptación + Pérdidas y Daños", base: "perdidas", shade: 0.25 },
+    { key: "mitigacion_perdidas", label: "Mitigación + Pérdidas y Daños", base: "mitigacion", shade: 0.25 },
+    { key: "adaptacion_mitigacion_perdidas", label: "Adaptación + Mitigación + Pérdidas y Daños", base: "perdidas", shade: 0.4 },
   ];
 
   const STATUS_ORDER = [
@@ -84,15 +91,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       .toLowerCase();
   }
 
-  function detectTypologyKey(measure = {}) {
+  function lightenColor(hex, amount = 0.25) {
+    const cleanHex = hex.replace("#", "");
+    const normalized = cleanHex.length === 3
+      ? cleanHex.split("").map((char) => char + char).join("")
+      : cleanHex.padEnd(6, "0");
+    const num = parseInt(normalized, 16);
+    const r = (num >> 16) & 0xff;
+    const g = (num >> 8) & 0xff;
+    const b = num & 0xff;
+
+    const mix = (channel) => Math.round(channel + (255 - channel) * amount);
+    const toHex = (channel) => channel.toString(16).padStart(2, "0");
+
+    return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+  }
+
+  function extractThemeFlags(measure = {}) {
     const tags = [];
     if (Array.isArray(measure.labels) && measure.labels.length) {
       tags.push(...measure.labels);
-    } else if (measure.pilar) {
+    }
+    if (measure.pilar) {
       tags.push(measure.pilar);
     }
     if (!tags.length) {
-      return null;
+      return { adaptacion: false, mitigacion: false, perdidas: false };
     }
 
     const normalizedTags = tags.map((tag) => normalizeText(tag));
@@ -100,45 +124,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hasMitigacion = normalizedTags.some((tag) => tag.includes("mitig"));
     const hasPerdidas = normalizedTags.some((tag) => tag.includes("perd") || tag.includes("dan"));
 
-    if (hasAdaptacion && hasMitigacion && hasPerdidas) {
+    return {
+      adaptacion: hasAdaptacion,
+      mitigacion: hasMitigacion,
+      perdidas: hasPerdidas,
+    };
+  }
+
+  function detectCombinationKey(flags = {}) {
+    const { adaptacion, mitigacion, perdidas } = flags;
+    if (adaptacion && mitigacion && perdidas) {
       return "adaptacion_mitigacion_perdidas";
     }
-    if (hasAdaptacion && hasMitigacion) {
+    if (adaptacion && mitigacion) {
       return "adaptacion_mitigacion";
     }
-    if (hasAdaptacion && hasPerdidas) {
+    if (adaptacion && perdidas) {
       return "adaptacion_perdidas";
     }
-    if (hasAdaptacion) {
-      return "adaptacion";
+    if (mitigacion && perdidas) {
+      return "mitigacion_perdidas";
     }
-    if (hasMitigacion) {
-      return "mitigacion";
+    if (adaptacion) {
+      return "solo_adaptacion";
+    }
+    if (mitigacion) {
+      return "solo_mitigacion";
+    }
+    if (perdidas) {
+      return "solo_perdidas";
     }
     return null;
   }
 
   function buildTypologyStats(data = []) {
-    const stats = {};
-    const colors = {};
-
-    TYPOLOGY_CATEGORIES.forEach((cat) => {
-      stats[cat.label] = 0;
-      colors[cat.label] = cat.color;
-    });
+    const stats = TYPOLOGY_TYPES.reduce((acc, type) => {
+      acc[type.key] = 0;
+      return acc;
+    }, {});
 
     data.forEach((measure) => {
-      const key = detectTypologyKey(measure);
-      if (!key) return;
-      const cat = TYPOLOGY_CATEGORIES.find((item) => item.key === key);
-      if (cat) {
-        stats[cat.label] += 1;
+      const flags = extractThemeFlags(measure);
+      const comboKey = detectCombinationKey(flags);
+      if (comboKey && stats.hasOwnProperty(comboKey)) {
+        stats[comboKey] += 1;
       }
     });
 
+    const categories = TYPOLOGY_TYPES.map((type) => type.label);
+    const values = TYPOLOGY_TYPES.map((type) => stats[type.key]);
+    const colors = TYPOLOGY_TYPES.reduce((acc, type, idx) => {
+      const baseColor = BASE_TYPOLOGY_COLORS[type.base] || "#262C51";
+      acc[categories[idx]] = type.shade ? lightenColor(baseColor, type.shade) : baseColor;
+      return acc;
+    }, {});
+
     return {
-      categories: TYPOLOGY_CATEGORIES.map((cat) => cat.label),
-      data: stats,
+      categories,
+      values,
       colors,
     };
   }
@@ -164,30 +207,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updateSummaryStats(data = []) {
-    if (!totalCardValue || !advancedCardValue || !advancedPercentValue || !executionCardValue) {
+    if (!totalCardValue || !implementationCardValue || !implementationPercentValue || !programmingCardValue) {
       return;
     }
 
     const totals = data.reduce(
       (acc, measure) => {
-        if (measure.status?.toLowerCase().includes("avanz")) {
-          acc.advanced += 1;
-          acc.execution += 1;
-        } else if (measure.status?.toLowerCase().includes("inicial")) {
-          acc.execution += 1;
+        const status = normalizeText(measure.status || "");
+        if (status.includes("avanz") || status.includes("inicial")) {
+          acc.implementation += 1;
+        } else if (status.includes("program")) {
+          acc.programming += 1;
         }
         acc.total += 1;
         return acc;
       },
-      { total: 0, advanced: 0, execution: 0 }
+      { total: 0, implementation: 0, programming: 0 }
     );
 
-    const advancedPercent = totals.total ? Math.round((totals.advanced / totals.total) * 100) : 0;
+    const implementationPercent = totals.total ? Math.round((totals.implementation / totals.total) * 100) : 0;
 
     totalCardValue.textContent = totals.total;
-    advancedCardValue.textContent = totals.advanced;
-    advancedPercentValue.textContent = `${advancedPercent}%`;
-    executionCardValue.textContent = totals.execution;
+    implementationCardValue.textContent = totals.implementation;
+    implementationPercentValue.textContent = `${implementationPercent}%`;
+    programmingCardValue.textContent = totals.programming;
   }
 
   function renderTypologyChart(pilaresStats = {}) {
@@ -199,23 +242,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const values = categories.map((key) => (pilaresStats.data && pilaresStats.data[key]) || 0);
+    const values = pilaresStats.values || [];
     const hasData = values.some((value) => value > 0);
     if (!hasData) {
       chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
       return;
     }
 
-    c3.generate({
+    const chart = c3.generate({
       bindto: "#chart_tipo_medidas",
       size: { height: 380 },
       data: {
-        columns: [["value", ...values]],
+        columns: [["Medidas", ...values]],
         type: "bar",
         color: function (color, d) {
-          const key = categories[d.index];
-          return (pilaresStats.colors && pilaresStats.colors[key]) || "#262C51";
+          const category = categories[d.index];
+          return pilaresStats.colors?.[category] || color;
         },
+      },
+      onrendered: function () {
+        const svg = document.querySelector("#chart_tipo_medidas svg");
+        if (!svg) return;
+        svg.querySelectorAll(".mye-bar-total").forEach((node) => node.remove());
+
+        const bars = svg.querySelectorAll("path.c3-bar");
+        bars.forEach((bar, idx) => {
+          const value = values[idx] || 0;
+          const bbox = bar.getBBox();
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", bbox.x + bbox.width + 6);
+          text.setAttribute("y", bbox.y + bbox.height / 2 + 4);
+          text.setAttribute("fill", "#262C51");
+          text.setAttribute("font-size", "12");
+          text.setAttribute("font-weight", "bold");
+          text.classList.add("mye-bar-total");
+          text.textContent = value;
+          bar.parentNode.appendChild(text);
+        });
       },
       axis: {
         rotated: true,
@@ -243,8 +306,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       tooltip: {
         format: {
+          title: function (index) {
+            return categories[index];
+          },
           value: function (value) {
-            return value + " medidas";
+            return `${value} medidas`;
           },
         },
       },
@@ -274,7 +340,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       donut: {
         width: 50,
-        title: "Estados",
+        title: "250 Medidas"
       },
       legend: {
         position: "right",
@@ -415,6 +481,322 @@ function verDetalle(id) {
 
 {% block content %}
 
+<style>
+  /* Añadiendo estilos modernos con mejores espaciados y transiciones */
+  .mye-content {
+    background-color: #f8f9fa !important;
+    min-height: 100vh;
+  }
+
+  /* Header mejorado con mejor espaciado y estructura */
+  .mye-header {
+    background: linear-gradient(135deg, #262C51 0%, #1a2038 100%);
+    box-shadow: 0 4px 20px rgba(38, 44, 81, 0.2);
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem 0;
+  }
+
+  .mye-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 50%);
+    pointer-events: none;
+  }
+
+  .mye-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
+  }
+
+  .mye-title-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  #mye-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    line-height: 1.2;
+  }
+
+  #mye-title .bi-graph-up-arrow {
+    font-size: 2rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 12px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  #mye-title .bi-info-circle {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: auto;
+  }
+
+  #mye-title .bi-info-circle:hover {
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .mye-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* Botones del header con mejor espaciado */
+  .mye-buttons {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .mye-buttons button,
+  .mye-buttons a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: white;
+    color: #262C51;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mye-buttons button:hover,
+  .mye-buttons a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    background: #f8f9fa;
+  }
+
+  .mye-buttons img {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Sistema de tabs con mejor contraste y centrado */
+  .nav-tabs {
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 3px solid #e9ecef;
+    padding: 0;
+    margin: 0;
+    display: flex;
+  }
+
+  .nav-tabs .nav-item {
+    margin: 0;
+    flex: 1;
+  }
+
+  .nav-tabs .nav-link {
+    border: none;
+    border-right: 1px solid #dee2e6;
+    border-radius: 0;
+    color: #495057;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    background: transparent;
+    text-align: center;
+  }
+
+  .nav-tabs .nav-item:last-child .nav-link {
+    border-right: none;
+  }
+
+  .nav-tabs .nav-link:hover {
+    background: rgba(38, 44, 81, 0.05);
+    color: #262C51;
+  }
+
+  .nav-tabs .nav-link.active {
+    background: #262C51;
+    color: white;
+    position: relative;
+  }
+
+  .nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: white;
+  }
+
+  .nav-tabs .nav-link i {
+    font-size: 1.35rem;
+  }
+
+  .nav-tabs .nav-link.active i {
+    color: white;
+  }
+
+  /* Cards mejoradas */
+  .card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-header {
+    background: linear-gradient(to right, rgba(38, 44, 81, 0.08), rgba(38, 44, 81, 0.02));
+    border-bottom: 1px solid rgba(38, 44, 81, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* Tarjetas de estadísticas con colores */
+  .stat-card-success .card-header {
+    background: linear-gradient(to right, #e8f5e9, #f5fff9);
+    border-color: #c8e6c9;
+  }
+
+  .stat-card-info .card-header {
+    background: linear-gradient(to right, #e3f2fd, #f9fcff);
+    border-color: #bbdefb;
+  }
+
+  .stat-card-purple .card-header {
+    background: linear-gradient(to right, #e8eaf6, #f3e5f5);
+    border-color: #c5cae9;
+  }
+
+  /* Buscador mejorado */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+
+  .search-wrapper input {
+    padding-left: 48px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border: 2px solid rgba(38, 44, 81, 0.15);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .search-wrapper input:focus {
+    border-color: #262C51;
+    box-shadow: 0 0 0 4px rgba(38, 44, 81, 0.1);
+  }
+
+  /* Botones mejorados */
+  .btn-primary-custom {
+    background: #262C51;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(38, 44, 81, 0.2);
+  }
+
+  .btn-primary-custom:hover {
+    background: #1a2038;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(38, 44, 81, 0.3);
+  }
+
+  /* Section dividers */
+  .section-divider {
+    width: 6px;
+    height: 32px;
+    background: linear-gradient(to bottom, #262C51, rgba(38, 44, 81, 0.5));
+    border-radius: 4px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .mye-header {
+      padding: 2rem 0;
+    }
+
+    #mye-title {
+      font-size: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .mye-subtitle {
+      font-size: 1rem;
+    }
+
+    .mye-buttons {
+      width: 100%;
+      margin-top: 1.5rem;
+      justify-content: flex-start;
+    }
+
+    .nav-tabs .nav-link {
+      padding: 1rem 0.75rem;
+      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-tabs .nav-link i {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+
         <div class="mye-content" style="background-color: white !important;">
             <div class="mye-header">
         <div class="mye-title-content" style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -505,422 +887,424 @@ function verDetalle(id) {
 
     </div>
     <!-- Contenido de tabs -->
-    <div class="tab-content" id="nav-tabContent" style="margin-top:20px;">
-<!-- TAB: Panorama General -->
-<div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
-
-  <!-- Header con título y botón de descarga -->
-  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-    <div>
-      <h2 class="fw-semibold mb-1" style="color:#262C51;">Vista General del Sistema</h2>
-      <p class="text-muted mb-0">Análisis estadístico y estado de todas las medidas del plan</p>
-    </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style="background-color:#262C51; border:none;">
-      <i class="bi bi-download"></i> Descargar Reporte General
-    </button>
-  </div>
-
-  <!-- Tarjetas resumen -->
-  <div class="row g-4 mb-5">
-  <!-- 🟣 Total de Medidas -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
-      
-      <!-- Header (40px alto, 24px padding, centrado) -->
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; ">
-        <span class="fw-semibold">Total de Medidas</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
-          <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <!-- Body -->
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="total_measures_value">{{ total_measures }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e8f5e9, #f5fff9); border-color:#c8e6c9; color:#198754;">
-        <span class="fw-semibold">Progreso Avanzado</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d1fadf; width:36px; height:36px;">
-          <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold" id="advanced_measures_value">{{ advanced_count }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado (<span id="advanced_percent_value">{{ percent_advanced }}%</span>)</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <span class="fw-semibold">En Ejecución</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d7efff; width:36px; height:36px;">
-          <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="execution_measures_value">{{ execution_count }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-
-    </div>
-  </div>
-  </div>
-
-  <!-- Gráficos principales -->
-  <div class="row g-4 mb-5">
-    <div class="col-lg-6">
-      <div class="card h-100 border shadow-lg overflow-hidden">
-        <div class="card-header border-bottom bg-gradient" style="background:linear-gradient(to right, rgba(38,44,81,0.08), rgba(38,44,81,0.02));">
-          <h5 class="fw-semibold mb-1" style="color:#262C51;">Tipología de Medidas</h5>
-          <p class="text-muted mb-0">Clasificación según adaptación, mitigación y pérdidas y daños</p>
-        </div>
-        <div class="card-body" style="height:420px;">
-          <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-6">
-      <div class="card h-100 border shadow-lg overflow-hidden">
-        <div class="card-header border-bottom bg-gradient" style="background:linear-gradient(to right, rgba(38,44,81,0.08), rgba(38,44,81,0.02));">
-          <h5 class="fw-semibold mb-1" style="color:#262C51;">Estado de Avance General</h5>
-          <p class="text-muted mb-0">Distribución de medidas según su nivel de progreso</p>
-        </div>
-        <div class="card-body" style="height:420px;">
-          <div id="chart_estado_general" style="height:100%; width:100%;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
-  <!-- Análisis del panorama -->
-  <div class="card shadow-md border overflow-hidden" style="min-height:185px;">
-    <div class="card-header border-bottom flex-column justify-content-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Panorama</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Categoría predominante</h6>
-          <p class="text-muted mb-0">
-              {{ top_pilar_name }} con <strong>{{ top_pilar_count }}</strong> medidas
-          </p>
-        </div>
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Estado predominante</h6>
-          <p class="text-muted mb-0">
-              {{ pred_status_name }} con <strong>{{ pred_status_count }}</strong> medidas
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- TAB: Medidas -->
-<div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
-
-  <!-- Tarjetas de estadísticas -->
-<div class="row g-4 mb-5">
-
-  <div class="row g-4 mb-5">
-    <!-- 🟣 Total de Medidas -->
-    <div class="col-md-4">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
+    <div class="tab-content" id="nav-tabContent" style="margin-top: 2rem;">
         
-        <!-- Header (40px alto, 24px padding, centrado) -->
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; ">
-          <span class="fw-semibold">Total de Medidas</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-               style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
-            <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
+      <!-- TAB: Panorama General -->
+      <div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
+        
+        <!-- Header con título y botón mejorados -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Vista General del Sistema</h2>
+            <p class="text-muted mb-0">Estado de todas las medidas del plan</p>
           </div>
+          <button class="btn btn-primary-custom">
+            <i class="bi bi-download"></i> Descargar Reporte General
+          </button>
         </div>
-  
-        <!-- Body -->
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-            style="height:calc(220px - 40px); padding-left:24px;">
-          <h3 class="mb-1 fw-semibold" style="color:#262C51;" id="total_measures_value">{{ total_measures }}</h3>
-          <p class="text-muted mb-0">Acciones en monitoreo</p>
-        </div>
-      </div>
-    </div>
 
-  <!-- 🟢 Progreso Avanzado -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e8f5e9, #f5fff9); border-color:#c8e6c9; color:#198754;">
-        <span class="fw-semibold">Progreso Avanzado</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d1fadf; width:36px; height:36px;">
-          <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold" id="advanced_measures_value">{{ advanced_count }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado (<span id="advanced_percent_value">{{ percent_advanced }}%</span>)</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔵 En Ejecución -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <span class="fw-semibold">En Ejecución</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d7efff; width:36px; height:36px;">
-          <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_count }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-  <div class="tab-content mt-4" id="nav-tabContent">
-    <div class="tab-pane fade show active" id="nav-medidas" role="tabpanel">
-
-      <!-- Buscador -->
-      <div class="d-flex align-items-center gap-3 mb-4">
-        <div style="width:6px;height:32px;background:linear-gradient(to bottom,#262C51,rgba(38,44,81,0.5));border-radius:4px;"></div>
-        <h2 class="fw-semibold mb-0" style="color:#262C51;">Explorar Medidas</h2>
-      </div>
-
-      <div class="position-relative mb-4">
-        <i class="bi bi-search position-absolute" style="left:16px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:1.2rem;"></i>
-        <input id="search_measures" class="form-control ps-5 py-3 border-2 rounded-3" placeholder="Buscar medidas por título, descripción o responsable...">
-      </div>
-
-      <div class="row g-4">
-        <!-- Filtros -->
-        <div class="col-lg-3">
-          <div class="card border shadow-md rounded-3">
-            <div class="card-header border-bottom bg-light">
-              <h6 class="fw-semibold mb-0" style="color:#262C51;">Filtros</h6>
+        <!-- Tarjetas resumen con colores y espaciados mejorados -->
+        <div class="row g-4 mb-5">
+          <!-- Total de Medidas -->
+          <div class="col-md-4">
+            <div class="card border shadow-md h-100" style="border-color: rgba(38,44,81,0.2);">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:rgba(38,44,81,0.1); width:40px; height:40px;">
+                  <i class="bi bi-bullseye" style="font-size:1.25rem; color:#262C51;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;" id="total_measures_value">{{ total_measures }}</h1>
+                <p class="text-muted mb-0">Medidas climáticas adoptadas en el PNAyMCC</p>
+              </div>
             </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
-                <select id="filtro_tipo" class="form-select">
-                  <option value="">Todas</option>
-                  <option>Adaptación</option>
-                  <option>Mitigación</option>
-                  <option>Pérdidas y Daños</option>
-                </select>
+          </div>
+
+          <!-- En Implementación -->
+          <div class="col-md-4">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#198754;">En Implementación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d1fadf; width:40px; height:40px;">
+                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#198754;"></i>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
-                <select id="filtro_linea" class="form-select">
-                  <option value="">Todas</option>
-                  <option>Transversales</option>
-                  <option>Instrumentales</option>
-                  <option>Estratégicas</option>
-                </select>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;" id="implementation_measures_value">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span id="implementation_percent_value">{{ percent_implementation }}%</span>)</p>
               </div>
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
-                <select id="filtro_nivel" class="form-select">
-                  <option value="all">Todos</option>
-                  <option>Inicial</option>
-                  <option>En curso</option>
-                  <option>Avanzada</option>
-                </select>
+            </div>
+          </div>
+
+          <!-- En Programación -->
+          <div class="col-md-4">
+            <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#0d6efd;">En Programación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d7efff; width:40px; height:40px;">
+                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#0d6efd;"></i>
+                </div>
               </div>
-              <button id="clear_filters" class="btn w-100 text-white" style="background-color:#262C51;">Limpiar filtros</button>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;" id="programming_measures_value">{{ programming_count }}</h1>
+                <p class="text-muted mb-0">Medidas en programación</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Listado -->
-        <div class="col-lg-9">
-          <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-3" style="border:2px solid rgba(38,44,81,0.1);">
-            <p class="mb-0 text-muted">Mostrando <span id="measures_count" class="fw-semibold" style="color:#262C51;">0</span> medidas</p>
+        <!-- Gráficos principales con headers mejorados -->
+        <div class="row g-4 mb-5">
+          <div class="col-lg-6">
+            <div class="card h-100 border shadow-lg" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h5 class="fw-semibold mb-1" style="color:#262C51;">Tipología de Medidas</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Clasificación según adaptación, mitigación y pérdidas y daños</p>
+              </div>
+              <div class="card-body" style="height:420px;">
+                <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
+              </div>
+              <div class="card-footer bg-light border-top">
+                <p class="text-muted small mb-0 text-center">
+                  Cada barra corresponde a una de las siete tipologías (individuales o combinadas) definidas en el PNAyMCC.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div id="no_results" class="text-center py-5 border border-dashed rounded-3" style="border-color:rgba(38,44,81,0.2);display:none;">
-            <i class="bi bi-search mb-3" style="font-size:3rem;color:rgba(38,44,81,0.4);"></i>
-            <h5 class="text-muted mb-2">No se encontraron medidas</h5>
-            <p class="text-muted">Intenta ajustar los filtros o términos de búsqueda</p>
-          </div>
-
-          <div id="measures_list" class="row row-cols-1 g-4"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TAB: Marco Conceptual -->
-<div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
-
-  <!-- Header con título y botón -->
-  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-    <div>
-      <h2 class="fw-semibold mb-1" style="color:#262C51;">Líneas y Enfoques</h2>
-      <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
-    </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
-      <i class="bi bi-download"></i> Descargar Catálogo Completo
-    </button>
-  </div>
-
-  <!-- Grilla de Cards -->
-  <div class="row g-4 mb-5">
-
-    <!-- 🟣 Enfoques Transversales -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#c5cae9; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e8eaf6, #f3e5f5); border-color:#c5cae9; color:#262C51;">
-          <span class="fw-semibold">Enfoques Transversales</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#e3e0f3; width:36px; height:36px;">
-            <i class="bi bi-globe" style="font-size:1.1rem;"></i>
+          <div class="col-lg-6">
+            <div class="card h-100 border shadow-lg" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h5 class="fw-semibold mb-1" style="color:#262C51;">Estado de Avance General</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Distribución de medidas según su nivel de progreso</p>
+              </div>
+              <div class="card-body" style="height:420px;">
+                <div id="chart_estado_general" style="height:100%; width:100%;"></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Incorporan principios de equidad, género, derechos humanos y sostenibilidad para fortalecer las políticas climáticas.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#262C51; opacity:0.85;">Transversal</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- 🟢 Líneas Instrumentales -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#c8e6c9; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e7f9ed, #f5fff9); border-color:#c8e6c9; color:#198754;">
-          <span class="fw-semibold">Líneas Instrumentales</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#d1fadf; width:36px; height:36px;">
-            <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i>
+        <!-- Análisis del panorama mejorado -->
+        <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
+          <div class="card-header stat-card-info">
+            <h5 class="fw-semibold mb-0" style="color:#262C51;">
+              <i class="bi bi-graph-up me-2"></i>
+              Análisis del Panorama
+            </h5>
+          </div>
+          <div class="card-body" style="padding: 2rem;">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="mb-2 fw-semibold" style="color:#262C51;">Categoría predominante</h6>
+                    <p class="text-muted mb-0">
+                      {{ top_pilar_name }} con <strong style="color:#262C51;">{{ top_pilar_count }}</strong> medidas
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="mb-2 fw-semibold" style="color:#262C51;">Estado predominante</h6>
+                    <p class="text-muted mb-0">
+                      {{ pred_status_name }} con <strong style="color:#262C51;">{{ pred_status_count }}</strong> medidas
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Conjunto de herramientas técnicas y de gestión que permiten operacionalizar las acciones climáticas a nivel sectorial y territorial.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#00897b; opacity:0.85;">Instrumental</span>
-        </div>
       </div>
-    </div>
 
-    <!-- 🔵 Líneas Estratégicas -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#bbdefb; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-          <span class="fw-semibold">Líneas Estratégicas</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#d7efff; width:36px; height:36px;">
-            <i class="bi bi-compass" style="font-size:1.1rem;"></i>
+      <!-- TAB: Medidas -->
+      <div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
+        
+        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-4">
+            <div class="card border shadow-md h-100" style="border-color: rgba(38,44,81,0.2);">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:rgba(38,44,81,0.1); width:40px; height:40px;">
+                  <i class="bi bi-bullseye" style="font-size:1.25rem; color:#262C51;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
+                <p class="text-muted mb-0">Acciones en monitoreo</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#198754;">En Implementación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d1fadf; width:40px; height:40px;">
+                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#198754;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#0d6efd;">En Programación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d7efff; width:40px; height:40px;">
+                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#0d6efd;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ programming_count }}</h1>
+                <p class="text-muted mb-0">Medidas en programación</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Direccionan la acción climática hacia resultados de largo plazo, integrando innovación, financiamiento e institucionalidad.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#5c6bc0; opacity:0.85;">Estratégica</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- 🟣 Pilares de Gobernanza -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#e1bee7; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #f3e5f5, #f9f3ff); border-color:#e1bee7; color:#9c27b0;">
-          <span class="fw-semibold">Pilares de Gobernanza</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#f0d7f8; width:36px; height:36px;">
-            <i class="bi bi-diagram-3" style="font-size:1.1rem;"></i>
+        <!-- Sección de explorar medidas con divider decorativo -->
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="section-divider"></div>
+          <h2 class="fw-semibold mb-0" style="color:#262C51; font-size: 1.75rem;">Explorar Medidas</h2>
+        </div>
+
+        <!-- Buscador mejorado con ícono -->
+        <div class="search-wrapper">
+          <i class="bi bi-search"></i>
+          <input id="search_measures" class="form-control" placeholder="Buscar medidas por título, descripción o responsable...">
+        </div>
+
+        <div class="row g-4">
+          <!-- Filtros -->
+          <div class="col-lg-3">
+            <div class="card border shadow-md rounded-3" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h6 class="fw-semibold mb-0" style="color:#262C51;">
+                  <i class="bi bi-funnel me-2"></i>
+                  Filtros
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
+                  <select id="filtro_tipo" class="form-select">
+                    <option value="">Todas</option>
+                    <option>Adaptación</option>
+                    <option>Mitigación</option>
+                    <option>Pérdidas y Daños</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
+                  <select id="filtro_linea" class="form-select">
+                    <option value="">Todas</option>
+                    <option>Transversales</option>
+                    <option>Instrumentales</option>
+                    <option>Estratégicas</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
+                  <select id="filtro_nivel" class="form-select">
+                    <option value="all">Todos</option>
+                    <option>Inicial</option>
+                    <option>En curso</option>
+                    <option>Avanzada</option>
+                  </select>
+                </div>
+                <button id="clear_filters" class="btn btn-primary-custom w-100">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Listado -->
+          <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-4 shadow-sm" style="border-color:rgba(38,44,81,0.15) !important; background: rgba(38,44,81,0.02);">
+              <p class="mb-0 text-muted">
+                Mostrando <span id="measures_count" class="fw-bold" style="color:#262C51;">0</span> medidas
+              </p>
+            </div>
+
+            <div id="no_results" class="text-center py-5 border border-dashed rounded-3" style="border-color:rgba(38,44,81,0.2) !important; display:none;">
+              <i class="bi bi-search mb-3" style="font-size:3rem;color:rgba(38,44,81,0.3);"></i>
+              <h5 class="fw-semibold mb-2" style="color:#262C51;">No se encontraron medidas</h5>
+              <p class="text-muted">Intenta ajustar los filtros o términos de búsqueda</p>
+            </div>
+
+            <div id="measures_list" class="row row-cols-1 g-4"></div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Promueven coordinación interinstitucional, participación social y transparencia en la implementación de políticas climáticas.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#9c27b0; opacity:0.85;">Gobernanza</span>
+      </div>
+
+      <!-- TAB: Marco Conceptual -->
+      <div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
+        
+        <!-- Header con título y botón -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Líneas y Enfoques</h2>
+            <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
+          </div>
+          <button class="btn btn-primary-custom">
+            <i class="bi bi-download"></i> Descargar Catálogo Completo
+          </button>
+        </div>
+
+        <!-- Grilla de Cards conceptuales -->
+        <div class="row g-4 mb-5">
+          {% if line_categories %}
+            {% for category in line_categories %}
+              <div class="col-md-6">
+                <div class="card border shadow-md h-100" style="border-color: {{ category.color|default:'#c5cae9' }};">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <div>
+                      <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
+                      <p class="text-muted small mb-0">
+                        {{ category.line_total }} línea{{ category.line_total|pluralize }} registradas
+                        {% if category.measure_total %}
+                        · {{ category.measure_total }} medida{{ category.measure_total|pluralize }} activas
+                        {% endif %}
+                      </p>
+                    </div>
+                    <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                         style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                      <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ category.line_total }}</h1>
+                    <p class="text-muted mb-3">
+                      Líneas y enfoques provenientes del módulo de medidas
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                      {% for line in category.lines %}
+                        <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
+                          <div class="d-flex align-items-center gap-2 mb-2">
+                            {% if line.icon_url %}
+                              <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                            {% else %}
+                              <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
+                                {{ line.measure_count }} med
+                              </span>
+                            {% endif %}
+                            <div>
+                              <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
+                              <p class="text-muted small mb-0">
+                                {% if line.measure_count %}
+                                  {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
+                                {% else %}
+                                  Sin medidas activas
+                                {% endif %}
+                              </p>
+                            </div>
+                          </div>
+                          {% if line.description %}
+                            <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
+                          {% endif %}
+                        </div>
+                      {% empty %}
+                        <p class="text-muted mb-0">Sin líneas registradas.</p>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="col-12">
+              <div class="border rounded-3 p-4 text-center text-muted" style="border-color: rgba(38,44,81,0.2);">
+                No se encontraron líneas o enfoques activos para mostrar.
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Descripción expandida del marco conceptual -->
+        <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
+          <div class="card-header">
+            <h5 class="fw-semibold mb-0" style="color:#262C51;">
+              <i class="bi bi-book me-2"></i>
+              Marco Conceptual del PNAyMCC
+            </h5>
+          </div>
+          <div class="card-body" style="padding: 2rem;">
+            <p class="text-muted mb-4">
+              El Plan Nacional de Adaptación y Mitigación al Cambio Climático se estructura en cuatro grandes categorías que organizan y orientan las medidas climáticas del país.
+            </p>
+            
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c5cae9, rgba(197, 202, 233, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Enfoques Transversales</h6>
+                    <p class="text-muted small mb-0">
+                      Incluyen perspectivas de género, juventud, pueblos indígenas, entre otros, que deben estar presentes en todas las acciones.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #bbdefb, rgba(187, 222, 251, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Sectores Estratégicos</h6>
+                    <p class="text-muted small mb-0">
+                      Áreas prioritarias como energía, transporte, bosques, agua y ciudades que requieren atención específica.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c8e6c9, rgba(200, 230, 201, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares Instrumentales</h6>
+                    <p class="text-muted small mb-0">
+                      Herramientas como financiamiento, tecnología, y desarrollo de capacidades que facilitan la implementación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares de Gobernanza</h6>
+                    <p class="text-muted small mb-0">
+                      Estructuras de coordinación nacional, provincial y municipal que aseguran una gestión integrada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-  </div>
-
-  <!-- Sección inferior: análisis -->
-  <div class="card shadow-md border overflow-hidden" style="min-height:185px;">
-    <div class="card-header border-bottom flex-column justify-content-center"
-         style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
-                border-color:#bbdefb; color:#0d6efd;">
-      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Marco Conceptual</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Enfoque más transversal</h6>
-          <p class="text-muted mb-0">Equidad de género y derechos humanos integrados en <strong>3 líneas</strong>.</p>
-        </div>
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Línea estratégica predominante</h6>
-          <p class="text-muted mb-0">Innovación y fortalecimiento institucional presentes en <strong>5 medidas</strong>.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
     </div>
 
         </div>

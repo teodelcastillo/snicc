@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Prefetch
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from django.urls import path
@@ -406,8 +406,8 @@ def mye_overview(request):
     count_by_status = Counter(measures.values_list('status', flat=True))
     avanzada = count_by_status.get(Measure.Status.avanzada, 0)
     inicial = count_by_status.get(Measure.Status.inicial, 0)
-    exec_count = avanzada + inicial
-    percent_advanced = round((avanzada / total_measures) * 100) if total_measures > 0 else 0
+    implementation_count = avanzada + inicial
+    percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
 
     top_pilar = (Pilar.objects
                  .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
@@ -418,9 +418,9 @@ def mye_overview(request):
 
     prog = count_by_status.get(Measure.Status.prog, 0)
     indef = count_by_status.get(Measure.Status.adefinir, 0)
-    if exec_count >= prog and exec_count >= indef:
-        pred_status_name = "En curso"
-        pred_status_count = exec_count
+    if implementation_count >= prog and implementation_count >= indef:
+        pred_status_name = "En implementación"
+        pred_status_count = implementation_count
     elif prog >= indef:
         pred_status_name = "En programación"
         pred_status_count = prog
@@ -430,14 +430,68 @@ def mye_overview(request):
 
     context.update({
         'total_measures': total_measures,
-        'advanced_count': avanzada,
-        'percent_advanced': percent_advanced,
-        'execution_count': exec_count,
+        'implementation_count': implementation_count,
+        'percent_implementation': percent_implementation,
+        'programming_count': prog,
         'top_pilar_name': top_pilar_name,
         'top_pilar_count': top_pilar_count,
         'pred_status_name': pred_status_name,
         'pred_status_count': pred_status_count,
     })
+
+    category_icons = {
+        'Enfoques Transversales': 'bi-globe',
+        'Sectores Estratégicos': 'bi-building',
+        'Pilares Instrumentales': 'bi-gear-fill',
+        'Pilares de Gobernanza': 'bi-diagram-3',
+    }
+
+    lines_prefetch = Prefetch(
+        'line_set',
+        queryset=Line.objects.annotate(
+            active_measure_count=Count('measures', filter=Q(measures__is_active=True))
+        ).order_by('name'),
+        to_attr='prefetched_lines',
+    )
+
+    line_categories_qs = (
+        LineCategory.objects
+        .prefetch_related(lines_prefetch)
+        .annotate(
+            line_total=Count('line', distinct=True),
+            active_measure_total=Count(
+                'line__measures',
+                filter=Q(line__measures__is_active=True),
+                distinct=True,
+            ),
+        )
+        .order_by('name')
+    )
+
+    line_categories = []
+    for category in line_categories_qs:
+        prefetched_lines = getattr(category, 'prefetched_lines', [])
+        line_categories.append({
+            'id': category.id,
+            'name': category.name,
+            'color': category.color,
+            'icon_class': category_icons.get(category.name, 'bi-diagram-3'),
+            'line_total': category.line_total or 0,
+            'measure_total': category.active_measure_total or 0,
+            'lines': [
+                {
+                    'id': line.id,
+                    'name': line.name,
+                    'description': line.description,
+                    'measure_count': getattr(line, 'active_measure_count', 0) or 0,
+                    'color': line.color,
+                    'icon_url': line.icon.url if line.icon else None,
+                }
+                for line in prefetched_lines
+            ],
+        })
+
+    context['line_categories'] = line_categories
 
     return render(request, 'mainv2/staticpage/mye.html', context)
 
