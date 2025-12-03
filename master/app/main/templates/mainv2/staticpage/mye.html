@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const STATUS_COLORS = {
     "Completada": "#198754",
-    "En implementación avanzada": "#65AD9D",
-    "En implementación inicial": "#D21685",
-    "En programación": "#F9E297",
+    "En implementación avanzada": "#8881fe",
+    "En implementación inicial": "#0d6efd",
+    "En programación": "#b88200",
     "A definir": "#3A3669",
   };
 
@@ -256,66 +256,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const chart = c3.generate({
+    const columns = categories.map((category, idx) => [category, values[idx] || 0]);
+    const colorMap = categories.reduce((acc, category) => {
+      acc[category] = pilaresStats.colors?.[category] || "#262C51";
+      return acc;
+    }, {});
+    const totalMeasures = values.reduce((acc, value) => acc + (value || 0), 0);
+
+    c3.generate({
       bindto: "#chart_tipo_medidas",
       size: { height: 380 },
       data: {
-        columns: [["Medidas", ...values]],
-        type: "bar",
-        color: function (color, d) {
-          const category = categories[d.index];
-          return pilaresStats.colors?.[category] || color;
-        },
-      },
-      onrendered: function () {
-        const svg = document.querySelector("#chart_tipo_medidas svg");
-        if (!svg) return;
-        svg.querySelectorAll(".mye-bar-total").forEach((node) => node.remove());
-
-        const bars = svg.querySelectorAll("path.c3-bar");
-        bars.forEach((bar, idx) => {
-          const value = values[idx] || 0;
-          const bbox = bar.getBBox();
-          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          text.setAttribute("x", bbox.x + bbox.width + 6);
-          text.setAttribute("y", bbox.y + bbox.height / 2 + 4);
-          text.setAttribute("fill", "#262C51");
-          text.setAttribute("font-size", "12");
-          text.setAttribute("font-weight", "bold");
-          text.classList.add("mye-bar-total");
-          text.textContent = value;
-          bar.parentNode.appendChild(text);
-        });
-      },
-      axis: {
-        rotated: true,
-        x: {
-          type: "category",
-          categories,
-          tick: {
-            multiline: false,
-            fit: true,
-          },
-        },
-        y: {
-          tick: {
-            format: d3.format("d"),
-          },
-        },
-      },
-      bar: {
-        width: {
-          ratio: 0.5,
-        },
+        columns,
+        type: "donut",
+        colors: colorMap,
       },
       legend: {
-        show: false,
+        position: "right",
+      },
+      donut: {
+        width: 50,
+        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        label: {
+          format: function (value) {
+            return value > 0 ? value : "";
+          },
+        },
       },
       tooltip: {
         format: {
-          title: function (index) {
-            return categories[index];
-          },
           value: function (value) {
             return `${value} medidas`;
           },
@@ -1126,11 +1095,10 @@ function verDetalle(id) {
           </button>
         </div>
 
-        <!-- Tarjetas resumen con colores y espaciados mejorados -->
+        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
         <div class="row g-4 mb-5">
-          <!-- Total de Medidas -->
-          <div class="col-md-4">
-            <div class="card border shadow-md h-100" style="border-color: rgba(38,44,81,0.2);">
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
@@ -1139,42 +1107,56 @@ function verDetalle(id) {
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;" id="total_measures_value">{{ total_measures }}</h1>
-                <p class="text-muted mb-0">Medidas climáticas adoptadas en el PNAyMCC</p>
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
+                <p class="text-muted mb-0">Acciones en monitoreo</p>
               </div>
             </div>
           </div>
 
-          <!-- En Implementación -->
-          <div class="col-md-4">
-            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
               <div class="card-header d-flex align-items-center justify-content-between">
-                <span class="fw-semibold" style="color:#198754;">En Implementación</span>
+                <span class="fw-semibold" style="color:#b88200;">En Programación</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-                     style="background-color:#d1fadf; width:40px; height:40px;">
-                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#198754;"></i>
+                     style="background-color:#fff3cd; width:40px; height:40px;">
+                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#b88200;"></i>
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;" id="implementation_measures_value">{{ implementation_count }}</h1>
-                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span id="implementation_percent_value">{{ percent_implementation }}%</span>)</p>
+                <h1 class="mb-2 fw-bold" style="color:#b88200; font-size: 2.5rem;">{{ programming_count }}</h1>
+                <p class="text-muted mb-0">Medidas en programación</p>
               </div>
             </div>
           </div>
 
-          <!-- En Programación -->
-          <div class="col-md-4">
+          <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
               <div class="card-header d-flex align-items-center justify-content-between">
-                <span class="fw-semibold" style="color:#0d6efd;">En Programación</span>
+                <span class="fw-semibold" style="color:#0d6efd;">En Implementación</span>
                 <div class="p-2 rounded d-flex align-items-center justify-content-center" 
                      style="background-color:#d7efff; width:40px; height:40px;">
-                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#0d6efd;"></i>
+                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#0d6efd;"></i>
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;" id="programming_measures_value">{{ programming_count }}</h1>
-                <p class="text-muted mb-0">Medidas en programación</p>
+                <h1 class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#198754;">Completadas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d1fadf; width:40px; height:40px;">
+                  <i class="bi bi-check-circle-fill" style="font-size:1.25rem; color:#198754;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
+                <p class="text-muted mb-0">Medidas completadas.</p>
               </div>
             </div>
           </div>
@@ -1193,7 +1175,7 @@ function verDetalle(id) {
               </div>
               <div class="card-footer bg-light border-top">
                 <p class="text-muted small mb-0 text-center">
-                  Cada barra corresponde a una de las siete tipologías (individuales o combinadas) definidas en el PNAyMCC.
+                  Cada segmento circular corresponde a una de las siete tipologías (individuales o combinadas) definidas en el PNAyMCC.
                 </p>
               </div>
             </div>
