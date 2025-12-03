@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroTipo = document.getElementById("filtro_tipo");
   const filtroLinea = document.getElementById("filtro_linea");
   const filtroNivel = document.getElementById("filtro_nivel");
+  const filtroAlcance = document.getElementById("filtro_alcance");
+  const filtroAutoridad = document.getElementById("filtro_autoridad");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
   const chartTypology = document.getElementById("chart_tipo_medidas");
@@ -75,7 +77,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("/measure/filter-simple.json");
       const data = await res.json();
       measures = data.measures || data.data || [];
+      populateTypeFilterOptions(measures);
       populateLineFilterOptions(measures);
+      populateScopeFilterOptions(measures);
+      populateAuthorityFilterOptions(measures);
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -363,6 +368,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderStatusChart(statusStats);
   }
 
+  function populateTypeFilterOptions(data = []) {
+    if (!filtroTipo) return;
+    const typeSet = new Set();
+
+    data.forEach((measure) => {
+      if (Array.isArray(measure.labels) && measure.labels.length) {
+        measure.labels.forEach((label) => {
+          const cleaned = label?.trim();
+          if (cleaned) {
+            typeSet.add(cleaned);
+          }
+        });
+        return;
+      }
+
+      if (measure.pilar) {
+        measure.pilar
+          .replace(/\sy\s/gi, ",")
+          .replace(/\se\s/gi, ",")
+          .split(",")
+          .map((segment) => segment.trim())
+          .filter(Boolean)
+          .forEach((segment) => typeSet.add(segment));
+      }
+    });
+
+    filtroTipo.innerHTML = '<option value="">Todas</option>';
+    Array.from(typeSet)
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((label) => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        filtroTipo.appendChild(option);
+      });
+  }
+
   function populateLineFilterOptions(data = []) {
     if (!filtroLinea) return;
     const lines = Array.from(
@@ -382,6 +424,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  function populateScopeFilterOptions(data = []) {
+    if (!filtroAlcance) return;
+    const scopes = Array.from(
+      new Set(
+        data
+          .map((m) => (m.scope_label || m.scope || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    filtroAlcance.innerHTML = '<option value="">Todos</option>';
+    scopes.forEach((scope) => {
+      const option = document.createElement("option");
+      option.value = scope;
+      option.textContent = scope;
+      filtroAlcance.appendChild(option);
+    });
+  }
+
+  function populateAuthorityFilterOptions(data = []) {
+    if (!filtroAutoridad) return;
+    const authorities = Array.from(
+      new Set(
+        data
+          .map((m) => (m.responsable || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    filtroAutoridad.innerHTML = '<option value="">Todas</option>';
+    authorities.forEach((authority) => {
+      const option = document.createElement("option");
+      option.value = authority;
+      option.textContent = authority;
+      filtroAutoridad.appendChild(option);
+    });
+  }
+
   // 2️⃣ Renderizar cards dinámicamente
   function renderMeasures(filtered) {
     listContainer.innerHTML = "";
@@ -394,24 +474,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     noResults.style.display = "none";
 
     filtered.forEach((m) => {
-      const badgeColor =
-        m.status?.toLowerCase().includes("avanz") ? "bg-success" :
-        m.status?.toLowerCase().includes("curso") ? "bg-info text-dark" : "bg-secondary";
+      const statusColor = m.status ? m.status.toLowerCase() : "";
+      const statusBadgeClass = statusColor.includes("avanz")
+        ? "bg-success text-white"
+        : statusColor.includes("inicial")
+          ? "bg-warning text-dark"
+          : statusColor.includes("program")
+            ? "bg-info text-dark"
+            : "bg-secondary text-white";
+
+      const statusBadge = m.status
+        ? `<span class="badge ${statusBadgeClass}">${m.status}</span>`
+        : "";
+
+      const typeLabel = Array.isArray(m.labels) && m.labels.length
+        ? m.labels.join(" · ")
+        : (m.pilar || "");
+      const typeBadge = typeLabel
+        ? `<span class="badge bg-info text-dark">${typeLabel}</span>`
+        : "";
+
+      const lineBadge = m.linea
+        ? `<span class="badge text-dark border" style="background-color: rgba(38,44,81,0.05);">${m.linea}</span>`
+        : "";
+
+      const scopeLabel = m.scope_label || m.scope;
+      const scopeBadge = scopeLabel
+        ? `<span class="badge text-dark border" style="background-color: rgba(38,44,81,0.05);">${scopeLabel}</span>`
+        : "";
+
+      const badges = [statusBadge, typeBadge, lineBadge, scopeBadge]
+        .filter(Boolean)
+        .join("");
 
       const card = `
         <div class="col">
           <div class="card shadow-md border h-100 rounded-3 hover-shadow">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="fw-semibold" style="color:#262C51;">${m.name || "Sin título"}</h5>
-                <span class="badge ${badgeColor}">${m.status || "N/A"}</span>
+            <div class="card-body d-flex flex-column">
+              <div class="mb-3">
+                <h5 class="fw-semibold mb-2" style="color:#262C51;">${m.name || "Sin título"}</h5>
+                <p class="text-muted mb-0">${m.description || ""}</p>
               </div>
-              <p class="text-muted mb-2">${m.description || ""}</p>
               <p class="text-muted small mb-3">
                 <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
               </p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="badge bg-info text-dark">${m.pilar || "Sin pilar"}</span>
+              <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex flex-wrap gap-2">
+                  ${badges || '<span class="text-muted small">Sin etiquetas</span>'}
+                </div>
                 <button class="btn btn-sm text-white" style="background-color:#262C51;"
                         onclick="verDetalle(${m.id})">
                   Ver detalles
@@ -428,26 +538,57 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 3️⃣ Aplicar búsqueda y filtros
   function applyFilters() {
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm = normalizeText(searchInput.value);
     const tipo = filtroTipo.value;
     const linea = filtroLinea.value;
     const nivel = filtroNivel.value;
+    const alcance = filtroAlcance ? filtroAlcance.value : "";
+    const autoridad = filtroAutoridad ? filtroAutoridad.value : "";
+
+    const normalizedTipo = normalizeText(tipo);
+    const normalizedLinea = normalizeText(linea);
+    const normalizedNivel = nivel && nivel !== "all" ? normalizeText(nivel) : "";
+    const normalizedAlcance = normalizeText(alcance);
+    const normalizedAutoridad = normalizeText(autoridad);
 
     const filtered = measures.filter((m) => {
       const matchesSearch =
         !searchTerm ||
-        m.name?.toLowerCase().includes(searchTerm) ||
-        m.description?.toLowerCase().includes(searchTerm) ||
-        m.responsable?.toLowerCase().includes(searchTerm);
+        normalizeText(m.name).includes(searchTerm) ||
+        normalizeText(m.description).includes(searchTerm) ||
+        normalizeText(m.responsable).includes(searchTerm);
 
-      const matchesTipo = !tipo || (m.pilar && m.pilar.includes(tipo));
-    const matchesLinea =
-      !linea ||
-      (m.linea_id && String(m.linea_id) === String(linea));
+      const matchesTipo =
+        !tipo ||
+        (Array.isArray(m.labels) && m.labels.some((label) => normalizeText(label) === normalizedTipo)) ||
+        normalizeText(m.pilar).includes(normalizedTipo);
+
+      const matchesLinea =
+        !linea ||
+        (m.linea_id && String(m.linea_id) === String(linea)) ||
+        (normalizedLinea && normalizeText(m.linea).includes(normalizedLinea));
+
       const matchesNivel =
-        nivel === "all" || (m.status && m.status.toLowerCase().includes(nivel.toLowerCase()));
+        !normalizedNivel ||
+        normalizeText(m.status).includes(normalizedNivel);
 
-      return matchesSearch && matchesTipo && matchesLinea && matchesNivel;
+      const matchesAlcance =
+        !normalizedAlcance ||
+        normalizeText(m.scope).includes(normalizedAlcance) ||
+        normalizeText(m.scope_label).includes(normalizedAlcance);
+
+      const matchesAutoridad =
+        !normalizedAutoridad ||
+        normalizeText(m.responsable) === normalizedAutoridad;
+
+      return (
+        matchesSearch &&
+        matchesTipo &&
+        matchesLinea &&
+        (nivel === "all" ? true : matchesNivel) &&
+        matchesAlcance &&
+        matchesAutoridad
+      );
     });
 
     renderMeasures(filtered);
@@ -458,11 +599,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   filtroTipo.addEventListener("change", applyFilters);
   filtroLinea.addEventListener("change", applyFilters);
   filtroNivel.addEventListener("change", applyFilters);
+  if (filtroAlcance) {
+    filtroAlcance.addEventListener("change", applyFilters);
+  }
+  if (filtroAutoridad) {
+    filtroAutoridad.addEventListener("change", applyFilters);
+  }
 
   btnClear.addEventListener("click", () => {
     filtroTipo.value = "";
     filtroLinea.value = "";
     filtroNivel.value = "all";
+    if (filtroAlcance) {
+      filtroAlcance.value = "";
+    }
+    if (filtroAutoridad) {
+      filtroAutoridad.value = "";
+    }
     searchInput.value = "";
     renderMeasures(measures);
   });
@@ -1107,27 +1260,34 @@ function verDetalle(id) {
                   <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
                   <select id="filtro_tipo" class="form-select">
                     <option value="">Todas</option>
-                    <option>Adaptación</option>
-                    <option>Mitigación</option>
-                    <option>Pérdidas y Daños</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
                   <select id="filtro_linea" class="form-select">
                     <option value="">Todas</option>
-                    <option>Transversales</option>
-                    <option>Instrumentales</option>
-                    <option>Estratégicas</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
                   <select id="filtro_nivel" class="form-select">
                     <option value="all">Todos</option>
-                    <option>Inicial</option>
-                    <option>En curso</option>
-                    <option>Avanzada</option>
+                    <option value="En implementación inicial">En implementación inicial</option>
+                    <option value="En implementación avanzada">En implementación avanzada</option>
+                    <option value="En programación">En programación</option>
+                    <option value="A definir">A definir</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_alcance" style="color:#262C51;">Nivel de alcance</label>
+                  <select id="filtro_alcance" class="form-select">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_autoridad" style="color:#262C51;">Autoridad responsable</label>
+                  <select id="filtro_autoridad" class="form-select">
+                    <option value="">Todas</option>
                   </select>
                 </div>
                 <button id="clear_filters" class="btn btn-primary-custom w-100">

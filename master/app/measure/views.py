@@ -536,6 +536,8 @@ def measure_list_json(request):
             "linea_id": line_id,
             "linea_categoria": line_category,
             "responsable": responsable,
+            "scope": measure.scope,
+            "scope_label": measure.get_scope_display(),
             "labels": label_names,
         })
 
