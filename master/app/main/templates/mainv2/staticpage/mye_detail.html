@@ -4,167 +4,385 @@
 {% block head %}
 <link rel="stylesheet" href="{% static 'main/css/mye.css' %}">
 <style>
+  /* Hero section modernizado con mejor gradiente y espaciado */
+  .mye-hero-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  @media (min-width: 992px) {
+    .mye-hero-wrapper {
+      flex-direction: row;
+      align-items: stretch;
+    }
+  }
   .mye-detail-hero {
-    background: linear-gradient(135deg, rgba(38,44,81,0.08), rgba(38,44,81,0.01));
-    border-radius: 24px;
-    padding: 32px;
+    background: linear-gradient(135deg, rgba(38,44,81,0.95) 0%, rgba(38,44,81,0.85) 100%);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(38,44,81,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    flex: 1;
   }
-  .mye-chip {
+  .mye-detail-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+  }
+  .mye-detail-hero * {
+    position: relative;
+    z-index: 1;
+  }
+  .mye-hero-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .mye-hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .mye-hero-meta-item .meta-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.65);
+    font-weight: 600;
+  }
+  .mye-hero-meta-item .meta-value {
+    color: rgba(255,255,255,0.95);
+    font-weight: 600;
+  }
+  .mye-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  }
+  .mye-hero-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  @media (min-width: 992px) {
+    .mye-hero-footer {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+  .mye-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .mye-download-btn {
+    font-weight: 600;
+    padding: 0.75rem 1.75rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .mye-download-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+  .mye-hero-download {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  @media (min-width: 992px) {
+    .mye-hero-download {
+      min-width: 240px;
+    }
+  }
+  /* Chips armonizados con módulo MyE */
+  .badge-chip {
     border-radius: 999px;
-    padding: 4px 14px;
-    font-size: 0.85rem;
-    background-color: rgba(38,44,81,0.08);
-    color: #262C51;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    line-height: 1;
   }
+  .badge-status {
+    font-size: 0.85rem;
+  }
+  .badge-status-programming {
+    background-color: #fff3cd;
+    color: #b88200;
+    border-color: #fce7b2;
+  }
+  .badge-status-implementation {
+    background-color: #d7efff;
+    color: #0d6efd;
+    border-color: #bbdefb;
+  }
+  .badge-status-completed {
+    background-color: #d1fadf;
+    color: #198754;
+    border-color: #c8e6c9;
+  }
+  .badge-status-default {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #dfe3e7;
+  }
+  .badge-type {
+    background-color: #2c6694;
+    color: #ffffff;
+    border-color: #1f4a6a;
+  }
+  .badge-line {
+    background-color: rgba(38,44,81,0.12);
+    color: #f8f9ff;
+    border-color: rgba(255,255,255,0.2);
+  }
+  .badge-scope {
+    background-color: rgba(25,135,84,0.15);
+    color: #d1f7e2;
+    border-color: rgba(25,135,84,0.25);
+  }
+  /* Tarjetas de sección con sombra moderna */
   .mye-section-card {
-    border: 1px solid rgba(38,44,81,0.12);
-    border-radius: 18px;
+    border: 1px solid rgba(38,44,81,0.08);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(38,44,81,0.06);
+    transition: all 0.3s ease;
+  }
+  .mye-section-card:hover {
+    box-shadow: 0 4px 16px rgba(38,44,81,0.1);
   }
   .mye-section-card h5 {
     color: #262C51;
+    font-weight: 600;
   }
   .mye-section-card .section-content {
     color: #4f546c;
   }
+  /* Badge con mejor diseño */
   .badge-gradient {
     color: #fff;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 999px;
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    font-weight: 600;
   }
   .tab-card-title {
     color: #262C51;
+    font-weight: 600;
+  }
+  /* Tabs nav-pills mejoradas con mejor contraste y centrado */
+  .nav-pills {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(38,44,81,0.06);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    border: 1px solid rgba(38,44,81,0.08);
+  }
+  .nav-pills .nav-item {
+    margin: 0;
+  }
+  .nav-pills .nav-link {
+    color: #495057;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    background: transparent;
+  }
+  .nav-pills .nav-link:hover {
+    color: #262C51;
+    background: rgba(38,44,81,0.05);
+    border-color: rgba(38,44,81,0.1);
+  }
+  .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #262C51 0%, #1a2038 100%);
+    color: white;
+    border-color: #262C51;
+    box-shadow: 0 4px 12px rgba(38,44,81,0.25);
+  }
+  .nav-pills .nav-link i {
+    font-size: 1.35rem;
+    margin-right: 0.5rem;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4 py-md-5">
-  <a href="{% url 'measure:mye' %}" class="btn btn-link text-decoration-none ps-0 mb-3" style="color:#262C51;">
-    <i class="bi bi-arrow-left"></i> Volver al módulo MyE
+  <!-- Botón de volver mejorado -->
+  <a href="{% url 'measure:mye' %}" class="btn btn-link text-decoration-none ps-0 mb-4 d-inline-flex align-items-center gap-2" style="color:#262C51; font-weight: 500;">
+    <i class="bi bi-arrow-left fs-5"></i> Volver al módulo Monitoreo
   </a>
 
-  <div class="mye-detail-hero shadow-sm mb-4">
-    <div class="d-flex flex-column flex-lg-row justify-content-between gap-4">
-      <div>
-        {% if measure.code %}
-          <div class="text-primary fw-semibold text-uppercase small mb-2">{{ measure.code }}</div>
-        {% endif %}
-        <h1 class="fw-semibold" style="color:#262C51;">{{ measure.name }}</h1>
-        <p class="text-muted mb-3">{{ description|default:"Sin descripción disponible" }}</p>
-        <div class="d-flex flex-wrap gap-3 text-muted small">
+  <!-- Hero section con mejor espaciado y contraste -->
+  <div class="mye-detail-hero mb-5">
+    <div class="d-flex flex-column gap-3">
+      {% if measure.code %}
+        <span class="badge-chip badge-type text-uppercase align-self-start">{{ measure.code }}</span>
+      {% endif %}
+      <h1 class="fw-bold" style="color: white; font-size: 2rem; line-height: 1.3;">{{ measure.name }}</h1>
+      <p class="mb-0" style="color: rgba(255,255,255,0.85); font-size: 1.05rem; line-height: 1.6;">{{ description|default:"Sin descripción disponible" }}</p>
+    </div>
+
+    <div class="mye-hero-meta-grid">
+      <div class="mye-hero-meta-item">
+        <span class="meta-label">Tipo de medida</span>
+        <span class="meta-value">
+          {% if measure.pilares %}
+            {{ measure.pilares.name }}
+          {% elif labels %}
+            {{ labels|first }}
+          {% else %}
+            Sin definir
+          {% endif %}
+        </span>
+      </div>
+      <div class="mye-hero-meta-item">
+        <span class="meta-label">Línea o enfoque</span>
+        <span class="meta-value">
           {% if measure.line %}
-            <div><i class="bi bi-layers"></i> Línea/enfoque: <strong>{{ measure.line.name }}</strong></div>
+            {{ measure.line.name }}
+          {% else %}
+            Sin definir
           {% endif %}
-          {% if measure.line.category %}
-            <div><i class="bi bi-segmented-nav"></i> Categoría: <strong>{{ measure.line.category.name }}</strong></div>
-          {% endif %}
-          {% if measure.action %}
-            <div><i class="bi bi-diagram-2"></i> Línea de acción: <strong>{{ measure.action.name }}</strong></div>
-          {% endif %}
+        </span>
+      </div>
+      <div class="mye-hero-meta-item">
+        <span class="meta-label">Nivel de avance</span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="mye-status-dot" style="background-color:{{ status_color }};"></span>
+          <span class="badge-chip badge-status {{ progress_style.chip_class|default:'badge-status-default' }}">{{ measure.get_status_display }}</span>
         </div>
       </div>
-      <div class="text-lg-end">
-        <div class="d-flex align-items-center justify-content-lg-end gap-2 mb-3">
-          <span class="rounded-circle d-inline-block" style="width:14px;height:14px;background-color:{{ status_color }};"></span>
-          <span class="badge {{ progress_style.badge_class }}">{{ measure.get_status_display }}</span>
-        </div>
-        <div class="mb-3 d-flex flex-wrap gap-2 justify-content-lg-end">
-          {% for label in labels %}
-            <span class="mye-chip">{{ label }}</span>
-          {% empty %}
-            <span class="text-muted small">Sin etiquetas adicionales</span>
-          {% endfor %}
-        </div>
-        <a href="{% url 'measure:pdf-export' measure.id %}" class="btn btn-primary" style="background-color:#262C51;border:none;">
-          <i class="bi bi-file-earmark-arrow-down"></i> Descargar ficha (PDF)
-        </a>
-      </div>
+    </div>
+    <div>
+      <a href="{% url 'measure:pdf-export' measure.id %}" class="btn btn-light d-inline-flex align-items-center justify-content-center gap-2 mye-download-btn ms-lg-auto">
+        <i class="bi bi-file-earmark-arrow-down fs-5"></i> Descargar ficha (PDF)
+      </a>
     </div>
   </div>
 
-  <div class="row g-4 mb-4">
+    <div class="mye-hero-footer">
+  </div>
+
+  <!-- Tarjetas de información con mejor diseño y sombras -->
+  <div class="row g-4 mb-5">
     <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
-            <i class="bi bi-building"></i> Autoridad de aplicación
+      <div class="card h-100 border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-building fs-5" style="color: #262C51;"></i> Autoridad de aplicación
           </div>
-          <p class="mb-0 fw-semibold" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
+          <p class="mb-0 fw-semibold fs-5" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
-            <i class="bi bi-geo-alt"></i> Alcance y estado
+      <div class="card h-100 border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-geo-alt fs-5" style="color: #262C51;"></i> Alcance y estado
           </div>
-          <p class="mb-1 fw-semibold" style="color:#262C51;">{{ measure.get_scope_display }}</p>
+          <p class="mb-1 fw-semibold fs-5" style="color:#262C51;">{{ measure.get_scope_display }}</p>
           <small class="text-muted">Actualizado {{ measure.last_modified|date:"d/m/Y" }}</small>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-2">
-            <i class="bi bi-calendar-week"></i> Período / Meta
+      <div class="card h-100 border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-calendar-week fs-5" style="color: #262C51;"></i> Período / Meta
           </div>
-          <p class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
+          <p class="mb-1 fw-semibold fs-5" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
           <small class="text-muted">Meta {{ measure.year }}</small>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="card shadow-sm border-0 mb-5">
-    <div class="card-body">
+  <!-- Tarjeta de pilares mejorada 
+  <div class="card border-0 mye-section-card mb-5">
+    <div class="card-body p-4">
       <div class="row">
-        <div class="col-md-6">
-          <p class="text-muted mb-2">Pilares / Tipos</p>
+        <div class="col-md-6 mb-4 mb-md-0">
+          <p class="text-muted mb-3 text-uppercase small" style="letter-spacing: 0.05em; font-weight: 600;">Pilares / Tipos</p>
           <div class="d-flex flex-wrap gap-2">
             {% if measure.pilares %}
-              <span class="badge rounded-pill text-white" style="background-color:{{ measure.pilares.color }};">{{ measure.pilares.name }}</span>
+              <span class="badge rounded-pill text-white fs-6" style="background-color:{{ measure.pilares.color }}; padding: 8px 18px;">{{ measure.pilares.name }}</span>
             {% endif %}
             {% for label in labels %}
-              <span class="badge rounded-pill bg-light text-dark border">{{ label }}</span>
+              <span class="badge rounded-pill bg-light text-dark border fs-6" style="padding: 8px 18px;">{{ label }}</span>
             {% endfor %}
           </div>
         </div>
-        <div class="col-md-6 mt-4 mt-md-0">
-          <p class="text-muted mb-2">Líneas y enfoques</p>
+        <div class="col-md-6">
+          <p class="text-muted mb-3 text-uppercase small" style="letter-spacing: 0.05em; font-weight: 600;">Líneas y enfoques</p>
           <div class="d-flex flex-wrap gap-2">
             {% if measure.line %}
-              <span class="badge rounded-pill bg-info text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ measure.line.name }}</span>
+              <span class="badge rounded-pill bg-info text-dark fs-6" style="padding: 8px 18px;"><i class="bi bi-diagram-3 me-1"></i>{{ measure.line.name }}</span>
             {% endif %}
             {% if measure.line.category %}
-              <span class="badge rounded-pill bg-secondary"><i class="bi bi-grid-3x3-gap me-1"></i>{{ measure.line.category.name }}</span>
+              <span class="badge rounded-pill bg-secondary fs-6" style="padding: 8px 18px;"><i class="bi bi-grid-3x3-gap me-1"></i>{{ measure.line.category.name }}</span>
             {% endif %}
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </div>-->
 
-  <div class="border-top border-2 mb-4" style="border-color: rgba(38,44,81,0.1) !important;"></div>
+  <div class="border-top border-2 mb-5" style="border-color: rgba(38,44,81,0.1) !important;"></div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <ul class="nav nav-pills mb-3" id="measureDetailTabs" role="tablist">
+  <!-- Tabs con mejor centrado, contraste y diseño -->
+  <div class="card border-0 mye-section-card mb-5">
+    <div class="card-body p-4">
+      <ul class="nav nav-pills mb-4" id="measureDetailTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="tab-general-tab" data-bs-toggle="tab" data-bs-target="#tab-general" type="button" role="tab">General</button>
+          <button class="nav-link active" id="tab-general-tab" data-bs-toggle="tab" data-bs-target="#tab-general" type="button" role="tab">
+            <i class="bi bi-info-circle"></i> General
+          </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-implementacion-tab" data-bs-toggle="tab" data-bs-target="#tab-implementacion" type="button" role="tab">Implementación</button>
+          <button class="nav-link" id="tab-implementacion-tab" data-bs-toggle="tab" data-bs-target="#tab-implementacion" type="button" role="tab">
+            <i class="bi bi-gear"></i> Implementación
+          </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-analisis-tab" data-bs-toggle="tab" data-bs-target="#tab-analisis" type="button" role="tab">Análisis</button>
+          <button class="nav-link" id="tab-analisis-tab" data-bs-toggle="tab" data-bs-target="#tab-analisis" type="button" role="tab">
+            <i class="bi bi-graph-up"></i> Análisis
+          </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-seguimiento-tab" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">Seguimiento</button>
+          <button class="nav-link" id="tab-seguimiento-tab" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">
+            <i class="bi bi-clipboard-check"></i> Seguimiento
+          </button>
         </li>
       </ul>
 
@@ -172,15 +390,15 @@
         <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
           {% if metas %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for meta in metas %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-check-circle text-success"></i>
-                      <span>{{ meta }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-check-circle text-success fs-5 mt-1"></i>
+                      <span class="flex-grow-1">{{ meta }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -192,10 +410,10 @@
             {% if alcance_geografico %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     <p class="mb-0">{{ alcance_geografico|safe }}</p>
                   </div>
                 </div>
@@ -204,10 +422,10 @@
             {% if estimacion_gastos %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-cash-coin me-2"></i>Estimación de gastos al 2030</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     <p class="mb-0">{{ estimacion_gastos|safe }}</p>
                   </div>
                 </div>
@@ -217,10 +435,10 @@
 
           {% if riesgos_climaticos %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 {{ riesgos_climaticos|safe }}
               </div>
             </div>
@@ -228,10 +446,10 @@
 
           {% if reduccion_emisiones %}
             <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 {{ reduccion_emisiones|safe }}
               </div>
             </div>
@@ -241,15 +459,17 @@
         <div class="tab-pane fade" id="tab-implementacion" role="tabpanel">
           {% if financiamiento %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-currency-exchange me-2"></i>Financiamiento</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in financiamiento %}
-                    <li class="d-flex gap-2 mb-2">
-                      <span class="badge rounded-circle bg-primary" style="width:10px;height:10px;"></span>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <span class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:24px;height:24px;padding:0;margin-top:2px;">
+                        <i class="bi bi-check" style="font-size: 0.875rem;"></i>
+                      </span>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -259,15 +479,15 @@
 
           {% if instrumentos %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-tools me-2"></i>Instrumentos y herramientas</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in instrumentos %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-wrench-adjustable text-primary"></i>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-wrench-adjustable text-primary fs-5 mt-1"></i>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -277,15 +497,15 @@
 
           {% if necesidades %}
             <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-lightning-charge me-2"></i>Necesidades y barreras</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in necesidades %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-exclamation-circle text-warning"></i>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-exclamation-circle text-warning fs-5 mt-1"></i>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -299,10 +519,10 @@
             {% if analisis_genero %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-people me-2"></i>Enfoque de género y diversidad</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     {{ analisis_genero|safe }}
                   </div>
                 </div>
@@ -311,10 +531,10 @@
             {% if analisis_riesgo %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-shield-check me-2"></i>Gestión integral del riesgo</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     {{ analisis_riesgo|safe }}
                   </div>
                 </div>
@@ -323,10 +543,10 @@
             {% if analisis_salud %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-heart-pulse me-2"></i>Enfoque de salud</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     {{ analisis_salud|safe }}
                   </div>
                 </div>
@@ -335,10 +555,10 @@
             {% if analisis_transicion %}
               <div class="col-md-6">
                 <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0">
+                  <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="tab-card-title mb-0"><i class="bi bi-briefcase me-2"></i>Transición justa</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body px-4 pb-4">
                     {{ analisis_transicion|safe }}
                   </div>
                 </div>
@@ -348,10 +568,10 @@
 
           {% if cobeneficios %}
             <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-star me-2"></i>Cobeneficios entre adaptación y mitigación</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 {{ cobeneficios|safe }}
               </div>
             </div>
@@ -361,15 +581,15 @@
         <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
           {% if indicadores %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-clipboard-check me-2"></i>Indicadores para el monitoreo</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in indicadores %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-check2-square text-success"></i>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-check2-square text-success fs-5 mt-1"></i>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -379,10 +599,10 @@
 
           {% if relacion_ley %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-balance-scale me-2"></i>Relación con la Ley 27.520</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 {{ relacion_ley|safe }}
               </div>
             </div>
@@ -390,10 +610,10 @@
 
           {% if objetivo_general %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Objetivo general</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 {{ objetivo_general|safe }}
               </div>
             </div>
@@ -401,15 +621,15 @@
 
           {% if resultados_esperados %}
             <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-award me-2"></i>Resultados esperados</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in resultados_esperados %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-check-circle text-primary"></i>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-check-circle text-primary fs-5 mt-1"></i>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -419,15 +639,15 @@
 
           {% if seguimiento_extra %}
             <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0">
+              <div class="card-header bg-transparent border-0 pt-4 px-4">
                 <h5 class="tab-card-title mb-0"><i class="bi bi-journal-text me-2"></i>Notas de seguimiento</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body px-4 pb-4">
                 <ul class="list-unstyled mb-0">
                   {% for item in seguimiento_extra %}
-                    <li class="d-flex gap-2 mb-2">
-                      <i class="bi bi-dot"></i>
-                      <span>{{ item }}</span>
+                    <li class="d-flex gap-3 mb-3 align-items-start">
+                      <i class="bi bi-dot fs-4 mt-1"></i>
+                      <span class="flex-grow-1">{{ item }}</span>
                     </li>
                   {% endfor %}
                 </ul>
@@ -439,25 +659,47 @@
     </div>
   </div>
 
+  <!-- Sección inferior con mejor espaciado -->
   <div class="row g-4">
     <div class="col-lg-6">
       <div class="card mye-section-card h-100">
-        <div class="card-body">
-          <h5 class="fw-semibold mb-3">Información general</h5>
+        <div class="card-body p-4">
+          <h5 class="fw-semibold mb-4" style="color: #262C51;">Información general</h5>
           <ul class="list-unstyled text-muted mb-0">
             {% if measure.pilares %}
-              <li class="mb-2"><strong class="text-dark d-block">Pilar</strong>{{ measure.pilares.name }}</li>
+              <li class="mb-3">
+                <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Pilar</strong>
+                <span>{{ measure.pilares.name }}</span>
+              </li>
             {% endif %}
-            <li class="mb-2"><strong class="text-dark d-block">Nivel de avance</strong>{{ measure.get_status_display }}</li>
-            <li class="mb-2"><strong class="text-dark d-block">Alcance</strong>{{ measure.get_scope_display }}</li>
-            <li class="mb-2"><strong class="text-dark d-block">Meta / Año</strong>{{ measure.year }}</li>
+            <li class="mb-3">
+              <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Nivel de avance</strong>
+              <span>{{ measure.get_status_display }}</span>
+            </li>
+            <li class="mb-3">
+              <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Alcance</strong>
+              <span>{{ measure.get_scope_display }}</span>
+            </li>
+            <li class="mb-3">
+              <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Meta / Año</strong>
+              <span>{{ measure.year }}</span>
+            </li>
             {% if responsable %}
-              <li class="mb-2"><strong class="text-dark d-block">Responsable</strong>{{ responsable }}</li>
+              <li class="mb-3">
+                <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Responsable</strong>
+                <span>{{ responsable }}</span>
+              </li>
             {% endif %}
             {% if execution_period %}
-              <li class="mb-2"><strong class="text-dark d-block">Período de ejecución</strong>{{ execution_period }}</li>
+              <li class="mb-3">
+                <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Período de ejecución</strong>
+                <span>{{ execution_period }}</span>
+              </li>
             {% endif %}
-            <li><strong class="text-dark d-block">Última actualización</strong>{{ measure.last_modified|date:"d/m/Y" }}</li>
+            <li>
+              <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Última actualización</strong>
+              <span>{{ measure.last_modified|date:"d/m/Y" }}</span>
+            </li>
           </ul>
         </div>
       </div>
@@ -466,12 +708,12 @@
     <div class="col-lg-6">
       {% if national_objectives %}
         <div class="card mye-section-card mb-4">
-          <div class="card-body">
-            <h5 class="fw-semibold mb-3">Metas nacionales vinculadas</h5>
+          <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4" style="color: #262C51;">Metas nacionales vinculadas</h5>
             <ul class="list-unstyled mb-0 text-muted">
               {% for objective in national_objectives %}
-                <li class="mb-2">
-                  <strong class="text-dark d-block">{{ objective.full_name }}</strong>
+                <li class="mb-3">
+                  <strong class="text-dark d-block mb-1">{{ objective.full_name }}</strong>
                   {% if objective.meta_1 %}
                     <small>{{ objective.meta_1.full_name }}</small>
                   {% endif %}
@@ -484,12 +726,12 @@
 
       {% if related_measures %}
         <div class="card mye-section-card">
-          <div class="card-body">
-            <h5 class="fw-semibold mb-3">Medidas relacionadas</h5>
+          <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4" style="color: #262C51;">Medidas relacionadas</h5>
             <ul class="list-unstyled mb-0">
               {% for item in related_measures %}
                 <li class="mb-3">
-                  <a href="{% url 'measure:detail_view' item.id %}" class="text-decoration-none">
+                  <a href="{% url 'measure:detail_view' item.id %}" class="text-decoration-none d-flex flex-column gap-1">
                     <span class="d-block fw-semibold" style="color:#262C51;">{{ item.name }}</span>
                     <small class="text-muted">{{ item.get_status_display }}</small>
                   </a>
@@ -504,12 +746,12 @@
 
   {% if extra_sections %}
     <div class="card mye-section-card mt-4">
-      <div class="card-body">
-        <h5 class="fw-semibold mb-3">Información adicional</h5>
+      <div class="card-body p-4">
+        <h5 class="fw-semibold mb-4" style="color: #262C51;">Información adicional</h5>
         <div class="row g-4">
           {% for section in extra_sections %}
             <div class="col-md-6">
-              <h6 class="text-uppercase small text-muted">{{ section.name }}</h6>
+              <h6 class="text-uppercase small text-muted mb-2" style="letter-spacing: 0.05em; font-weight: 600;">{{ section.name }}</h6>
               <div class="section-content">{{ section.value|safe }}</div>
             </div>
           {% endfor %}

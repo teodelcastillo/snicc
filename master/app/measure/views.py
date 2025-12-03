@@ -580,26 +580,31 @@ PROGRESS_STYLE = {
         'badge_class': 'bg-success text-white',
         'dot_class': 'bg-success',
         'text_class': 'text-success',
+        'chip_class': 'badge-status-implementation',
     },
     Measure.Status.inicial: {
         'badge_class': 'bg-warning text-dark',
         'dot_class': 'bg-warning',
         'text_class': 'text-warning',
+        'chip_class': 'badge-status-implementation',
     },
     Measure.Status.prog: {
         'badge_class': 'bg-info text-dark',
         'dot_class': 'bg-info',
         'text_class': 'text-info',
+        'chip_class': 'badge-status-programming',
     },
     Measure.Status.completada: {
         'badge_class': 'bg-success text-white',
         'dot_class': 'bg-success',
         'text_class': 'text-success',
+        'chip_class': 'badge-status-completed',
     },
     Measure.Status.adefinir: {
         'badge_class': 'bg-secondary',
         'dot_class': 'bg-secondary',
         'text_class': 'text-secondary',
+        'chip_class': 'badge-status-default',
     },
 }
 
