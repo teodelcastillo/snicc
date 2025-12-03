@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const implementationCardValue = document.getElementById("implementation_measures_value");
   const implementationPercentValue = document.getElementById("implementation_percent_value");
   const programmingCardValue = document.getElementById("programming_measures_value");
+  const loadMoreBtn = document.getElementById("load_more_measures");
+  const measuresTotalLabel = document.getElementById("measures_total");
 
   const BASE_TYPOLOGY_COLORS = {
     adaptacion: "#6157FF",
@@ -64,7 +66,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     "A definir": "#3A3669",
   };
 
+  const PAGE_SIZE = 7;
   let measures = [];
+  let filteredMeasures = [];
+  let visibleCount = 0;
+  let isLoadingMore = false;
 
   // Loader inicial
   listContainer.innerHTML = `
@@ -98,6 +104,58 @@ document.addEventListener("DOMContentLoaded", async () => {
       .toLowerCase();
   }
 
+  function splitPilarText(value = "") {
+    return value
+      .toString()
+      .replace(/\sy\s/gi, ",")
+      .replace(/\se\s/gi, ",")
+      .split(",")
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+  }
+
+  function getMeasurePilares(measure = {}) {
+    if (!measure) {
+      return [];
+    }
+    const raw = measure.pilares;
+
+    const normalizeEntry = (entry) => {
+      if (!entry) return "";
+      if (typeof entry === "string") {
+        return entry.trim();
+      }
+      if (typeof entry === "object") {
+        const candidate = entry.name || entry.label || entry.value || "";
+        return typeof candidate === "string" ? candidate.trim() : "";
+      }
+      return "";
+    };
+
+    if (Array.isArray(raw)) {
+      const values = raw.map(normalizeEntry).filter(Boolean);
+      if (values.length) {
+        return values;
+      }
+    } else if (raw && typeof raw === "object") {
+      const value = normalizeEntry(raw);
+      if (value) {
+        return [value];
+      }
+    } else if (typeof raw === "string" && raw.trim()) {
+      const values = splitPilarText(raw);
+      if (values.length) {
+        return values;
+      }
+    }
+
+    if (typeof measure.pilar === "string" && measure.pilar.trim()) {
+      return splitPilarText(measure.pilar);
+    }
+
+    return [];
+  }
+
   function lightenColor(hex, amount = 0.25) {
     const cleanHex = hex.replace("#", "");
     const normalized = cleanHex.length === 3
@@ -115,12 +173,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function extractThemeFlags(measure = {}) {
-    const tags = [];
+    const tags = [...getMeasurePilares(measure)];
     if (Array.isArray(measure.labels) && measure.labels.length) {
       tags.push(...measure.labels);
-    }
-    if (measure.pilar) {
-      tags.push(measure.pilar);
     }
     if (!tags.length) {
       return { adaptacion: false, mitigacion: false, perdidas: false };
@@ -355,6 +410,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const typeSet = new Set();
 
     data.forEach((measure) => {
+      const pilares = getMeasurePilares(measure);
+      if (pilares.length) {
+        pilares.forEach((name) => typeSet.add(name));
+        return;
+      }
+
       if (Array.isArray(measure.labels) && measure.labels.length) {
         measure.labels.forEach((label) => {
           const cleaned = label?.trim();
@@ -362,17 +423,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             typeSet.add(cleaned);
           }
         });
-        return;
-      }
-
-      if (measure.pilar) {
-        measure.pilar
-          .replace(/\sy\s/gi, ",")
-          .replace(/\se\s/gi, ",")
-          .split(",")
-          .map((segment) => segment.trim())
-          .filter(Boolean)
-          .forEach((segment) => typeSet.add(segment));
       }
     });
 
@@ -444,79 +494,112 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 2️⃣ Renderizar cards dinámicamente
-  function renderMeasures(filtered) {
-    listContainer.innerHTML = "";
+  function createMeasureCard(m = {}) {
+    const statusColor = normalizeText(m.status);
+    let statusVariant = "default";
+    if (statusColor.includes("complet")) {
+      statusVariant = "completed";
+    } else if (statusColor.includes("program")) {
+      statusVariant = "programming";
+    } else if (statusColor.includes("avanz") || statusColor.includes("inicial")) {
+      statusVariant = "implementation";
+    }
 
-    if (!filtered.length) {
+    const statusBadge = m.status
+      ? `<span class="badge-chip badge-status badge-status-${statusVariant}">${m.status}</span>`
+      : "";
+
+    const pillarLabels = getMeasurePilares(m);
+    const typeLabel = pillarLabels.length
+      ? pillarLabels.join(" · ")
+      : (Array.isArray(m.labels) && m.labels.length ? m.labels.join(" · ") : "");
+    const typeBadge = typeLabel
+      ? `<span class="badge-chip badge-type">${typeLabel}</span>`
+      : "";
+
+    const lineBadge = m.linea
+      ? `<span class="badge-chip badge-line">${m.linea}</span>`
+      : "";
+
+    const scopeLabel = m.scope_label || m.scope;
+    const scopeBadge = scopeLabel
+      ? `<span class="badge-chip badge-scope">${scopeLabel}</span>`
+      : "";
+
+    const badges = [statusBadge, typeBadge, lineBadge, scopeBadge]
+      .filter(Boolean)
+      .join("");
+
+    return `
+      <div class="col">
+        <div class="card shadow-md border h-100 rounded-3 hover-shadow">
+          <div class="card-body d-flex flex-column">
+            <div class="mb-3">
+              <h5 class="fw-semibold mb-2" style="color:#262C51;">${m.name || "Sin título"}</h5>
+              <p class="text-muted mb-0">${m.description || ""}</p>
+            </div>
+            <p class="text-muted small mb-3">
+              <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
+            </p>
+            <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <div class="d-flex flex-wrap gap-2">
+                ${badges || '<span class="text-muted small">Sin etiquetas</span>'}
+              </div>
+              <button class="btn btn-sm text-white" style="background-color:#262C51;"
+                      onclick="verDetalle(${m.id})">
+                Ver detalles
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // 2️⃣ Renderizar cards dinámicamente con lazy load
+  function renderMeasures(filtered) {
+    filteredMeasures = filtered;
+    visibleCount = 0;
+    listContainer.innerHTML = "";
+    totalLabel.textContent = 0;
+    if (measuresTotalLabel) {
+      measuresTotalLabel.textContent = filteredMeasures.length;
+    }
+
+    if (!filteredMeasures.length) {
       noResults.style.display = "block";
-      totalLabel.textContent = 0;
+      updateLoadMoreVisibility();
       return;
     }
     noResults.style.display = "none";
+    renderNextBatch();
+  }
 
-    filtered.forEach((m) => {
-      const statusColor = normalizeText(m.status);
-      let statusVariant = "default";
-      if (statusColor.includes("complet")) {
-        statusVariant = "completed";
-      } else if (statusColor.includes("program")) {
-        statusVariant = "programming";
-      } else if (statusColor.includes("avanz") || statusColor.includes("inicial")) {
-        statusVariant = "implementation";
-      }
+  function renderNextBatch() {
+    if (isLoadingMore || visibleCount >= filteredMeasures.length) {
+      totalLabel.textContent = visibleCount;
+      return;
+    }
+    isLoadingMore = true;
+    const nextVisible = Math.min(filteredMeasures.length, visibleCount + PAGE_SIZE);
+    const fragment = document.createDocumentFragment();
 
-      const statusBadge = m.status
-        ? `<span class="badge-chip badge-status badge-status-${statusVariant}">${m.status}</span>`
-        : "";
-
-      const typeLabel = Array.isArray(m.labels) && m.labels.length
-        ? m.labels.join(" · ")
-        : (m.pilar || "");
-      const typeBadge = typeLabel
-        ? `<span class="badge-chip badge-type">${typeLabel}</span>`
-        : "";
-
-      const lineBadge = m.linea
-        ? `<span class="badge-chip badge-line">${m.linea}</span>`
-        : "";
-
-      const scopeLabel = m.scope_label || m.scope;
-      const scopeBadge = scopeLabel
-        ? `<span class="badge-chip badge-scope">${scopeLabel}</span>`
-        : "";
-
-      const badges = [statusBadge, typeBadge, lineBadge, scopeBadge]
-        .filter(Boolean)
-        .join("");
-
-      const card = `
-        <div class="col">
-          <div class="card shadow-md border h-100 rounded-3 hover-shadow">
-            <div class="card-body d-flex flex-column">
-              <div class="mb-3">
-                <h5 class="fw-semibold mb-2" style="color:#262C51;">${m.name || "Sin título"}</h5>
-                <p class="text-muted mb-0">${m.description || ""}</p>
-              </div>
-              <p class="text-muted small mb-3">
-                <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
-              </p>
-              <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex flex-wrap gap-2">
-                  ${badges || '<span class="text-muted small">Sin etiquetas</span>'}
-                </div>
-                <button class="btn btn-sm text-white" style="background-color:#262C51;"
-                        onclick="verDetalle(${m.id})">
-                  Ver detalles
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>`;
-      listContainer.insertAdjacentHTML("beforeend", card);
+    filteredMeasures.slice(visibleCount, nextVisible).forEach((measure) => {
+      const template = document.createElement("template");
+      template.innerHTML = createMeasureCard(measure).trim();
+      fragment.appendChild(template.content.firstElementChild);
     });
 
-    totalLabel.textContent = filtered.length;
+    listContainer.appendChild(fragment);
+    visibleCount = nextVisible;
+    totalLabel.textContent = visibleCount;
+    isLoadingMore = false;
+    updateLoadMoreVisibility();
+  }
+  function updateLoadMoreVisibility() {
+    if (!loadMoreBtn) return;
+    const shouldShow = filteredMeasures.length > visibleCount;
+    loadMoreBtn.style.display = shouldShow ? "inline-flex" : "none";
+    loadMoreBtn.disabled = isLoadingMore;
   }
 
   // 3️⃣ Aplicar búsqueda y filtros
@@ -541,10 +624,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         normalizeText(m.description).includes(searchTerm) ||
         normalizeText(m.responsable).includes(searchTerm);
 
+      const pillarValues = getMeasurePilares(m).map((value) => normalizeText(value));
       const matchesTipo =
         !tipo ||
+        pillarValues.some((value) => value === normalizedTipo) ||
         (Array.isArray(m.labels) && m.labels.some((label) => normalizeText(label) === normalizedTipo)) ||
-        normalizeText(m.pilar).includes(normalizedTipo);
+        normalizeText(m.pilar || "").includes(normalizedTipo);
 
       const matchesLinea =
         !linea ||
@@ -587,6 +672,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   if (filtroAutoridad) {
     filtroAutoridad.addEventListener("change", applyFilters);
+  }
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+      if (!isLoadingMore) {
+        renderNextBatch();
+      }
+    });
   }
 
   btnClear.addEventListener("click", () => {
@@ -1387,7 +1479,8 @@ function verDetalle(id) {
           <div class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-4 shadow-sm" style="border-color:rgba(38,44,81,0.15) !important; background: rgba(38,44,81,0.02);">
               <p class="mb-0 text-muted">
-                Mostrando <span id="measures_count" class="fw-bold" style="color:#262C51;">0</span> medidas
+                Mostrando <span id="measures_count" class="fw-bold" style="color:#262C51;">0</span> medidas de
+                <span id="measures_total" class="fw-bold" style="color:#262C51;">0</span>
               </p>
             </div>
 
@@ -1398,6 +1491,11 @@ function verDetalle(id) {
             </div>
 
             <div id="measures_list" class="row row-cols-1 g-4"></div>
+            <div class="text-center mt-4">
+              <button id="load_more_measures" class="btn btn-primary-custom px-4" style="display:none;">
+                <i class="bi bi-arrow-down-circle me-2"></i> Cargar más medidas
+              </button>
+            </div>
           </div>
         </div>
       </div>

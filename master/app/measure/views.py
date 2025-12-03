@@ -526,6 +526,13 @@ def measure_list_json(request):
         responsable = fields.get('Autoridad de aplicación', '')
         label_names = list(measure.labels.values_list('name', flat=True))
         pilar_name = measure.pilares.name if measure.pilares else ", ".join(label_names)
+        pilares_payload = None
+        if measure.pilares:
+            pilares_payload = {
+                "id": measure.pilares.id,
+                "name": measure.pilares.name,
+                "color": measure.pilares.color,
+            }
         line_name = measure.line.name if measure.line else ''
         line_category = measure.line.category.name if measure.line and measure.line.category else ''
         line_id = measure.line.id if measure.line else None
@@ -536,6 +543,7 @@ def measure_list_json(request):
             "status": measure.status,
             "description": description,
             "pilar": pilar_name,
+            "pilares": pilares_payload,
             "linea": line_name,
             "linea_id": line_id,
             "linea_categoria": line_category,
