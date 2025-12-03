@@ -141,6 +141,7 @@ class Measure(LongNamed):
         prog = ('En programación', 'En programación')
         inicial = ('En implementación inicial', 'En implementación inicial')
         avanzada = ('En implementación avanzada', 'En implementación avanzada')
+        completada = ('Completada', 'Completada')
         adefinir = ('A definir', 'A definir')
 
     class Scope(models.TextChoices):
@@ -152,6 +153,7 @@ class Measure(LongNamed):
         Status.prog: "#33c45a",
         Status.inicial: "#f9ff59",
         Status.avanzada: "#ff9159",
+        Status.completada: "#0f8b48",
         Status.adefinir: "#a1a1a1",
     }
 

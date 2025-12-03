@@ -14,6 +14,9 @@ def set_status_avan(model, request, qset):
 @admin.action(description='Establecer el estado como '+Measure.Status.inicial)
 def set_status_inic(model, request, qset):
     qset.update(status=Measure.Status.inicial)
+@admin.action(description='Establecer el estado como '+Measure.Status.completada)
+def set_status_comp(model, request, qset):
+    qset.update(status=Measure.Status.completada)
 @admin.action(description='Activar')
 def set_active(model, request, qset):
     qset.update(is_active=True)
@@ -28,7 +31,7 @@ class MeasureAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'status', 'is_active')
     list_filter = ('is_active', 'line', 'labels')
     search_fields = ('name','code')
-    actions = [set_active, set_inactive, set_status_adef, set_status_inic, set_status_avan, set_status_prog]
+    actions = [set_active, set_inactive, set_status_adef, set_status_inic, set_status_avan, set_status_prog, set_status_comp]
 
     fieldsets = (
         (None, {"fields": ('code', 'name', 'is_active', 'year', 'status', 'scope')}),

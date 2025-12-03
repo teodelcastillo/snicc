@@ -406,6 +406,7 @@ def mye_overview(request):
     count_by_status = Counter(measures.values_list('status', flat=True))
     avanzada = count_by_status.get(Measure.Status.avanzada, 0)
     inicial = count_by_status.get(Measure.Status.inicial, 0)
+    completadas = count_by_status.get(Measure.Status.completada, 0)
     implementation_count = avanzada + inicial
     percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
 
@@ -418,21 +419,24 @@ def mye_overview(request):
 
     prog = count_by_status.get(Measure.Status.prog, 0)
     indef = count_by_status.get(Measure.Status.adefinir, 0)
-    if implementation_count >= prog and implementation_count >= indef:
-        pred_status_name = "En implementación"
-        pred_status_count = implementation_count
-    elif prog >= indef:
-        pred_status_name = "En programación"
-        pred_status_count = prog
-    else:
-        pred_status_name = "A definir"
-        pred_status_count = indef
+    status_candidates = [
+        ("En implementación", implementation_count),
+        ("En programación", prog),
+        ("Completadas", completadas),
+        ("A definir", indef),
+    ]
+    pred_status_name, pred_status_count = status_candidates[0]
+    for name, count in status_candidates[1:]:
+        if count > pred_status_count:
+            pred_status_name = name
+            pred_status_count = count
 
     context.update({
         'total_measures': total_measures,
         'implementation_count': implementation_count,
         'percent_implementation': percent_implementation,
         'programming_count': prog,
+        'completed_count': completadas,
         'top_pilar_name': top_pilar_name,
         'top_pilar_count': top_pilar_count,
         'pred_status_name': pred_status_name,
@@ -586,6 +590,11 @@ PROGRESS_STYLE = {
         'badge_class': 'bg-info text-dark',
         'dot_class': 'bg-info',
         'text_class': 'text-info',
+    },
+    Measure.Status.completada: {
+        'badge_class': 'bg-success text-white',
+        'dot_class': 'bg-success',
+        'text_class': 'text-success',
     },
     Measure.Status.adefinir: {
         'badge_class': 'bg-secondary',
