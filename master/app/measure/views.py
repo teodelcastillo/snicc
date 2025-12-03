@@ -491,7 +491,13 @@ def mye_overview(request):
             ],
         })
 
+    line_category_columns = [[], []]
+    for index, category in enumerate(line_categories):
+        line_category_columns[index % 2].append(category)
+    line_category_columns = [column for column in line_category_columns if column]
+
     context['line_categories'] = line_categories
+    context['line_category_columns'] = line_category_columns
 
     return render(request, 'mainv2/staticpage/mye.html', context)
 

@@ -1173,15 +1173,83 @@ function verDetalle(id) {
 
         <!-- Grilla de Cards conceptuales -->
         <div class="row g-4 mb-5" id="lineCategoriesAccordion">
-          {% if line_categories %}
-            {% for category in line_categories %}
-              <div class="col-md-6">
-                <div class="card border shadow-md h-100" style="border-color: {{ category.color|default:'#c5cae9' }};">
+          {% if line_category_columns %}
+            {% for column in line_category_columns %}
+              <div class="col-lg-6 d-flex flex-column gap-4">
+                {% for category in column %}
+                  <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
+                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.parentloop.first or not forloop.first %}collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#category_lines_{{ category.id }}"
+                            aria-expanded="{% if forloop.parentloop.first and forloop.first %}true{% else %}false{% endif %}"
+                            aria-controls="category_lines_{{ category.id }}"
+                            style="background:transparent; border:0; padding:1.5rem;">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                             style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                          <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
+                        </div>
+                        <div>
+                          <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
+                          <p class="text-muted small mb-0">
+                            {{ category.line_total|default:0 }} línea{{ category.line_total|default:0|pluralize }} registradas ·
+                            {{ category.measure_total|default:0 }} medida{{ category.measure_total|default:0|pluralize }} activas
+                          </p>
+                        </div>
+                      </div>
+                      <div class="d-flex align-items-center gap-2 text-muted">
+                        <small>Ver detalle</small>
+                        <i class="bi bi-chevron-down transition-all"></i>
+                      </div>
+                    </button>
+                    <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.parentloop.first and forloop.first %}show{% endif %}">
+                      <div class="card-body">
+                        <div class="d-flex flex-wrap gap-3">
+                          {% for line in category.lines %}
+                            <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
+                              <div class="d-flex align-items-center gap-2 mb-2">
+                                {% if line.icon_url %}
+                                  <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                                {% else %}
+                                  <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
+                                    {{ line.measure_count }} med
+                                  </span>
+                                {% endif %}
+                                <div>
+                                  <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
+                                  <p class="text-muted small mb-0">
+                                    {% if line.measure_count %}
+                                      {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
+                                    {% else %}
+                                      Sin medidas activas
+                                    {% endif %}
+                                  </p>
+                                </div>
+                              </div>
+                              {% if line.description %}
+                                <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
+                              {% endif %}
+                            </div>
+                          {% empty %}
+                            <p class="text-muted mb-0">Sin líneas registradas.</p>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          {% elif line_categories %}
+            <div class="col-lg-6 d-flex flex-column gap-4">
+              {% for category in line_categories %}
+                <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
                   <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.first %}collapsed{% endif %}"
                           type="button"
                           data-bs-toggle="collapse"
                           data-bs-target="#category_lines_{{ category.id }}"
-                          aria-expanded="{{ forloop.first|yesno:'true,false' }}"
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
                           aria-controls="category_lines_{{ category.id }}"
                           style="background:transparent; border:0; padding:1.5rem;">
                     <div class="d-flex align-items-center gap-3">
@@ -1237,8 +1305,8 @@ function verDetalle(id) {
                     </div>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
           {% else %}
             <div class="col-12">
               <div class="border rounded-3 p-4 text-center text-muted" style="border-color: rgba(38,44,81,0.2);">
