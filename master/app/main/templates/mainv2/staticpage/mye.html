@@ -716,121 +716,227 @@ function verDetalle(id) {
     min-height: 100vh;
   }
 
-  /* Header mejorado con mejor espaciado y estructura */
+  /* Forzamos que el header pueda crecer sin recortes heredados */
+  .mye-content .mye-header {
+    display: block;
+    width: 100%;
+    margin: 0;
+    height: auto;
+  }
+
+  /* Header reconstruido */
   .mye-header {
-    background: linear-gradient(135deg, #262C51 0%, #1a2038 100%);
-    box-shadow: 0 4px 20px rgba(38, 44, 81, 0.2);
+    background: linear-gradient(120deg, #12172e 0%, #1f2f63 45%, #2f6ab4 75%, #35b7b0 100%);
+    color: white;
+    padding: clamp(2.5rem, 5vw, 4.25rem) 0;
     position: relative;
     overflow: hidden;
-    padding: 2.5rem 0;
+    border-radius: 0 0 32px 32px;
+    box-shadow: 0 25px 60px rgba(9, 13, 29, 0.35);
   }
 
-  .mye-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 200%;
-    height: 100%;
-    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 50%);
-    pointer-events: none;
-  }
-
+  .mye-header::before,
   .mye-header::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    filter: blur(0);
   }
 
-  .mye-title-content {
+  .mye-header::before {
+    width: 420px;
+    height: 420px;
+    top: -260px;
+    right: -120px;
+  }
+
+  .mye-header::after {
+    width: 260px;
+    height: 260px;
+    bottom: -180px;
+    left: -100px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .mye-header__inner {
     position: relative;
     z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 3.5rem);
+    display: flex;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .mye-header__info {
+    flex: 1 1 360px;
+    min-width: 280px;
+  }
+
+  .mye-header__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .mye-header__title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   #mye-title {
     color: white;
-    font-size: 2rem;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
     font-weight: 700;
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    line-height: 1.2;
-  }
-
-  #mye-title .bi-graph-up-arrow {
-    font-size: 2rem;
-    color: white;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 12px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-  }
-
-  #mye-title .bi-info-circle {
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.9);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: auto;
-  }
-
-  #mye-title .bi-info-circle:hover {
-    color: white;
-    transform: scale(1.1);
-  }
-
-  .mye-subtitle {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.1rem;
     margin: 0;
-    font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.15;
   }
 
-  /* Botones del header con mejor espaciado */
-  .mye-buttons {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .mye-buttons button,
-  .mye-buttons a {
+  .mye-info-trigger {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .mye-info-trigger:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .mye-header__subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 1rem 0 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .mye-header__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .mye-stat-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    padding: 1rem 1.25rem;
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .mye-stat__label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .mye-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .mye-header__actions {
+    flex: 0 0 320px;
+    min-width: 260px;
+    background: rgba(13, 19, 40, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 25px 50px rgba(8, 10, 25, 0.35);
+  }
+
+  .mye-header__actions p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+  }
+
+  .mye-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .mye-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
-    padding: 14px 24px;
-    background: white;
-    color: #262C51;
-    border: none;
-    border-radius: 10px;
+    width: 100%;
+    border-radius: 14px;
+    padding: 0.95rem 1.2rem;
     font-weight: 600;
     font-size: 0.95rem;
+    border: 1px solid transparent;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     text-decoration: none;
-    white-space: nowrap;
+    color: white;
   }
 
-  .mye-buttons button:hover,
-  .mye-buttons a:hover {
+  .mye-action.primary {
+    background: linear-gradient(120deg, #ffbf6c, #ff8e4f);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #1f1f1f;
+    box-shadow: 0 20px 35px rgba(255, 142, 79, 0.35);
+  }
+
+  .mye-action.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .mye-action:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-    background: #f8f9fa;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
   }
 
-  .mye-buttons img {
-    width: 20px;
-    height: 20px;
+  .mye-dropdown .dropdown-menu {
+    border-radius: 16px;
+    border: none;
+    padding: 0.35rem 0;
+    box-shadow: 0 25px 55px rgba(4, 6, 21, 0.4);
+  }
+
+  .mye-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    color: #1f2a44;
+  }
+
+  .mye-dropdown .dropdown-item:hover {
+    background: rgba(47, 106, 180, 0.08);
   }
 
   /* Sistema de tabs con mejor contraste y centrado */
@@ -1058,25 +1164,148 @@ function verDetalle(id) {
     border-radius: 4px;
   }
 
+  .mye-stat-card small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+  }
+
+  /* Modal informativo alineado al nuevo estilo */
+  .mye-modal-card {
+    border: 1px solid rgba(38, 44, 81, 0.15);
+    border-radius: 28px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 35px 60px rgba(11, 18, 40, 0.25);
+  }
+
+  .mye-modal-hero {
+    background: linear-gradient(135deg, #12172e, #1f2f63 55%, #35b7b0);
+    color: white;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .mye-modal-hero::after {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -60px;
+    top: -80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .mye-modal-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .mye-modal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.6rem;
+  }
+
+  .mye-modal-hero h5 {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mye-modal-hero p {
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .mye-modal-content {
+    padding: 2rem;
+  }
+
+  .mye-modal-section {
+    border-top: 1px solid rgba(38, 44, 81, 0.12);
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mye-modal-section h5 {
+    color: #262C51;
+    margin-bottom: 0.75rem;
+  }
+
+  .mye-modal-feature {
+    border: 1px solid rgba(38, 44, 81, 0.12);
+    border-radius: 18px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .mye-modal-feature:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  }
+
+  .mye-modal-feature h6 {
+    color: #262C51;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .mye-modal-feature h6 span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #262C51;
+    display: inline-block;
+  }
+
+  .mye-modal-feature p {
+    margin-bottom: 0;
+    color: #5f667e;
+  }
+
   /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .mye-header__inner {
+      flex-direction: column;
+    }
+
+    .mye-header__actions {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+  }
+
   @media (max-width: 768px) {
     .mye-header {
+      border-radius: 0 0 24px 24px;
       padding: 2rem 0;
     }
 
     #mye-title {
-      font-size: 1.5rem;
-      flex-wrap: wrap;
+      font-size: 1.6rem;
     }
 
-    .mye-subtitle {
+    .mye-header__subtitle {
       font-size: 1rem;
-    }
-
-    .mye-buttons {
-      width: 100%;
-      margin-top: 1.5rem;
-      justify-content: flex-start;
     }
 
     .nav-tabs .nav-link {
@@ -1094,35 +1323,51 @@ function verDetalle(id) {
 
         <div class="mye-content" style="background-color: white !important;">
             <div class="mye-header">
-        <div class="mye-title-content" style="display: flex; flex-direction: column; align-items: flex-start;">
-          <h1 id="mye-title" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            Monitoreo de Medidas Climáticas
-            <i class="bi bi-info-circle"
-              role="button"
-              style="cursor: pointer; font-size: 1.1em;"
-              data-bs-toggle="modal"
-              data-bs-target="#drawerRightInfo"
-              aria-label="Ver información sobre el módulo">
-            </i>
-          </h1>
-          <p style="margin: 0 0 0 40px; color: #555;">
-            Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
-          </p>
-        </div>
+                <div class="mye-header__inner">
+                    <div class="mye-header__info">
 
-        <div class="mye-buttons float-end me-2">
-            <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
-                <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar documentos"><span>Descargar documentos</span></button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/measure/export.csv">Descargar en lista (CSV)</a></li>
-                    <li><div class="dropdown-item" id="download_pdf">Descargar en fichas (PDF)</div></li>
-                    <li><div class="dropdown-item" onclick="openDetailPopup([], true)">Descargar detalle (PDF)</div></li>
-                </ul>
+                        <div class="mye-header__title-row">
+                            <h1 id="mye-title">Monitoreo de Medidas Climáticas</h1>
+                            <button
+                                class="mye-info-trigger"
+                                type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#drawerRightInfo"
+                                aria-label="Ver información sobre el módulo">
+                                <i class="bi bi-info-lg"></i>
+                            </button>
+                        </div>
+
+                        <p class="mye-header__subtitle">
+                            Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático.
+                        </p>
+
+                    </div>
+
+                        <div class="mye-actions">
+                            <div class="dropdown mye-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
+                                <button
+                                    class="mye-action secondary dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <i class="bi bi-cloud-arrow-down-fill"></i>
+                                    Descarga
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/measure/export.csv"><i class="bi bi-list-check"></i>Lista completa (CSV)</a></li>
+                                    <li><div class="dropdown-item" id="download_pdf"><i class="bi bi-files"></i>Fichas resumidas (PDF)</div></li>
+                                    <li><div class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</div></li>
+                                </ul>
+                            </div>
+                            <a class="mye-action secondary" href="/editor/measure/">
+                                <i class="bi bi-sliders"></i>
+                                Administrar MyE
+                            </a>
+                        </div>
+                </div>
             </div>
-            <a href="/editor/measure/"><img src="{% static 'main/images/mye/admin.svg' %}" alt="Admin MyE"><span>Admin MyE</span></a>
-        </div>
-    </div>
-    <div class="mye-body">
+    <div class="mye-body" style="margin-top:56px">
         <div class="mye-body-content"><!-- col-auto px-0-->
     <!-- Nuevo navbar estilo moderno -->
     <div class="bg-white border rounded-3 overflow-hidden"  style="border: none !important;" >
@@ -1193,9 +1438,6 @@ function verDetalle(id) {
             <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Vista General del Sistema</h2>
             <p class="text-muted mb-0">Estado de todas las medidas del plan</p>
           </div>
-          <button class="btn btn-primary-custom">
-            <i class="bi bi-download"></i> Descargar Reporte General
-          </button>
         </div>
 
         <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
@@ -1509,9 +1751,7 @@ function verDetalle(id) {
             <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Líneas y Enfoques</h2>
             <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
           </div>
-          <button class="btn btn-primary-custom">
-            <i class="bi bi-download"></i> Descargar Catálogo Completo
-          </button>
+
         </div>
 
         <!-- Grilla de Cards conceptuales -->
@@ -1772,32 +2012,31 @@ function verDetalle(id) {
 <!-- Modal -->
 <div class="modal fade" id="drawerRightInfo" tabindex="-1" aria-labelledby="drawerRightInfoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content border-0 shadow-md" >
-
-      <div class="modal-body p-4">
-        <!-- Card principal -->
-        <div class="shadow-md rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
-          
-          <!-- Header -->
-          <div class="p-4 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="p-3 rounded-3 text-white shadow-md d-flex align-items-center justify-content-center" style="background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85));">
-                <i class="bi bi-info-lg fs-4"></i>
+    <div class="modal-content border-0 bg-transparent">
+      <div class="modal-body p-0">
+        <div class="mye-modal-card">
+          <div class="mye-modal-hero d-flex align-items-start justify-content-between gap-3 flex-wrap">
+            <div class="d-flex align-items-start gap-3">
+              <div class="mye-modal-hero-icon">
+                <i class="bi bi-info-lg"></i>
               </div>
               <div>
-                <h5 class="mb-1 fw-semibold" style="color: #262C51;">¿Qué es el Módulo de Monitoreo de Medidas Climáticas?</h5>
-                <p class="mb-0 text-muted">
-                  Herramienta para el seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
+                <div class="mye-modal-pill">
+                  <i class="bi bi-globe2"></i>
+                  Módulo de Monitoreo
+                </div>
+                <h5 class="fw-semibold" style="color:white;">¿Qué es el Módulo de Monitoreo de Medidas Climáticas?</h5>
+                <p>
+                  Herramienta para el seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático.
                 </p>
               </div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
 
-          <!-- Contenido -->
-          <div class="p-4">
-            <div class="border-top pt-3 mb-4">
-              <h5 class="mb-2" style="color: #262C51;">Propósito del Sistema</h5>
+          <div class="mye-modal-content">
+            <div class="mye-modal-section">
+              <h5 class="fw-semibold">Propósito del Sistema</h5>
               <p class="text-muted">
                 El sistema de monitoreo de Argentina es una herramienta clave para seguir el progreso de las 
                 acciones propuestas en el Plan Nacional de Adaptación y Mitigación al cambio climático. 
@@ -1807,48 +2046,45 @@ function verDetalle(id) {
 
             <div class="row g-4">
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Evaluación de Efectividad
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Permite evaluar la efectividad de las políticas climáticas implementadas en todo el territorio nacional.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Transparencia y Mejora
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Busca fomentar la transparencia y la mejora continua de las estrategias de adaptación y mitigación.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Compromisos Internacionales
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Fundamental para asegurar que Argentina cumpla con sus compromisos climáticos internacionales.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Protección Ciudadana
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Protege a la ciudadanía y ecosistemas, reduciendo la vulnerabilidad frente al cambio climático.
                   </p>
                 </div>
