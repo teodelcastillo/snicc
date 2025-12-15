@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroLinea = document.getElementById("filtro_linea");
   const filtroNivel = document.getElementById("filtro_nivel");
   const filtroAlcance = document.getElementById("filtro_alcance");
-  const filtroAutoridad = document.getElementById("filtro_autoridad");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
   const chartTypology = document.getElementById("chart_tipo_medidas");
@@ -34,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const programmingCardValue = document.getElementById("programming_measures_value");
   const loadMoreBtn = document.getElementById("load_more_measures");
   const measuresTotalLabel = document.getElementById("measures_total");
+  const showResponsableField = {{ show_responsable_field|yesno:"true,false" }};
 
   const BASE_TYPOLOGY_COLORS = {
     adaptacion: "#6157FF",
@@ -88,7 +88,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       populateTypeFilterOptions(measures);
       populateLineFilterOptions(measures);
       populateScopeFilterOptions(measures);
-      populateAuthorityFilterOptions(measures);
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -475,25 +474,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function populateAuthorityFilterOptions(data = []) {
-    if (!filtroAutoridad) return;
-    const authorities = Array.from(
-      new Set(
-        data
-          .map((m) => (m.responsable || "").trim())
-          .filter(Boolean)
-      )
-    ).sort((a, b) => a.localeCompare(b));
-
-    filtroAutoridad.innerHTML = '<option value="">Todas</option>';
-    authorities.forEach((authority) => {
-      const option = document.createElement("option");
-      option.value = authority;
-      option.textContent = authority;
-      filtroAutoridad.appendChild(option);
-    });
-  }
-
   function createMeasureCard(m = {}) {
     const statusColor = normalizeText(m.status);
     let statusVariant = "default";
@@ -530,6 +510,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       .filter(Boolean)
       .join("");
 
+    const responsableBlock = showResponsableField
+      ? `<p class="text-muted small mb-3">
+              <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
+            </p>`
+      : "";
+
     return `
       <div class="col">
         <div class="card shadow-md border h-100 rounded-3 hover-shadow">
@@ -538,9 +524,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <h5 class="fw-semibold mb-2" style="color:#262C51;">${m.name || "Sin título"}</h5>
               <p class="text-muted mb-0">${m.description || ""}</p>
             </div>
-            <p class="text-muted small mb-3">
-              <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
-            </p>
+            ${responsableBlock}
             <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-3">
               <div class="d-flex flex-wrap gap-2">
                 ${badges || '<span class="text-muted small">Sin etiquetas</span>'}
@@ -609,20 +593,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const linea = filtroLinea.value;
     const nivel = filtroNivel.value;
     const alcance = filtroAlcance ? filtroAlcance.value : "";
-    const autoridad = filtroAutoridad ? filtroAutoridad.value : "";
 
     const normalizedTipo = normalizeText(tipo);
     const normalizedLinea = normalizeText(linea);
     const normalizedNivel = nivel && nivel !== "all" ? normalizeText(nivel) : "";
     const normalizedAlcance = normalizeText(alcance);
-    const normalizedAutoridad = normalizeText(autoridad);
 
     const filtered = measures.filter((m) => {
       const matchesSearch =
         !searchTerm ||
         normalizeText(m.name).includes(searchTerm) ||
-        normalizeText(m.description).includes(searchTerm) ||
-        normalizeText(m.responsable).includes(searchTerm);
+        normalizeText(m.description).includes(searchTerm);
 
       const pillarValues = getMeasurePilares(m).map((value) => normalizeText(value));
       const matchesTipo =
@@ -645,17 +626,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         normalizeText(m.scope).includes(normalizedAlcance) ||
         normalizeText(m.scope_label).includes(normalizedAlcance);
 
-      const matchesAutoridad =
-        !normalizedAutoridad ||
-        normalizeText(m.responsable) === normalizedAutoridad;
-
       return (
         matchesSearch &&
         matchesTipo &&
         matchesLinea &&
         (nivel === "all" ? true : matchesNivel) &&
-        matchesAlcance &&
-        matchesAutoridad
+        matchesAlcance
       );
     });
 
@@ -669,9 +645,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   filtroNivel.addEventListener("change", applyFilters);
   if (filtroAlcance) {
     filtroAlcance.addEventListener("change", applyFilters);
-  }
-  if (filtroAutoridad) {
-    filtroAutoridad.addEventListener("change", applyFilters);
   }
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener("click", () => {
@@ -687,9 +660,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     filtroNivel.value = "all";
     if (filtroAlcance) {
       filtroAlcance.value = "";
-    }
-    if (filtroAutoridad) {
-      filtroAutoridad.value = "";
     }
     searchInput.value = "";
     renderMeasures(measures);
@@ -1734,7 +1704,7 @@ function verDetalle(id) {
         <!-- Buscador mejorado con ícono -->
         <div class="search-wrapper">
           <i class="bi bi-search"></i>
-          <input id="search_measures" class="form-control" placeholder="Buscar medidas por título, descripción o responsable...">
+          <input id="search_measures" class="form-control" placeholder="Buscar medidas por título o descripción...">
         </div>
 
         <div class="row g-4">
@@ -1775,12 +1745,6 @@ function verDetalle(id) {
                   <label class="fw-semibold mb-2" for="filtro_alcance" style="color:#262C51;">Nivel de alcance</label>
                   <select id="filtro_alcance" class="form-select">
                     <option value="">Todos</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label class="fw-semibold mb-2" for="filtro_autoridad" style="color:#262C51;">Autoridad responsable</label>
-                  <select id="filtro_autoridad" class="form-select">
-                    <option value="">Todas</option>
                   </select>
                 </div>
                 <button id="clear_filters" class="btn btn-primary-custom w-100">

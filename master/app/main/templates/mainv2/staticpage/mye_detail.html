@@ -294,16 +294,18 @@
 
   <!-- Tarjetas de información con mejor diseño y sombras -->
   <div class="row g-4 mb-5">
-    <div class="col-md-4">
-      <div class="card h-100 border-0 mye-section-card">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
-            <i class="bi bi-building fs-5" style="color: #262C51;"></i> Autoridad de aplicación
+    {% if show_responsable_field %}
+      <div class="col-md-4">
+        <div class="card h-100 border-0 mye-section-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+              <i class="bi bi-building fs-5" style="color: #262C51;"></i> Autoridad de aplicación
+            </div>
+            <p class="mb-0 fw-semibold fs-5" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
           </div>
-          <p class="mb-0 fw-semibold fs-5" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
         </div>
       </div>
-    </div>
+    {% endif %}
     <div class="col-md-4">
       <div class="card h-100 border-0 mye-section-card">
         <div class="card-body p-4">
@@ -684,7 +686,7 @@
               <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Meta / Año</strong>
               <span>{{ measure.year }}</span>
             </li>
-            {% if responsable %}
+            {% if show_responsable_field and responsable %}
               <li class="mb-3">
                 <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Responsable</strong>
                 <span>{{ responsable }}</span>

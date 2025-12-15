@@ -61,6 +61,11 @@ STATUS_COLOR = {
     'A definir': '#3A3669'
 }
 STATUS_DICT = {x.label:None for x in Measure.Status}
+RESPONSABLE_FIELD_NAME = 'Autoridad de aplicación'
+
+
+def _is_responsable_field_active():
+    return MeasureField.active.filter(name=RESPONSABLE_FIELD_NAME).exists()
 
 def stacked_bar(qset):
     """Pandas black magic."""
@@ -502,6 +507,7 @@ def mye_overview(request):
 
     context['line_categories'] = line_categories
     context['line_category_columns'] = line_category_columns
+    context['show_responsable_field'] = _is_responsable_field_active()
 
     return render(request, 'mainv2/staticpage/mye.html', context)
 
@@ -519,11 +525,13 @@ def measure_list_json(request):
         .all()
     )
 
+    responsable_field_active = _is_responsable_field_active()
+
     data = []
     for measure in measures:
         fields = measure.fields or {}
         description = fields.get('Descripción', '')
-        responsable = fields.get('Autoridad de aplicación', '')
+        responsable = fields.get(RESPONSABLE_FIELD_NAME, '') if responsable_field_active else ''
         label_names = list(measure.labels.values_list('name', flat=True))
         pilar_name = measure.pilares.name if measure.pilares else ", ".join(label_names)
         pilares_payload = None
@@ -631,6 +639,8 @@ def measure_detail_view(request, id):
 
     sections, extra_sections = _measure_field_sections(measure)
     field_values = measure.fields or {}
+    show_responsable_field = _is_responsable_field_active()
+    responsable_value = field_values.get(RESPONSABLE_FIELD_NAME) if show_responsable_field else None
     labels = list(measure.labels.values_list('name', flat=True))
     related_measures = list(
         Measure.active
@@ -656,7 +666,7 @@ def measure_detail_view(request, id):
         'labels': labels,
         'national_objectives': measure.national_objectives.select_related('meta_1__meta_0'),
         'related_measures': related_measures,
-        'responsable': field_values.get('Autoridad de aplicación'),
+        'responsable': responsable_value,
         'execution_period': field_values.get('Período de ejecución'),
         'description': field_values.get('Descripción'),
         'metas': metas,
@@ -680,6 +690,7 @@ def measure_detail_view(request, id):
         'field_sections': sections,
         'extra_sections': extra_sections,
         'progress_style': progress_style,
+        'show_responsable_field': show_responsable_field,
     })
 
     return render(request, 'mainv2/staticpage/mye_detail.html', context)
