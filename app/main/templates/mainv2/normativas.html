@@ -136,6 +136,7 @@
                                         outline: 1px #D8D8D8 solid;
                                         outline-offset: -1px;
                                         background: white;
+                                        box-sizing: border-box;
                                         '>
                                         <div style='display: flex; flex-direction: column; align-items: flex-start; gap: 18px;'>
                                             <!-- Título + Ícono -->
@@ -156,6 +157,8 @@
                                                 display: -webkit-box;
                                                 -webkit-line-clamp: 2;
                                                 -webkit-box-orient: vertical;
+                                                overflow-wrap: anywhere;
+                                                word-break: break-word;
                                                 '>
                                                 {{ content.name }}
                                                 </div>
@@ -176,6 +179,9 @@
                                             display: -webkit-box;
                                             -webkit-line-clamp: 3;
                                             -webkit-box-orient: vertical;
+                                            overflow-wrap: anywhere;
+                                            word-break: break-word;
+                                            margin-bottom: 24px;
                                             '>
                                             {{ content.description }}
                                             </div>

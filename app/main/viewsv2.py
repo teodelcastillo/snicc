@@ -35,6 +35,8 @@ def default_context(request, add=None):
 # static pages
 
 def staticpage(request, path):
+    if path == 'mye.html':
+        return redirect('measure:mye')
     context = default_context(request)
     return render(request, 'mainv2/staticpage/'+path, context)
 

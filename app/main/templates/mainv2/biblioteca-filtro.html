@@ -118,13 +118,13 @@
 
             <div class="library-content links-content">
                 {% for b in books %}{% with content=b|translate:lang %}
-                    <div class="row-link">
+                    <div class="row-link" style="display:flex; align-items:flex-start; gap:18px; padding:20px 0; border-bottom:1px solid #E1E1E1; flex-wrap:wrap;">
                         {% if b.image %}
-                        <img src="{{b.image.url}}" alt="">
+                        <img src="{{b.image.url}}" alt="" style="width:88px; height:88px; object-fit:contain; flex-shrink:0;">
                         {% else %}
-                        <img src="{% static 'main/images/library/image.png' %}" alt="">
+                        <img src="{% static 'main/images/library/image.png' %}" alt="" style="width:88px; height:88px; object-fit:contain; flex-shrink:0;">
                         {% endif %}
-                        <div class="link-content-right">
+                        <div class="link-content-right" style="display:flex; flex-direction:column; gap:8px; flex:1; min-width:200px;">
                             <a href="{{b.url|default:"#"}}" target="_blank">
                                 <h2>{{content.title}}</h2>
                             </a> 

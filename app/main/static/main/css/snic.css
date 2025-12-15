@@ -1256,6 +1256,15 @@ main {
     text-align: center;
     padding: 0 2rem;
 }
+.section-cards .cards-recursos.cards-recursos-no-scroll {
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+.section-cards .cards-recursos.cards-recursos-no-scroll .col {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+}
 .section-cards .cards-recursos .card-hover .card-header + .list-group li.list-group-item {
     padding: 0;
 }

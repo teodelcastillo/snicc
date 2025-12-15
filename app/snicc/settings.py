@@ -26,8 +26,8 @@ SECRET_KEY = 'django-insecure-1474fz#=#h0y@h025onccdty9&_tp2(3^pbnp5dhd6ct^p(8k%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ 'snicc.ecoclimasol.com', 'localhost', 'snicc.ambiente.gob.ar','snicc-test.ambiente.gob.ar' ]
-CSRF_TRUSTED_ORIGINS = ['https://*.ecoclimasol.com', 'https://snicc.ambiente.gob.ar', 'https://snicc-test.ambiente.gob.ar']
+ALLOWED_HOSTS = [ 'snicc.ecoclimasol.com', 'localhost', 'snicc.ambiente.gob.ar' ]
+CSRF_TRUSTED_ORIGINS = ['https://*.ecoclimasol.com', 'https://snicc.ambiente.gob.ar', 'https://localhost:8443' ]
 
 # Users
 AUTH_USER_MODEL = "user.User"

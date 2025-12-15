@@ -62,7 +62,7 @@ class Line(LongNamed, Colored):
         verbose_name_plural = 'líneas/enfoques'
 
     def measure_count(self):
-        return Measure.objects.filter(action__line=self).count()
+        return self.measures.count()
 
 class Action(LongNamed, Colored):
     description = models.TextField(default='', blank=True, verbose_name='descripción', help_text='HTML permitido')    
@@ -141,6 +141,7 @@ class Measure(LongNamed):
         prog = ('En programación', 'En programación')
         inicial = ('En implementación inicial', 'En implementación inicial')
         avanzada = ('En implementación avanzada', 'En implementación avanzada')
+        completada = ('Completada', 'Completada')
         adefinir = ('A definir', 'A definir')
 
     class Scope(models.TextChoices):
@@ -152,6 +153,7 @@ class Measure(LongNamed):
         Status.prog: "#33c45a",
         Status.inicial: "#f9ff59",
         Status.avanzada: "#ff9159",
+        Status.completada: "#0f8b48",
         Status.adefinir: "#a1a1a1",
     }
 
@@ -159,7 +161,15 @@ class Measure(LongNamed):
         verbose_name = 'medida'
 
     is_active = models.BooleanField(default=False, blank=True, verbose_name='activa')
-    action = models.ForeignKey(Action, on_delete=models.CASCADE, verbose_name = 'línea de acción')
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='measures', verbose_name='línea/enfoque')
+    action = models.ForeignKey(
+        Action,
+        on_delete=models.SET_NULL,
+        related_name='measure_set',
+        null=True,
+        blank=True,
+        verbose_name='línea de acción'
+    )
     code = models.CharField(max_length=6, verbose_name='codigo') # e.g. "GR-10"
     labels = models.ManyToManyField(Label, verbose_name='pilares', blank=True)
     pilares = models.ForeignKey(Pilar, null=True, on_delete=models.SET_NULL)

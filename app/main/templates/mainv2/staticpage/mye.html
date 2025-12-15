@@ -22,10 +22,55 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroTipo = document.getElementById("filtro_tipo");
   const filtroLinea = document.getElementById("filtro_linea");
   const filtroNivel = document.getElementById("filtro_nivel");
+  const filtroAlcance = document.getElementById("filtro_alcance");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
+  const chartTypology = document.getElementById("chart_tipo_medidas");
+  const chartStatus = document.getElementById("chart_estado_general");
+  const totalCardValue = document.getElementById("total_measures_value");
+  const implementationCardValue = document.getElementById("implementation_measures_value");
+  const implementationPercentValue = document.getElementById("implementation_percent_value");
+  const programmingCardValue = document.getElementById("programming_measures_value");
+  const loadMoreBtn = document.getElementById("load_more_measures");
+  const measuresTotalLabel = document.getElementById("measures_total");
+  const showResponsableField = {{ show_responsable_field|yesno:"true,false" }};
 
+  const BASE_TYPOLOGY_COLORS = {
+    adaptacion: "#6157FF",
+    mitigacion: "#0D6EFD",
+    perdidas: "#DC2626",
+  };
+  const TYPOLOGY_TYPES = [
+    { key: "solo_adaptacion", label: "Adaptación", base: "adaptacion", shade: 0 },
+    { key: "solo_mitigacion", label: "Mitigación", base: "mitigacion", shade: 0 },
+    { key: "solo_perdidas", label: "Pérdidas y Daños", base: "perdidas", shade: 0 },
+    { key: "adaptacion_mitigacion", label: "Adaptación + Mitigación", base: "adaptacion", shade: 0.25 },
+    { key: "adaptacion_perdidas", label: "Adaptación + Pérdidas y Daños", base: "perdidas", shade: 0.25 },
+    { key: "mitigacion_perdidas", label: "Mitigación + Pérdidas y Daños", base: "mitigacion", shade: 0.25 },
+    { key: "adaptacion_mitigacion_perdidas", label: "Adaptación + Mitigación + Pérdidas y Daños", base: "perdidas", shade: 0.4 },
+  ];
+
+  const STATUS_ORDER = [
+    "Completada",
+    "En implementación avanzada",
+    "En implementación inicial",
+    "En programación",
+    "A definir",
+  ];
+
+  const STATUS_COLORS = {
+    "Completada": "#198754",
+    "En implementación avanzada": "#8881fe",
+    "En implementación inicial": "#0d6efd",
+    "En programación": "#b88200",
+    "A definir": "#3A3669",
+  };
+
+  const PAGE_SIZE = 7;
   let measures = [];
+  let filteredMeasures = [];
+  let visibleCount = 0;
+  let isLoadingMore = false;
 
   // Loader inicial
   listContainer.innerHTML = `
@@ -40,6 +85,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("/measure/filter-simple.json");
       const data = await res.json();
       measures = data.measures || data.data || [];
+      populateTypeFilterOptions(measures);
+      populateLineFilterOptions(measures);
+      populateScopeFilterOptions(measures);
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -47,70 +95,544 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 2️⃣ Renderizar cards dinámicamente
-  function renderMeasures(filtered) {
-    listContainer.innerHTML = "";
+  function normalizeText(value = "") {
+    return value
+      .toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
 
-    if (!filtered.length) {
+  function splitPilarText(value = "") {
+    return value
+      .toString()
+      .replace(/\sy\s/gi, ",")
+      .replace(/\se\s/gi, ",")
+      .split(",")
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+  }
+
+  function getMeasurePilares(measure = {}) {
+    if (!measure) {
+      return [];
+    }
+    const raw = measure.pilares;
+
+    const normalizeEntry = (entry) => {
+      if (!entry) return "";
+      if (typeof entry === "string") {
+        return entry.trim();
+      }
+      if (typeof entry === "object") {
+        const candidate = entry.name || entry.label || entry.value || "";
+        return typeof candidate === "string" ? candidate.trim() : "";
+      }
+      return "";
+    };
+
+    if (Array.isArray(raw)) {
+      const values = raw.map(normalizeEntry).filter(Boolean);
+      if (values.length) {
+        return values;
+      }
+    } else if (raw && typeof raw === "object") {
+      const value = normalizeEntry(raw);
+      if (value) {
+        return [value];
+      }
+    } else if (typeof raw === "string" && raw.trim()) {
+      const values = splitPilarText(raw);
+      if (values.length) {
+        return values;
+      }
+    }
+
+    if (typeof measure.pilar === "string" && measure.pilar.trim()) {
+      return splitPilarText(measure.pilar);
+    }
+
+    return [];
+  }
+
+  function lightenColor(hex, amount = 0.25) {
+    const cleanHex = hex.replace("#", "");
+    const normalized = cleanHex.length === 3
+      ? cleanHex.split("").map((char) => char + char).join("")
+      : cleanHex.padEnd(6, "0");
+    const num = parseInt(normalized, 16);
+    const r = (num >> 16) & 0xff;
+    const g = (num >> 8) & 0xff;
+    const b = num & 0xff;
+
+    const mix = (channel) => Math.round(channel + (255 - channel) * amount);
+    const toHex = (channel) => channel.toString(16).padStart(2, "0");
+
+    return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+  }
+
+  function extractThemeFlags(measure = {}) {
+    const tags = [...getMeasurePilares(measure)];
+    if (Array.isArray(measure.labels) && measure.labels.length) {
+      tags.push(...measure.labels);
+    }
+    if (!tags.length) {
+      return { adaptacion: false, mitigacion: false, perdidas: false };
+    }
+
+    const normalizedTags = tags.map((tag) => normalizeText(tag));
+    const hasAdaptacion = normalizedTags.some((tag) => tag.includes("adapt"));
+    const hasMitigacion = normalizedTags.some((tag) => tag.includes("mitig"));
+    const hasPerdidas = normalizedTags.some((tag) => tag.includes("perd") || tag.includes("dan"));
+
+    return {
+      adaptacion: hasAdaptacion,
+      mitigacion: hasMitigacion,
+      perdidas: hasPerdidas,
+    };
+  }
+
+  function detectCombinationKey(flags = {}) {
+    const { adaptacion, mitigacion, perdidas } = flags;
+    if (adaptacion && mitigacion && perdidas) {
+      return "adaptacion_mitigacion_perdidas";
+    }
+    if (adaptacion && mitigacion) {
+      return "adaptacion_mitigacion";
+    }
+    if (adaptacion && perdidas) {
+      return "adaptacion_perdidas";
+    }
+    if (mitigacion && perdidas) {
+      return "mitigacion_perdidas";
+    }
+    if (adaptacion) {
+      return "solo_adaptacion";
+    }
+    if (mitigacion) {
+      return "solo_mitigacion";
+    }
+    if (perdidas) {
+      return "solo_perdidas";
+    }
+    return null;
+  }
+
+  function buildTypologyStats(data = []) {
+    const stats = TYPOLOGY_TYPES.reduce((acc, type) => {
+      acc[type.key] = 0;
+      return acc;
+    }, {});
+
+    data.forEach((measure) => {
+      const flags = extractThemeFlags(measure);
+      const comboKey = detectCombinationKey(flags);
+      if (comboKey && stats.hasOwnProperty(comboKey)) {
+        stats[comboKey] += 1;
+      }
+    });
+
+    const categories = TYPOLOGY_TYPES.map((type) => type.label);
+    const values = TYPOLOGY_TYPES.map((type) => stats[type.key]);
+    const colors = TYPOLOGY_TYPES.reduce((acc, type, idx) => {
+      const baseColor = BASE_TYPOLOGY_COLORS[type.base] || "#262C51";
+      acc[categories[idx]] = type.shade ? lightenColor(baseColor, type.shade) : baseColor;
+      return acc;
+    }, {});
+
+    return {
+      categories,
+      values,
+      colors,
+    };
+  }
+
+  function buildStatusStats(data = []) {
+    const stats = {};
+    STATUS_ORDER.forEach((status) => {
+      stats[status] = 0;
+    });
+
+    data.forEach((measure) => {
+      const status = measure.status || "";
+      if (stats.hasOwnProperty(status)) {
+        stats[status] += 1;
+      }
+    });
+
+    return {
+      keys: STATUS_ORDER,
+      data: stats,
+      colors: STATUS_COLORS,
+    };
+  }
+
+  function updateSummaryStats(data = []) {
+    if (!totalCardValue || !implementationCardValue || !implementationPercentValue || !programmingCardValue) {
+      return;
+    }
+
+    const totals = data.reduce(
+      (acc, measure) => {
+        const status = normalizeText(measure.status || "");
+        if (status.includes("avanz") || status.includes("inicial")) {
+          acc.implementation += 1;
+        } else if (status.includes("program")) {
+          acc.programming += 1;
+        }
+        acc.total += 1;
+        return acc;
+      },
+      { total: 0, implementation: 0, programming: 0 }
+    );
+
+    const implementationPercent = totals.total ? Math.round((totals.implementation / totals.total) * 100) : 0;
+
+    totalCardValue.textContent = totals.total;
+    implementationCardValue.textContent = totals.implementation;
+    implementationPercentValue.textContent = `${implementationPercent}%`;
+    programmingCardValue.textContent = totals.programming;
+  }
+
+  function renderTypologyChart(pilaresStats = {}) {
+    if (!chartTypology) return;
+
+    const categories = pilaresStats.categories || [];
+    if (!categories.length) {
+      chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
+
+    const values = pilaresStats.values || [];
+    const hasData = values.some((value) => value > 0);
+    if (!hasData) {
+      chartTypology.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
+
+    const columns = categories.map((category, idx) => [category, values[idx] || 0]);
+    const colorMap = categories.reduce((acc, category) => {
+      acc[category] = pilaresStats.colors?.[category] || "#262C51";
+      return acc;
+    }, {});
+    const totalMeasures = values.reduce((acc, value) => acc + (value || 0), 0);
+
+    c3.generate({
+      bindto: "#chart_tipo_medidas",
+      size: { height: 380 },
+      data: {
+        columns,
+        type: "donut",
+        colors: colorMap,
+      },
+      legend: {
+        position: "right",
+      },
+      donut: {
+        width: 50,
+        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        label: {
+          format: function (value) {
+            return value > 0 ? value : "";
+          },
+        },
+      },
+      tooltip: {
+        format: {
+          value: function (value) {
+            return `${value} medidas`;
+          },
+        },
+      },
+    });
+  }
+
+  function renderStatusChart(statusStats = {}) {
+    if (!chartStatus) return;
+    const keys = statusStats.keys || [];
+    if (!keys.length) {
+      chartStatus.innerHTML = '<p class="text-muted text-center mt-5">Sin datos disponibles</p>';
+      return;
+    }
+
+    const columns = keys.map((key) => {
+      const label = key || "Sin dato";
+      return [label, (statusStats.data && statusStats.data[key]) || 0];
+    });
+    const colorMap = keys.reduce((acc, key) => {
+      const label = key || "Sin dato";
+      acc[label] = statusStats.colors?.[key] || "#262C51";
+      return acc;
+    }, {});
+    const totalMeasures = columns.reduce((acc, [, value]) => acc + (value || 0), 0);
+
+    c3.generate({
+      bindto: "#chart_estado_general",
+      size: { height: 380 },
+      data: {
+        columns,
+        type: "donut",
+        colors: colorMap,
+      },
+      legend: {
+        position: "right",
+      },
+      donut: {
+        width: 50,
+        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        label: {
+          format: function (value) {
+            return value > 0 ? value : "";
+          },
+        },
+      },
+      tooltip: {
+        format: {
+          value: function (value) {
+            return value + " medidas";
+          },
+        },
+      },
+    });
+  }
+
+  function renderPanoramaSections(data = []) {
+    updateSummaryStats(data);
+    const typologyStats = buildTypologyStats(data);
+    renderTypologyChart(typologyStats);
+    const statusStats = buildStatusStats(data);
+    renderStatusChart(statusStats);
+  }
+
+  function populateTypeFilterOptions(data = []) {
+    if (!filtroTipo) return;
+    const typeSet = new Set();
+
+    data.forEach((measure) => {
+      const pilares = getMeasurePilares(measure);
+      if (pilares.length) {
+        pilares.forEach((name) => typeSet.add(name));
+        return;
+      }
+
+      if (Array.isArray(measure.labels) && measure.labels.length) {
+        measure.labels.forEach((label) => {
+          const cleaned = label?.trim();
+          if (cleaned) {
+            typeSet.add(cleaned);
+          }
+        });
+      }
+    });
+
+    filtroTipo.innerHTML = '<option value="">Todas</option>';
+    Array.from(typeSet)
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((label) => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        filtroTipo.appendChild(option);
+      });
+  }
+
+  function populateLineFilterOptions(data = []) {
+    if (!filtroLinea) return;
+    const lines = Array.from(
+      new Map(
+        data
+          .filter((m) => m.linea && m.linea_id)
+          .map((m) => [m.linea_id, m.linea])
+      ).entries()
+    ).sort((a, b) => a[1].localeCompare(b[1]));
+
+    filtroLinea.innerHTML = '<option value="">Todas</option>';
+    lines.forEach(([id, name]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = name;
+      filtroLinea.appendChild(option);
+    });
+  }
+
+  function populateScopeFilterOptions(data = []) {
+    if (!filtroAlcance) return;
+    const scopes = Array.from(
+      new Set(
+        data
+          .map((m) => (m.scope_label || m.scope || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    filtroAlcance.innerHTML = '<option value="">Todos</option>';
+    scopes.forEach((scope) => {
+      const option = document.createElement("option");
+      option.value = scope;
+      option.textContent = scope;
+      filtroAlcance.appendChild(option);
+    });
+  }
+
+  function createMeasureCard(m = {}) {
+    const statusColor = normalizeText(m.status);
+    let statusVariant = "default";
+    if (statusColor.includes("complet")) {
+      statusVariant = "completed";
+    } else if (statusColor.includes("program")) {
+      statusVariant = "programming";
+    } else if (statusColor.includes("avanz") || statusColor.includes("inicial")) {
+      statusVariant = "implementation";
+    }
+
+    const statusBadge = m.status
+      ? `<span class="badge-chip badge-status badge-status-${statusVariant}">${m.status}</span>`
+      : "";
+
+    const pillarLabels = getMeasurePilares(m);
+    const typeLabel = pillarLabels.length
+      ? pillarLabels.join(" · ")
+      : (Array.isArray(m.labels) && m.labels.length ? m.labels.join(" · ") : "");
+    const typeBadge = typeLabel
+      ? `<span class="badge-chip badge-type">${typeLabel}</span>`
+      : "";
+
+    const lineBadge = m.linea
+      ? `<span class="badge-chip badge-line">${m.linea}</span>`
+      : "";
+
+    const scopeLabel = m.scope_label || m.scope;
+    const scopeBadge = scopeLabel
+      ? `<span class="badge-chip badge-scope">${scopeLabel}</span>`
+      : "";
+
+    const badges = [statusBadge, typeBadge, lineBadge, scopeBadge]
+      .filter(Boolean)
+      .join("");
+
+    const responsableBlock = showResponsableField
+      ? `<p class="text-muted small mb-3">
+              <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
+            </p>`
+      : "";
+
+    return `
+      <div class="col">
+        <div class="card shadow-md border h-100 rounded-3 hover-shadow">
+          <div class="card-body d-flex flex-column">
+            <div class="mb-3">
+              <h5 class="fw-semibold mb-2" style="color:#262C51;">${m.name || "Sin título"}</h5>
+              <p class="text-muted mb-0">${m.description || ""}</p>
+            </div>
+            ${responsableBlock}
+            <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <div class="d-flex flex-wrap gap-2">
+                ${badges || '<span class="text-muted small">Sin etiquetas</span>'}
+              </div>
+              <button class="btn btn-sm text-white" style="background-color:#262C51;"
+                      onclick="verDetalle(${m.id})">
+                Ver detalles
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // 2️⃣ Renderizar cards dinámicamente con lazy load
+  function renderMeasures(filtered) {
+    filteredMeasures = filtered;
+    visibleCount = 0;
+    listContainer.innerHTML = "";
+    totalLabel.textContent = 0;
+    if (measuresTotalLabel) {
+      measuresTotalLabel.textContent = filteredMeasures.length;
+    }
+
+    if (!filteredMeasures.length) {
       noResults.style.display = "block";
-      totalLabel.textContent = 0;
+      updateLoadMoreVisibility();
       return;
     }
     noResults.style.display = "none";
+    renderNextBatch();
+  }
 
-    filtered.forEach((m) => {
-      const badgeColor =
-        m.status?.toLowerCase().includes("avanz") ? "bg-success" :
-        m.status?.toLowerCase().includes("curso") ? "bg-info text-dark" : "bg-secondary";
+  function renderNextBatch() {
+    if (isLoadingMore || visibleCount >= filteredMeasures.length) {
+      totalLabel.textContent = visibleCount;
+      return;
+    }
+    isLoadingMore = true;
+    const nextVisible = Math.min(filteredMeasures.length, visibleCount + PAGE_SIZE);
+    const fragment = document.createDocumentFragment();
 
-      const card = `
-        <div class="col">
-          <div class="card shadow-md border h-100 rounded-3 hover-shadow">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="fw-semibold" style="color:#262C51;">${m.name || "Sin título"}</h5>
-                <span class="badge ${badgeColor}">${m.status || "N/A"}</span>
-              </div>
-              <p class="text-muted mb-2">${m.description || ""}</p>
-              <p class="text-muted small mb-3">
-                <i class="bi bi-person"></i> ${m.responsable || "No asignado"}
-              </p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="badge bg-info text-dark">${m.pilar || "Sin pilar"}</span>
-                <button class="btn btn-sm text-white" style="background-color:#262C51;"
-                        onclick="verDetalle(${m.id})">
-                  Ver detalles
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>`;
-      listContainer.insertAdjacentHTML("beforeend", card);
+    filteredMeasures.slice(visibleCount, nextVisible).forEach((measure) => {
+      const template = document.createElement("template");
+      template.innerHTML = createMeasureCard(measure).trim();
+      fragment.appendChild(template.content.firstElementChild);
     });
 
-    totalLabel.textContent = filtered.length;
+    listContainer.appendChild(fragment);
+    visibleCount = nextVisible;
+    totalLabel.textContent = visibleCount;
+    isLoadingMore = false;
+    updateLoadMoreVisibility();
+  }
+  function updateLoadMoreVisibility() {
+    if (!loadMoreBtn) return;
+    const shouldShow = filteredMeasures.length > visibleCount;
+    loadMoreBtn.style.display = shouldShow ? "inline-flex" : "none";
+    loadMoreBtn.disabled = isLoadingMore;
   }
 
   // 3️⃣ Aplicar búsqueda y filtros
   function applyFilters() {
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm = normalizeText(searchInput.value);
     const tipo = filtroTipo.value;
     const linea = filtroLinea.value;
     const nivel = filtroNivel.value;
+    const alcance = filtroAlcance ? filtroAlcance.value : "";
+
+    const normalizedTipo = normalizeText(tipo);
+    const normalizedLinea = normalizeText(linea);
+    const normalizedNivel = nivel && nivel !== "all" ? normalizeText(nivel) : "";
+    const normalizedAlcance = normalizeText(alcance);
 
     const filtered = measures.filter((m) => {
       const matchesSearch =
         !searchTerm ||
-        m.name?.toLowerCase().includes(searchTerm) ||
-        m.description?.toLowerCase().includes(searchTerm) ||
-        m.responsable?.toLowerCase().includes(searchTerm);
+        normalizeText(m.name).includes(searchTerm) ||
+        normalizeText(m.description).includes(searchTerm);
 
-      const matchesTipo = !tipo || (m.pilar && m.pilar.includes(tipo));
-      const matchesLinea = !linea || (m.linea && m.linea.includes(linea));
+      const pillarValues = getMeasurePilares(m).map((value) => normalizeText(value));
+      const matchesTipo =
+        !tipo ||
+        pillarValues.some((value) => value === normalizedTipo) ||
+        (Array.isArray(m.labels) && m.labels.some((label) => normalizeText(label) === normalizedTipo)) ||
+        normalizeText(m.pilar || "").includes(normalizedTipo);
+
+      const matchesLinea =
+        !linea ||
+        (m.linea_id && String(m.linea_id) === String(linea)) ||
+        (normalizedLinea && normalizeText(m.linea).includes(normalizedLinea));
+
       const matchesNivel =
-        nivel === "all" || (m.status && m.status.toLowerCase().includes(nivel.toLowerCase()));
+        !normalizedNivel ||
+        normalizeText(m.status).includes(normalizedNivel);
 
-      return matchesSearch && matchesTipo && matchesLinea && matchesNivel;
+      const matchesAlcance =
+        !normalizedAlcance ||
+        normalizeText(m.scope).includes(normalizedAlcance) ||
+        normalizeText(m.scope_label).includes(normalizedAlcance);
+
+      return (
+        matchesSearch &&
+        matchesTipo &&
+        matchesLinea &&
+        (nivel === "all" ? true : matchesNivel) &&
+        matchesAlcance
+      );
     });
 
     renderMeasures(filtered);
@@ -121,17 +643,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   filtroTipo.addEventListener("change", applyFilters);
   filtroLinea.addEventListener("change", applyFilters);
   filtroNivel.addEventListener("change", applyFilters);
+  if (filtroAlcance) {
+    filtroAlcance.addEventListener("change", applyFilters);
+  }
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+      if (!isLoadingMore) {
+        renderNextBatch();
+      }
+    });
+  }
 
   btnClear.addEventListener("click", () => {
     filtroTipo.value = "";
     filtroLinea.value = "";
     filtroNivel.value = "all";
+    if (filtroAlcance) {
+      filtroAlcance.value = "";
+    }
     searchInput.value = "";
     renderMeasures(measures);
   });
 
   // 5️⃣ Iniciar carga
   await loadMeasures();
+  renderPanoramaSections(measures);
 });
 
 function verDetalle(id) {
@@ -143,37 +679,724 @@ function verDetalle(id) {
 
 {% block content %}
 
+<style>
+  /* Añadiendo estilos modernos con mejores espaciados y transiciones */
+  .mye-content {
+    background-color: #f8f9fa !important;
+    min-height: 100vh;
+  }
+
+  /* Forzamos que el header pueda crecer sin recortes heredados */
+  .mye-content .mye-header {
+    display: block;
+    width: 100%;
+    margin: 0;
+    height: auto;
+  }
+
+  /* Header reconstruido */
+  .mye-header {
+    background: linear-gradient(120deg, #12172e 0%, #1f2f63 45%, #2f6ab4 75%, #35b7b0 100%);
+    color: white;
+    padding: clamp(2.5rem, 5vw, 4.25rem) 0;
+    position: relative;
+    overflow: visible;
+    border-radius: 0 0 32px 32px;
+    box-shadow: 0 25px 60px rgba(9, 13, 29, 0.35);
+  }
+
+  .mye-header::before,
+  .mye-header::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    filter: blur(0);
+    pointer-events: none;
+  }
+
+  .mye-header::before {
+    width: 420px;
+    height: 420px;
+    top: -260px;
+    right: -120px;
+  }
+
+  .mye-header::after {
+    width: 260px;
+    height: 260px;
+    bottom: -180px;
+    left: -100px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .mye-header__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 3.5rem);
+    display: flex;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .mye-header__info {
+    flex: 1 1 360px;
+    min-width: 280px;
+  }
+
+  .mye-header__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .mye-header__title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  #mye-title {
+    color: white;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.15;
+  }
+
+  .mye-title-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .mye-info-trigger {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    padding: 0;
+  }
+
+  .mye-info-trigger:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .mye-header__subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 1rem 0 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .mye-header__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .mye-stat-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    padding: 1rem 1.25rem;
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .mye-stat__label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .mye-stat__value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .mye-header__actions {
+    flex: 0 0 320px;
+    min-width: 260px;
+    background: rgba(13, 19, 40, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 25px 50px rgba(8, 10, 25, 0.35);
+  }
+
+  .mye-header__actions p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+  }
+
+  .mye-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .mye-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    border-radius: 14px;
+    padding: 0.95rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: white;
+  }
+
+  .mye-action.primary {
+    background: linear-gradient(120deg, #ffbf6c, #ff8e4f);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #1f1f1f;
+    box-shadow: 0 20px 35px rgba(255, 142, 79, 0.35);
+  }
+
+  .mye-action.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .mye-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  }
+
+  .mye-dropdown .dropdown-menu {
+    border-radius: 16px;
+    border: none;
+    padding: 0.35rem 0;
+    box-shadow: 0 25px 55px rgba(4, 6, 21, 0.4);
+  }
+
+  .mye-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    color: #1f2a44;
+  }
+
+  .mye-dropdown .dropdown-item:hover {
+    background: rgba(47, 106, 180, 0.08);
+  }
+
+  /* Sistema de tabs con mejor contraste y centrado */
+  .nav-tabs {
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 3px solid #e9ecef;
+    padding: 0;
+    margin: 0;
+    display: flex;
+  }
+
+  .nav-tabs .nav-item {
+    margin: 0;
+    flex: 1;
+  }
+
+  .nav-tabs .nav-link {
+    border: none;
+    border-right: 1px solid #dee2e6;
+    border-radius: 0;
+    color: #495057;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    background: transparent;
+    text-align: center;
+  }
+
+  .nav-tabs .nav-item:last-child .nav-link {
+    border-right: none;
+  }
+
+  .nav-tabs .nav-link:hover {
+    background: rgba(38, 44, 81, 0.05);
+    color: #262C51;
+  }
+
+  .nav-tabs .nav-link.active {
+    background: #262C51;
+    color: white;
+    position: relative;
+  }
+
+  .nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: white;
+  }
+
+  .nav-tabs .nav-link i {
+    font-size: 1.35rem;
+  }
+
+  .nav-tabs .nav-link.active i {
+    color: white;
+  }
+
+  /* Cards mejoradas */
+  .card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-header {
+    background: linear-gradient(to right, rgba(38, 44, 81, 0.08), rgba(38, 44, 81, 0.02));
+    border-bottom: 1px solid rgba(38, 44, 81, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* Tarjetas de estadísticas con colores */
+  .stat-card-success .card-header {
+    background: linear-gradient(to right, #e8f5e9, #f5fff9);
+    border-color: #c8e6c9;
+  }
+
+  .stat-card-warning .card-header {
+    background: linear-gradient(to right, #fff3cd, #fff9e6);
+    border-color: #fce7b2;
+  }
+
+  .stat-card-info .card-header {
+    background: linear-gradient(to right, #e3f2fd, #f9fcff);
+    border-color: #bbdefb;
+  }
+
+  .stat-card-purple .card-header {
+    background: linear-gradient(to right, #e8eaf6, #f3e5f5);
+    border-color: #c5cae9;
+  }
+
+  .stat-card-neutral .card-header {
+    background: linear-gradient(to right, rgba(38, 44, 81, 0.12), rgba(38, 44, 81, 0.02));
+    border-color: rgba(38, 44, 81, 0.15);
+  }
+
+  .badge-chip {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .badge-status {
+    font-size: 0.82rem;
+  }
+
+  .badge-status-programming {
+    background-color: #fff3cd;
+    color: #b88200;
+    border-color: #fce7b2;
+  }
+
+  .badge-status-implementation {
+    background-color: #d7efff;
+    color: #0d6efd;
+    border-color: #bbdefb;
+  }
+
+  .badge-status-completed {
+    background-color: #d1fadf;
+    color: #198754;
+    border-color: #c8e6c9;
+  }
+
+  .badge-status-default {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #dfe3e7;
+  }
+
+  .badge-type {
+    background-color: #2c6694;
+    color: #ffffff;
+    border-color: #1f4a6a;
+  }
+
+  .badge-line {
+    background-color: rgba(38, 44, 81, 0.08);
+    color: #262C51;
+    border-color: rgba(38, 44, 81, 0.15);
+  }
+
+  .badge-scope {
+    background-color: rgba(25, 135, 84, 0.08);
+    color: #198754;
+    border-color: rgba(25, 135, 84, 0.2);
+  }
+
+  /* Buscador mejorado */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+
+  .search-wrapper input {
+    padding-left: 48px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border: 2px solid rgba(38, 44, 81, 0.15);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .search-wrapper input:focus {
+    border-color: #262C51;
+    box-shadow: 0 0 0 4px rgba(38, 44, 81, 0.1);
+  }
+
+  /* Botones mejorados */
+  .btn-primary-custom {
+    background: #262C51;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(38, 44, 81, 0.2);
+  }
+
+  .btn-primary-custom:hover {
+    background: #1a2038;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(38, 44, 81, 0.3);
+  }
+
+  /* Section dividers */
+  .section-divider {
+    width: 6px;
+    height: 32px;
+    background: linear-gradient(to bottom, #262C51, rgba(38, 44, 81, 0.5));
+    border-radius: 4px;
+  }
+
+  .mye-stat-card small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+  }
+
+  /* Modal informativo alineado al nuevo estilo */
+  .mye-modal-card {
+    border: 1px solid rgba(38, 44, 81, 0.15);
+    border-radius: 28px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 35px 60px rgba(11, 18, 40, 0.25);
+  }
+
+  .mye-modal-hero {
+    background: linear-gradient(135deg, #12172e, #1f2f63 55%, #35b7b0);
+    color: white;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .mye-modal-hero::after {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -60px;
+    top: -80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .mye-modal-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .mye-modal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.6rem;
+  }
+
+  .mye-modal-hero h5 {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mye-modal-hero p {
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .mye-modal-content {
+    padding: 2rem;
+  }
+
+  .mye-modal-section {
+    border-top: 1px solid rgba(38, 44, 81, 0.12);
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mye-modal-section h5 {
+    color: #262C51;
+    margin-bottom: 0.75rem;
+  }
+
+  .mye-modal-feature {
+    border: 1px solid rgba(38, 44, 81, 0.12);
+    border-radius: 18px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .mye-modal-feature:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  }
+
+  .mye-modal-feature h6 {
+    color: #262C51;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .mye-modal-feature h6 span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #262C51;
+    display: inline-block;
+  }
+
+  .mye-modal-feature p {
+    margin-bottom: 0;
+    color: #5f667e;
+  }
+
+  .mye-quick-dropdown {
+    position: relative;
+  }
+
+  .mye-quick-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.4rem;
+    border-radius: 14px;
+    background: white;
+    color: #1f2750;
+    font-weight: 600;
+    border: 1px solid rgba(31, 39, 80, 0.15);
+    box-shadow: 0 10px 30px rgba(22, 28, 58, 0.15);
+    transition: all 0.25s ease;
+  }
+
+  .mye-quick-trigger i {
+    font-size: 1rem;
+    color: #1f2750;
+  }
+
+  .mye-quick-trigger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(22, 28, 58, 0.22);
+  }
+
+  .mye-quick-dropdown .dropdown-menu {
+    border-radius: 18px;
+    border: 1px solid rgba(31, 39, 80, 0.08);
+    box-shadow: 0 20px 45px rgba(18, 23, 52, 0.18);
+  }
+
+  .mye-quick-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 1.2rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .mye-header__inner {
+      flex-direction: column;
+    }
+
+    .mye-header__actions {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .mye-header {
+      border-radius: 0 0 24px 24px;
+      padding: 2rem 0;
+    }
+
+    #mye-title {
+      font-size: 1.6rem;
+    }
+
+    .mye-header__subtitle {
+      font-size: 1rem;
+    }
+
+    .nav-tabs .nav-link {
+      padding: 1rem 0.75rem;
+      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-tabs .nav-link i {
+      font-size: 1.2rem;
+    }
+
+    .mye-quick-trigger {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
         <div class="mye-content" style="background-color: white !important;">
             <div class="mye-header">
-        <div class="mye-title-content" style="display: flex; flex-direction: column; align-items: flex-start;">
-          <h1 id="mye-title" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            Módulo de Monitoreo - Cambio Climático
-            <i class="bi bi-info-circle"
-              role="button"
-              style="cursor: pointer; font-size: 1.1em;"
-              data-bs-toggle="modal"
-              data-bs-target="#drawerRightInfo"
-              aria-label="Ver información sobre el módulo">
-            </i>
-          </h1>
-          <p style="margin: 0 0 0 40px; color: #555;">
-            Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
-          </p>
-        </div>
+                <div class="mye-header__inner">
+                    <div class="mye-header__info">
 
-        <div class="mye-buttons float-end me-2">
-            <div class="dropdown bootstrap-select" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar todas las medidas">
-                <button data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'main/images/mye/download.svg' %}" alt="Descargar documentos"><span>Descargar documentos</span></button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/measure/export.csv">Descargar en lista (CSV)</a></li>
-                    <li><div class="dropdown-item" id="download_pdf">Descargar en fichas (PDF)</div></li>
-                    <li><div class="dropdown-item" onclick="openDetailPopup([], true)">Descargar detalle (PDF)</div></li>
-                </ul>
+                        <div class="mye-header__title-row">
+                          <h1 id="mye-title">
+                            <span class="mye-title-text">
+                              Monitoreo de Medidas Climáticas
+                              <button
+                                  class="mye-info-trigger"
+                                  type="button"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#drawerRightInfo"
+                                  aria-label="Ver información sobre el módulo">
+                                  <i class="bi bi-info-lg"></i>
+                              </button>
+                            </span>
+                          </h1>
+                        </div>
+
+                        <p class="mye-header__subtitle">
+                            Sistema de seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático.
+                        </p>
+
+                    </div>
+
+                        <div class="mye-actions">
+
+                            <div class="dropdown mye-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Reporte de Progreso">
+                              <button
+                                  class="mye-action secondary dropdown-toggle"
+                                  type="button"
+                                  data-bs-toggle="dropdown"
+                                  aria-expanded="false">
+                                  <i class="bi bi-cloud-arrow-down-fill"></i>
+                                  Reporte de Progreso
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                  <li><div class="dropdown-item" id="download_pdf"><i class="bi bi-files"></i>Reporte de Progreso 2024 (PDF)</div></li>
+                              </ul>
+                          </div>
+                            <a class="mye-action secondary" href="/editor/measure/">
+                                <i class="bi bi-sliders"></i>
+                                Administrar Modulo
+                            </a>
+                        </div>
+                </div>
             </div>
-            <a href="/editor/measure/"><img src="{% static 'main/images/mye/admin.svg' %}" alt="Admin MyE"><span>Admin MyE</span></a>
-        </div>
-    </div>
-    <div class="mye-body">
+    <div class="mye-body" style="margin-top:56px">
         <div class="mye-body-content"><!-- col-auto px-0-->
     <!-- Nuevo navbar estilo moderno -->
     <div class="bg-white border rounded-3 overflow-hidden"  style="border: none !important;" >
@@ -233,458 +1456,552 @@ function verDetalle(id) {
 
     </div>
     <!-- Contenido de tabs -->
-    <div class="tab-content" id="nav-tabContent" style="margin-top:20px;">
-<!-- TAB: Panorama General -->
-<div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
-
-  <!-- Header con título y botón de descarga -->
-  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-    <div>
-      <h2 class="fw-semibold mb-1" style="color:#262C51;">Vista General del Sistema</h2>
-      <p class="text-muted mb-0">Análisis estadístico y estado de todas las medidas del plan</p>
-    </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
-      <i class="bi bi-download"></i> Descargar Reporte General
-    </button>
-  </div>
-
-<!-- Tarjetas resumen -->
-<div class="row g-4 mb-5">
-
-  <!-- 🟣 Total de Medidas -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
-      
-      <!-- Header (40px alto, 24px padding, centrado) -->
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; ">
-        <span class="fw-semibold">Total de Medidas</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
-          <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
+    <div class="tab-content" id="nav-tabContent" style="margin-top: 2rem;">
+        
+      <!-- TAB: Panorama General -->
+      <div class="tab-pane fade show active" id="nav-panorama" role="tabpanel" aria-labelledby="nav-panorama-tab">
+        
+        <!-- Header con título y botón mejorados -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Vista General del Sistema</h2>
+            <p class="text-muted mb-0">Estado de todas las medidas del plan</p>
+          </div>
+          <div class="dropdown mye-quick-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar documentos del panorama">
+            <button
+              class="mye-quick-trigger dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <i class="bi bi-arrow-down-circle"></i>
+              Descargar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/measure/export.csv"><i class="bi bi-list-check"></i>Lista completa (CSV)</a></li>
+              <li><button type="button" class="dropdown-item" onclick="document.getElementById('download_pdf').click()"><i class="bi bi-files"></i>Fichas resumidas (PDF)</button></li>
+              <li><button type="button" class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</button></li>
+            </ul>
+          </div>
         </div>
-      </div>
 
-      <!-- Body -->
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ total_measures }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🟢 Progreso Avanzado -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e8f5e9, #f5fff9); border-color:#c8e6c9; color:#198754;">
-        <span class="fw-semibold">Progreso Avanzado</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d1fadf; width:36px; height:36px;">
-          <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold">{{ percent_advanced }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔵 En Ejecución -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <span class="fw-semibold">En Ejecución</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d7efff; width:36px; height:36px;">
-          <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_count }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-<!-- Gráficos principales -->
-<div class="row g-4 mb-5">
-
-  <!-- 🟣 Gráfico Tipología de Medidas -->
-  <div class="col-lg-6">
-    <div class="card border shadow-md h-100 overflow-hidden position-relative"
-         style="transition: all 0.3s ease; border-color: rgba(38,44,81,0.15);">
-      
-      <!-- Overlay hover -->
-      <div class="position-absolute top-0 start-0 w-100 h-100"
-           style="background:linear-gradient(to bottom right, rgba(38,44,81,0.1), transparent);
-                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
-
-      <!-- Header con estilo principal oscuro -->
-      <div class="card-header border-bottom flex-column justify-content-center"
-          style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
-                  border-color:#bbdefb; color:#0d6efd; text-align:left;">
-        <h5 class="fw-semibold mb-1" style="margin:0;">Tipología de Medidas</h5>
-        <small class="text-muted" style="margin:0;">Clasificación según adaptación, mitigación y pérdidas y daños</small>
-      </div>
-
-
-
-      <!-- Body -->
-      <div class="card-body position-relative" style="height:400px; z-index:2;">
-        <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔵 Gráfico Estado de Avance General -->
-  <div class="col-lg-6">
-    <div class="card border shadow-md h-100 overflow-hidden position-relative"
-         style="transition: all 0.3s ease; border-color:#bbdefb;">
-      
-      <!-- Overlay hover -->
-      <div class="position-absolute top-0 start-0 w-100 h-100"
-           style="background:linear-gradient(to bottom right, #e3f2fd, transparent);
-                  opacity:0; transition:opacity 0.3s ease; z-index:1;"></div>
-
-      <!-- Header con estilo azul claro -->
-      <div class="card-header border-bottom flex-column justify-content-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <h5 class="fw-semibold mb-1">Estado de Avance General</h5>
-        <small class="text-muted">
-          Distribución de medidas según su nivel de progreso
-        </small>
-      </div>
-
-      <!-- Body -->
-      <div class="card-body position-relative" style="height:400px; z-index:2;">
-        <div id="chart_estado_general" style="height:100%; width:100%;"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-
-
-  <!-- Análisis del panorama -->
-  <div class="card shadow-md border overflow-hidden" style="min-height:185px;">
-    <div class="card-header border-bottom flex-column justify-content-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Panorama</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Categoría predominante</h6>
-          <p class="text-muted mb-0">
-              {{ top_pilar_name }} con <strong>{{ top_pilar_count }}</strong> medidas
-          </p>
-        </div>
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Estado predominante</h6>
-          <p class="text-muted mb-0">
-              {{ pred_status_name }} con <strong>{{ pred_status_count }}</strong> medidas
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- TAB: Medidas -->
-<div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
-
-  <!-- Tarjetas de estadísticas -->
-<div class="row g-4 mb-5">
-
-  <!-- 🟣 Total de Medidas -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color: rgba(38,44,81,0.2); transition: all .3s ease;">
-      
-      <!-- Header (40px alto, 24px padding, centrado) -->
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; ">
-        <span class="fw-semibold">Total de Medidas</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:rgba(38,44,81,0.1); width:36px; height:36px;">
-          <i class="bi bi-bullseye" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <!-- Body -->
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ total_measures }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🟢 Progreso Avanzado -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#c8e6c9; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e8f5e9, #f5fff9); border-color:#c8e6c9; color:#198754;">
-        <span class="fw-semibold">Progreso Avanzado</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d1fadf; width:36px; height:36px;">
-          <i class="bi bi-graph-up-arrow" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="text-success mb-1 fw-semibold">{{ percent_advanced }}</h3>
-        <p class="text-muted mb-0">Medidas con progreso avanzado</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🔵 En Ejecución -->
-  <div class="col-md-4">
-    <div class="card border shadow-md position-relative overflow-hidden"
-         style="height:220px; border-color:#bbdefb; transition: all .3s ease;">
-      
-      <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-           style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-        <span class="fw-semibold">En Ejecución</span>
-        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-             style="background-color:#d7efff; width:36px; height:36px;">
-          <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i>
-        </div>
-      </div>
-
-      <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-          style="height:calc(220px - 40px); padding-left:24px;">
-        <h3 class="mb-1 fw-semibold" style="color:#262C51;">{{ execution_count }}</h3>
-        <p class="text-muted mb-0">Acciones en monitoreo</p>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-  <div class="tab-content mt-4" id="nav-tabContent">
-    <div class="tab-pane fade show active" id="nav-medidas" role="tabpanel">
-
-      <!-- Buscador -->
-      <div class="d-flex align-items-center gap-3 mb-4">
-        <div style="width:6px;height:32px;background:linear-gradient(to bottom,#262C51,rgba(38,44,81,0.5));border-radius:4px;"></div>
-        <h2 class="fw-semibold mb-0" style="color:#262C51;">Explorar Medidas</h2>
-      </div>
-
-      <div class="position-relative mb-4">
-        <i class="bi bi-search position-absolute" style="left:16px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:1.2rem;"></i>
-        <input id="search_measures" class="form-control ps-5 py-3 border-2 rounded-3" placeholder="Buscar medidas por título, descripción o responsable...">
-      </div>
-
-      <div class="row g-4">
-        <!-- Filtros -->
-        <div class="col-lg-3">
-          <div class="card border shadow-md rounded-3">
-            <div class="card-header border-bottom bg-light">
-              <h6 class="fw-semibold mb-0" style="color:#262C51;">Filtros</h6>
+        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:rgba(38,44,81,0.1); width:40px; height:40px;">
+                  <i class="bi bi-bullseye" style="font-size:1.25rem; color:#262C51;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
+                <p class="text-muted mb-0">Acciones en monitoreo</p>
+              </div>
             </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
-                <select id="filtro_tipo" class="form-select">
-                  <option value="">Todas</option>
-                  <option>Adaptación</option>
-                  <option>Mitigación</option>
-                  <option>Pérdidas y Daños</option>
-                </select>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#b88200;">En Programación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#fff3cd; width:40px; height:40px;">
+                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#b88200;"></i>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
-                <select id="filtro_linea" class="form-select">
-                  <option value="">Todas</option>
-                  <option>Transversales</option>
-                  <option>Instrumentales</option>
-                  <option>Estratégicas</option>
-                </select>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#b88200; font-size: 2.5rem;">{{ programming_count }}</h1>
+                <p class="text-muted mb-0">Medidas en programación</p>
               </div>
-              <div class="mb-3">
-                <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
-                <select id="filtro_nivel" class="form-select">
-                  <option value="all">Todos</option>
-                  <option>Inicial</option>
-                  <option>En curso</option>
-                  <option>Avanzada</option>
-                </select>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#0d6efd;">En Implementación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d7efff; width:40px; height:40px;">
+                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#0d6efd;"></i>
+                </div>
               </div>
-              <button id="clear_filters" class="btn w-100 text-white" style="background-color:#262C51;">Limpiar filtros</button>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#198754;">Completadas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d1fadf; width:40px; height:40px;">
+                  <i class="bi bi-check-circle-fill" style="font-size:1.25rem; color:#198754;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
+                <p class="text-muted mb-0">Medidas completadas.</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Listado -->
-        <div class="col-lg-9">
-          <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-3" style="border:2px solid rgba(38,44,81,0.1);">
-            <p class="mb-0 text-muted">Mostrando <span id="measures_count" class="fw-semibold" style="color:#262C51;">0</span> medidas</p>
+        <!-- Gráficos principales con headers mejorados -->
+        <div class="row g-4 mb-5">
+          <div class="col-lg-6">
+            <div class="card h-100 border shadow-lg" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h5 class="fw-semibold mb-1" style="color:#262C51;">Tipología de Medidas</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Clasificación según adaptación, mitigación y pérdidas y daños</p>
+              </div>
+              <div class="card-body" style="height:420px;">
+                <div id="chart_tipo_medidas" style="height:100%; width:100%;"></div>
+              </div>
+              <div class="card-footer bg-light border-top">
+                <p class="text-muted small mb-0 text-center">
+                  Cada segmento circular corresponde a una de las siete tipologías (individuales o combinadas) definidas en el PNAyMCC.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div id="no_results" class="text-center py-5 border border-dashed rounded-3" style="border-color:rgba(38,44,81,0.2);display:none;">
-            <i class="bi bi-search mb-3" style="font-size:3rem;color:rgba(38,44,81,0.4);"></i>
-            <h5 class="text-muted mb-2">No se encontraron medidas</h5>
-            <p class="text-muted">Intenta ajustar los filtros o términos de búsqueda</p>
-          </div>
-
-          <div id="measures_list" class="row row-cols-1 g-4"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TAB: Marco Conceptual -->
-<div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
-
-  <!-- Header con título y botón -->
-  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-    <div>
-      <h2 class="fw-semibold mb-1" style="color:#262C51;">Líneas y Enfoques</h2>
-      <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
-    </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" style="background-color:#262C51; border:none;">
-      <i class="bi bi-download"></i> Descargar Catálogo Completo
-    </button>
-  </div>
-
-  <!-- Grilla de Cards -->
-  <div class="row g-4 mb-5">
-
-    <!-- 🟣 Enfoques Transversales -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#c5cae9; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e8eaf6, #f3e5f5); border-color:#c5cae9; color:#262C51;">
-          <span class="fw-semibold">Enfoques Transversales</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#e3e0f3; width:36px; height:36px;">
-            <i class="bi bi-globe" style="font-size:1.1rem;"></i>
+          <div class="col-lg-6">
+            <div class="card h-100 border shadow-lg" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h5 class="fw-semibold mb-1" style="color:#262C51;">Estado de Avance General</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Distribución de medidas según su nivel de progreso</p>
+              </div>
+              <div class="card-body" style="height:420px;">
+                <div id="chart_estado_general" style="height:100%; width:100%;"></div>
+              </div>
+              <div class="card-footer bg-light border-top">
+                <p class="text-muted small mb-0 text-center">
+                  Cada segmento circular corresponde a un estado de avance de la medida (En programación, en implementación inicial, en implementación avanzada, completada).
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Incorporan principios de equidad, género, derechos humanos y sostenibilidad para fortalecer las políticas climáticas.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#262C51; opacity:0.85;">Transversal</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- 🟢 Líneas Instrumentales -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#c8e6c9; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e7f9ed, #f5fff9); border-color:#c8e6c9; color:#198754;">
-          <span class="fw-semibold">Líneas Instrumentales</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#d1fadf; width:36px; height:36px;">
-            <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i>
+        <!-- Análisis del panorama mejorado 
+        <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
+          <div class="card-header stat-card-info">
+            <h5 class="fw-semibold mb-0" style="color:#262C51;">
+              <i class="bi bi-graph-up me-2"></i>
+              Análisis del Panorama
+            </h5>
+          </div>
+          <div class="card-body" style="padding: 2rem;">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="mb-2 fw-semibold" style="color:#262C51;">Categoría predominante</h6>
+                    <p class="text-muted mb-0">
+                      {{ top_pilar_name }} con <strong style="color:#262C51;">{{ top_pilar_count }}</strong> medidas
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="mb-2 fw-semibold" style="color:#262C51;">Estado predominante</h6>
+                    <p class="text-muted mb-0">
+                      {{ pred_status_name }} con <strong style="color:#262C51;">{{ pred_status_count }}</strong> medidas
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+
+      <!-- TAB: Medidas -->
+      <div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
+        
+        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:rgba(38,44,81,0.1); width:40px; height:40px;">
+                  <i class="bi bi-bullseye" style="font-size:1.25rem; color:#262C51;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
+                <p class="text-muted mb-0">Acciones en monitoreo</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#b88200;">En Programación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#fff3cd; width:40px; height:40px;">
+                  <i class="bi bi-speedometer2" style="font-size:1.25rem; color:#b88200;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#b88200; font-size: 2.5rem;">{{ programming_count }}</h1>
+                <p class="text-muted mb-0">Medidas en programación</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#0d6efd;">En Implementación</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d7efff; width:40px; height:40px;">
+                  <i class="bi bi-graph-up-arrow" style="font-size:1.25rem; color:#0d6efd;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card border shadow-md stat-card-success h-100" style="border-color:#c8e6c9;">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="fw-semibold" style="color:#198754;">Completadas</span>
+                <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                     style="background-color:#d1fadf; width:40px; height:40px;">
+                  <i class="bi bi-check-circle-fill" style="font-size:1.25rem; color:#198754;"></i>
+                </div>
+              </div>
+              <div class="card-body d-flex flex-column justify-content-center">
+                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
+                <p class="text-muted mb-0">Medidas completadas.</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Conjunto de herramientas técnicas y de gestión que permiten operacionalizar las acciones climáticas a nivel sectorial y territorial.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#00897b; opacity:0.85;">Instrumental</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- 🔵 Líneas Estratégicas -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#bbdefb; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff); border-color:#bbdefb; color:#0d6efd;">
-          <span class="fw-semibold">Líneas Estratégicas</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#d7efff; width:36px; height:36px;">
-            <i class="bi bi-compass" style="font-size:1.1rem;"></i>
+        <!-- Sección de explorar medidas con divider decorativo -->
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="section-divider"></div>
+          <h2 class="fw-semibold mb-0" style="color:#262C51; font-size: 1.75rem;">Explorar Medidas</h2>
+        </div>
+
+        <!-- Buscador mejorado con ícono -->
+        <div class="search-wrapper">
+          <i class="bi bi-search"></i>
+          <input id="search_measures" class="form-control" placeholder="Buscar medidas por título o descripción...">
+        </div>
+
+        <div class="row g-4">
+          <!-- Filtros -->
+          <div class="col-lg-3">
+            <div class="card border shadow-md rounded-3" style="border-color: rgba(38,44,81,0.15);">
+              <div class="card-header">
+                <h6 class="fw-semibold mb-0" style="color:#262C51;">
+                  <i class="bi bi-funnel me-2"></i>
+                  Filtros
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
+                  <select id="filtro_tipo" class="form-select">
+                    <option value="">Todas</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
+                  <select id="filtro_linea" class="form-select">
+                    <option value="">Todas</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
+                  <select id="filtro_nivel" class="form-select">
+                    <option value="all">Todos</option>
+                    <option value="En implementación inicial">En implementación inicial</option>
+                    <option value="En implementación avanzada">En implementación avanzada</option>
+                    <option value="En programación">En programación</option>
+                    <option value="Completada">Completada</option>
+                    <option value="A definir">A definir</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-semibold mb-2" for="filtro_alcance" style="color:#262C51;">Nivel de alcance</label>
+                  <select id="filtro_alcance" class="form-select">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+                <button id="clear_filters" class="btn btn-primary-custom w-100">
+                  <i class="bi bi-x-circle me-1"></i>
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Listado -->
+          <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center border rounded-3 p-3 mb-4 shadow-sm" style="border-color:rgba(38,44,81,0.15) !important; background: rgba(38,44,81,0.02);">
+              <p class="mb-0 text-muted">
+                Mostrando <span id="measures_count" class="fw-bold" style="color:#262C51;">0</span> medidas de
+                <span id="measures_total" class="fw-bold" style="color:#262C51;">0</span>
+              </p>
+            </div>
+
+            <div id="no_results" class="text-center py-5 border border-dashed rounded-3" style="border-color:rgba(38,44,81,0.2) !important; display:none;">
+              <i class="bi bi-search mb-3" style="font-size:3rem;color:rgba(38,44,81,0.3);"></i>
+              <h5 class="fw-semibold mb-2" style="color:#262C51;">No se encontraron medidas</h5>
+              <p class="text-muted">Intenta ajustar los filtros o términos de búsqueda</p>
+            </div>
+
+            <div id="measures_list" class="row row-cols-1 g-4"></div>
+            <div class="text-center mt-4">
+              <button id="load_more_measures" class="btn btn-primary-custom px-4" style="display:none;">
+                <i class="bi bi-arrow-down-circle me-2"></i> Cargar más medidas
+              </button>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Direccionan la acción climática hacia resultados de largo plazo, integrando innovación, financiamiento e institucionalidad.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#5c6bc0; opacity:0.85;">Estratégica</span>
-        </div>
       </div>
-    </div>
 
-    <!-- 🟣 Pilares de Gobernanza -->
-    <div class="col-md-6">
-      <div class="card border shadow-md position-relative overflow-hidden"
-           style="height:220px; border-color:#e1bee7; transition:all .3s ease;">
-        <div class="card-header border-bottom d-flex align-items-center justify-content-between text-center"
-             style="height:90px; padding:24px; background:linear-gradient(to right, #f3e5f5, #f9f3ff); border-color:#e1bee7; color:#9c27b0;">
-          <span class="fw-semibold">Pilares de Gobernanza</span>
-          <div class="p-2 rounded d-flex align-items-center justify-content-center"
-               style="background-color:#f0d7f8; width:36px; height:36px;">
-            <i class="bi bi-diagram-3" style="font-size:1.1rem;"></i>
+      <!-- TAB: Marco Conceptual -->
+      <div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
+        
+        <!-- Header con título y botón -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Líneas y Enfoques</h2>
+            <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
+          </div>
+
+        </div>
+
+        <!-- Grilla de Cards conceptuales -->
+        <div class="row g-4 mb-5" id="lineCategoriesAccordion">
+          {% if line_category_columns %}
+            {% for column in line_category_columns %}
+              <div class="col-lg-6 d-flex flex-column gap-4">
+                {% for category in column %}
+                  <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
+                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.parentloop.first or not forloop.first %}collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#category_lines_{{ category.id }}"
+                            aria-expanded="{% if forloop.parentloop.first and forloop.first %}true{% else %}false{% endif %}"
+                            aria-controls="category_lines_{{ category.id }}"
+                            style="background:transparent; border:0; padding:1.5rem;">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                             style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                          <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
+                        </div>
+                        <div>
+                          <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
+                          <p class="text-muted small mb-0">
+                            {{ category.line_total|default:0 }} línea{{ category.line_total|default:0|pluralize }} registradas ·
+                            {{ category.measure_total|default:0 }} medida{{ category.measure_total|default:0|pluralize }} activas
+                          </p>
+                        </div>
+                      </div>
+                      <div class="d-flex align-items-center gap-2 text-muted">
+                        <small>Ver detalle</small>
+                        <i class="bi bi-chevron-down transition-all"></i>
+                      </div>
+                    </button>
+                    <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.parentloop.first and forloop.first %}show{% endif %}">
+                      <div class="card-body">
+                        <div class="d-flex flex-wrap gap-3">
+                          {% for line in category.lines %}
+                            <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
+                              <div class="d-flex align-items-center gap-2 mb-2">
+                                {% if line.icon_url %}
+                                  <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                                {% else %}
+                                  <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
+                                    {{ line.measure_count }} med
+                                  </span>
+                                {% endif %}
+                                <div>
+                                  <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
+                                  <p class="text-muted small mb-0">
+                                    {% if line.measure_count %}
+                                      {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
+                                    {% else %}
+                                      Sin medidas activas
+                                    {% endif %}
+                                  </p>
+                                </div>
+                              </div>
+                              {% if line.description %}
+                                <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
+                              {% endif %}
+                            </div>
+                          {% empty %}
+                            <p class="text-muted mb-0">Sin líneas registradas.</p>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          {% elif line_categories %}
+            <div class="col-lg-6 d-flex flex-column gap-4">
+              {% for category in line_categories %}
+                <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
+                  <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.first %}collapsed{% endif %}"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#category_lines_{{ category.id }}"
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                          aria-controls="category_lines_{{ category.id }}"
+                          style="background:transparent; border:0; padding:1.5rem;">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                           style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                        <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
+                      </div>
+                      <div>
+                        <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
+                        <p class="text-muted small mb-0">
+                          {{ category.line_total|default:0 }} línea{{ category.line_total|default:0|pluralize }} registradas ·
+                          {{ category.measure_total|default:0 }} medida{{ category.measure_total|default:0|pluralize }} activas
+                        </p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                      <small>Ver detalle</small>
+                      <i class="bi bi-chevron-down transition-all"></i>
+                    </div>
+                  </button>
+                  <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                    <div class="card-body">
+                      <div class="d-flex flex-wrap gap-3">
+                        {% for line in category.lines %}
+                          <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                              {% if line.icon_url %}
+                                <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                              {% else %}
+                                <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
+                                  {{ line.measure_count }} med
+                                </span>
+                              {% endif %}
+                              <div>
+                                <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
+                                <p class="text-muted small mb-0">
+                                  {% if line.measure_count %}
+                                    {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
+                                  {% else %}
+                                    Sin medidas activas
+                                  {% endif %}
+                                </p>
+                              </div>
+                            </div>
+                            {% if line.description %}
+                              <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
+                            {% endif %}
+                          </div>
+                        {% empty %}
+                          <p class="text-muted mb-0">Sin líneas registradas.</p>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="col-12">
+              <div class="border rounded-3 p-4 text-center text-muted" style="border-color: rgba(38,44,81,0.2);">
+                No se encontraron líneas o enfoques activos para mostrar.
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Descripción expandida del marco conceptual -->
+        <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
+          <div class="card-header">
+            <h5 class="fw-semibold mb-0" style="color:#262C51;">
+              <i class="bi bi-book me-2"></i>
+              Marco Conceptual del PNAyMCC
+            </h5>
+          </div>
+          <div class="card-body" style="padding: 2rem;">
+            <p class="text-muted mb-4">
+              El Plan Nacional de Adaptación y Mitigación al Cambio Climático se estructura en cuatro grandes categorías que organizan y orientan las medidas climáticas del país.
+            </p>
+            
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c5cae9, rgba(197, 202, 233, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Enfoques Transversales</h6>
+                    <p class="text-muted small mb-0">
+                      Incluyen perspectivas de género, juventud, pueblos indígenas, entre otros, que deben estar presentes en todas las acciones.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #bbdefb, rgba(187, 222, 251, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Sectores Estratégicos</h6>
+                    <p class="text-muted small mb-0">
+                      Áreas prioritarias como energía, transporte, bosques, agua y ciudades que requieren atención específica.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c8e6c9, rgba(200, 230, 201, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares Instrumentales</h6>
+                    <p class="text-muted small mb-0">
+                      Herramientas como financiamiento, tecnología, y desarrollo de capacidades que facilitan la implementación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares de Gobernanza</h6>
+                    <p class="text-muted small mb-0">
+                      Estructuras de coordinación nacional, provincial y municipal que aseguran una gestión integrada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body d-flex flex-column justify-content-center align-items-start text-start"
-             style="height:calc(220px - 90px); padding-left:24px;">
-          <p class="text-muted mb-2">
-            Promueven coordinación interinstitucional, participación social y transparencia en la implementación de políticas climáticas.
-          </p>
-          <span class="badge rounded-pill text-white" style="background-color:#9c27b0; opacity:0.85;">Gobernanza</span>
-        </div>
       </div>
-    </div>
-
-  </div>
-
-  <!-- Sección inferior: análisis -->
-  <div class="card shadow-md border overflow-hidden" style="min-height:185px;">
-    <div class="card-header border-bottom flex-column justify-content-center"
-         style="height:90px; padding:24px; background:linear-gradient(to right, #e3f2fd, #f9fcff);
-                border-color:#bbdefb; color:#0d6efd;">
-      <h5 class="fw-semibold mb-0" style="color:#262C51;">Análisis del Marco Conceptual</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Enfoque más transversal</h6>
-          <p class="text-muted mb-0">Equidad de género y derechos humanos integrados en <strong>3 líneas</strong>.</p>
-        </div>
-        <div class="col-md-6">
-          <h6 class="mb-2" style="color:#262C51;">Línea estratégica predominante</h6>
-          <p class="text-muted mb-0">Innovación y fortalecimiento institucional presentes en <strong>5 medidas</strong>.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
     </div>
 
         </div>
@@ -733,32 +2050,31 @@ function verDetalle(id) {
 <!-- Modal -->
 <div class="modal fade" id="drawerRightInfo" tabindex="-1" aria-labelledby="drawerRightInfoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content border-0 shadow-md" >
-
-      <div class="modal-body p-4">
-        <!-- Card principal -->
-        <div class="shadow-md rounded-3 overflow-hidden" style="border: 1px solid rgba(38,44,81,0.2);">
-          
-          <!-- Header -->
-          <div class="p-4 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-3">
-              <div class="p-3 rounded-3 text-white shadow-md d-flex align-items-center justify-content-center" style="background: linear-gradient(to bottom right, #262C51, rgba(38,44,81,0.85));">
-                <i class="bi bi-info-lg fs-4"></i>
+    <div class="modal-content border-0 bg-transparent">
+      <div class="modal-body p-0">
+        <div class="mye-modal-card">
+          <div class="mye-modal-hero d-flex align-items-start justify-content-between gap-3 flex-wrap">
+            <div class="d-flex align-items-start gap-3">
+              <div class="mye-modal-hero-icon">
+                <i class="bi bi-info-lg"></i>
               </div>
               <div>
-                <h5 class="mb-1 fw-semibold" style="color: #262C51;">¿Qué es el Módulo de Evaluación y Monitoreo?</h5>
-                <p class="mb-0 text-muted">
-                  Herramienta para el seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático
+                <div class="mye-modal-pill">
+                  <i class="bi bi-globe2"></i>
+                  Módulo de Monitoreo
+                </div>
+                <h5 class="fw-semibold" style="color:white;">¿Qué es el Módulo de Monitoreo de Medidas Climáticas?</h5>
+                <p>
+                  Herramienta para el seguimiento del Plan Nacional de Adaptación y Mitigación al Cambio Climático.
                 </p>
               </div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
 
-          <!-- Contenido -->
-          <div class="p-4">
-            <div class="border-top pt-3 mb-4">
-              <h5 class="mb-2" style="color: #262C51;">Propósito del Sistema</h5>
+          <div class="mye-modal-content">
+            <div class="mye-modal-section">
+              <h5 class="fw-semibold">Propósito del Sistema</h5>
               <p class="text-muted">
                 El sistema de monitoreo de Argentina es una herramienta clave para seguir el progreso de las 
                 acciones propuestas en el Plan Nacional de Adaptación y Mitigación al cambio climático. 
@@ -768,48 +2084,45 @@ function verDetalle(id) {
 
             <div class="row g-4">
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Evaluación de Efectividad
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Permite evaluar la efectividad de las políticas climáticas implementadas en todo el territorio nacional.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Transparencia y Mejora
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Busca fomentar la transparencia y la mejora continua de las estrategias de adaptación y mitigación.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Compromisos Internacionales
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Fundamental para asegurar que Argentina cumpla con sus compromisos climáticos internacionales.
                   </p>
                 </div>
               </div>
-
               <div class="col-md-6">
-                <div class="bg-white p-4 rounded-3 shadow-md h-100 transition-all" style="border: 1px solid rgba(38,44,81,0.2);">
-                  <h6 class="mb-2 d-flex align-items-center gap-2" style="color: #262C51;">
-                    <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background-color:#262C51;"></span>
+                <div class="mye-modal-feature">
+                  <h6>
+                    <span></span>
                     Protección Ciudadana
                   </h6>
-                  <p class="text-muted mb-0">
+                  <p>
                     Protege a la ciudadanía y ecosistemas, reduciendo la vulnerabilidad frente al cambio climático.
                   </p>
                 </div>

@@ -1,10 +1,12 @@
-from django.db.models import Count, Q
-from django.shortcuts import render, redirect
+from django.db.models import Count, Q, Prefetch
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from django.urls import path
 from django.http import JsonResponse, HttpResponse, HttpRequest
 from main.views import base_context
+from main.viewsv2 import default_context
 from collections import Counter
+import re
 import pandas as pd
 import numpy as np
 import math
@@ -59,6 +61,11 @@ STATUS_COLOR = {
     'A definir': '#3A3669'
 }
 STATUS_DICT = {x.label:None for x in Measure.Status}
+RESPONSABLE_FIELD_NAME = 'Autoridad de aplicación'
+
+
+def _is_responsable_field_active():
+    return MeasureField.active.filter(name=RESPONSABLE_FIELD_NAME).exists()
 
 def stacked_bar(qset):
     """Pandas black magic."""
@@ -66,8 +73,8 @@ def stacked_bar(qset):
     statuses = list(STATUS_DICT.keys())
     pilstatset = set(pilares).union(statuses)
 
-    vals = Counter(qset.values_list('pilares__name', 'action__line__name'))
-    vals.update(Counter(qset.values_list('status', 'action__line__name')))
+    vals = Counter(qset.values_list('pilares__name', 'line__name'))
+    vals.update(Counter(qset.values_list('status', 'line__name')))
     # make and pivot the dataframe
     if vals:
         df = pd.DataFrame(vals.values(), index=vals.keys()).unstack().droplevel(0,axis=1)
@@ -118,7 +125,7 @@ def qset_builder(request):
     cat_id = request.GET.get('cat')
     if cat_id:
         lineqset = lineqset.filter(category_id=cat_id)
-        fil['action__line__category_id'] = cat_id
+        fil['line__category_id'] = cat_id
 
     pil = request.GET.getlist('pilar')
     if pil:
@@ -138,8 +145,7 @@ def qset_builder(request):
 
     lines = request.GET.getlist('line')
     if lines:
-        # lineqset = lineqset.filter(id__in=lines)
-        fil['action__line__in'] = lines
+        fil['line_id__in'] = lines
 
     qset = qset.filter(**fil)
     return qset, lineqset, fil
@@ -212,8 +218,8 @@ def measure_filter(request):
     if 'cat' in request.GET:
         # lines
         linecolors = {line.name:line.color for line in lineqset.all()}
-        linestat = {line:None for line in linecolors.keys()}    
-        linestat.update(Counter(qset.values_list('action__line__name', flat=True)))
+        linestat = {line:None for line in linecolors.keys()}
+        linestat.update(Counter(qset.values_list('line__name', flat=True)))
         res = {'stats': {'lines': {
             'data': linestat,
             'colors':linecolors,
@@ -223,7 +229,7 @@ def measure_filter(request):
         # categories
         catcolors = {cat.name:cat.color for cat in LineCategory.objects.all()}
         catstats = {cat:None for cat in catcolors.keys()}    
-        catstats.update(Counter(qset.values_list('action__line__category__name', flat=True)))
+        catstats.update(Counter(qset.values_list('line__category__name', flat=True)))
         res = {'stats': {'lines': { # it's lines, but it will work anyway
             'data': catstats,
             'colors':catcolors,
@@ -255,8 +261,8 @@ def measure_filter(request):
 def filter_details(request):
     qset, lineqset, fil = qset_builder(request)
     # remove empty lines
-    tmpfil = { 'action__measure__'+k:v for k,v in fil.items()}
-    lineqset = lineqset.annotate(mcount=Count('action__measure', filter=Q(**tmpfil))).filter(mcount__gt=0)
+    tmpfil = {'measures__' + k: v for k, v in fil.items()}
+    lineqset = lineqset.annotate(mcount=Count('measures', filter=Q(**tmpfil))).filter(mcount__gt=0)
 
     lineres, actionres = [], []
     for line in lineqset:
@@ -374,11 +380,11 @@ def many_measures_csv(request):
     res = HttpResponse(content_type="text/csv")
     writer = csv.writer(res)
     writer.writerow(['Línea o enfoque', 'Línea de acción', 'Nombre', 'Estado de implementación', 'Pilares', 'Autoridad de aplicación',])
-    for m in qset.order_by('action__line__name', 'action__name'):
+    for m in qset.order_by('line__name', 'action__name'):
         if m.fields:
-            writer.writerow([m.action.line, m.action, m.name, m.status, m.pilares, m.fields.get('Autoridad de aplicación', ''),])
+            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, m.fields.get('Autoridad de aplicación', ''),])
         else:
-            writer.writerow([m.action.line, m.action, m.name, m.status, m.pilares, '',])
+            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, '',])
     return res
 
 # recalc
@@ -392,20 +398,23 @@ def measure_pdf_recalc(request):
 
 
 def mye_overview(request):
-    context = base_context(request)
+    """
+    Vista principal del módulo MyE en la versión mainv2.
+    Renderiza la página con información agregada para los
+    contadores iniciales (el detalle dinámico se completa vía JS).
+    """
+    context = default_context(request)
 
-    # Total medidas activas
-    measures = Measure.active.all()
+    measures = Measure.active.select_related('pilares', 'line').all()
     total_measures = measures.count()
 
-    # Conteos por estado
     count_by_status = Counter(measures.values_list('status', flat=True))
     avanzada = count_by_status.get(Measure.Status.avanzada, 0)
     inicial = count_by_status.get(Measure.Status.inicial, 0)
-    exec_count = avanzada + inicial
-    percent_advanced = round((avanzada / total_measures) * 100) if total_measures > 0 else 0
+    completadas = count_by_status.get(Measure.Status.completada, 0)
+    implementation_count = avanzada + inicial
+    percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
 
-    # Pilar predominante
     top_pilar = (Pilar.objects
                  .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
                  .order_by('-num')
@@ -413,74 +422,286 @@ def mye_overview(request):
     top_pilar_name = top_pilar.name if top_pilar else ""
     top_pilar_count = top_pilar.num if top_pilar else 0
 
-    # Estado predominante (agrupado)
     prog = count_by_status.get(Measure.Status.prog, 0)
     indef = count_by_status.get(Measure.Status.adefinir, 0)
-    if exec_count >= prog and exec_count >= indef:
-        pred_status_name = "En Curso"
-        pred_status_count = exec_count
-    elif prog >= indef:
-        pred_status_name = "En programación"
-        pred_status_count = prog
-    else:
-        pred_status_name = "A definir"
-        pred_status_count = indef
+    status_candidates = [
+        ("En implementación", implementation_count),
+        ("En programación", prog),
+        ("Completadas", completadas),
+        ("A definir", indef),
+    ]
+    pred_status_name, pred_status_count = status_candidates[0]
+    for name, count in status_candidates[1:]:
+        if count > pred_status_count:
+            pred_status_name = name
+            pred_status_count = count
 
     context.update({
         'total_measures': total_measures,
-        'percent_advanced': percent_advanced,
-        'execution_count': exec_count,
+        'implementation_count': implementation_count,
+        'percent_implementation': percent_implementation,
+        'programming_count': prog,
+        'completed_count': completadas,
         'top_pilar_name': top_pilar_name,
         'top_pilar_count': top_pilar_count,
         'pred_status_name': pred_status_name,
         'pred_status_count': pred_status_count,
     })
 
-    return render(request, 'mainv2/mye.html', context)
+    category_icons = {
+        'Enfoques Transversales': 'bi-globe',
+        'Sectores Estratégicos': 'bi-building',
+        'Pilares Instrumentales': 'bi-gear-fill',
+        'Pilares de Gobernanza': 'bi-diagram-3',
+    }
+
+    lines_prefetch = Prefetch(
+        'line_set',
+        queryset=Line.objects.annotate(
+            active_measure_count=Count('measures', filter=Q(measures__is_active=True))
+        ).order_by('name'),
+        to_attr='prefetched_lines',
+    )
+
+    line_categories_qs = (
+        LineCategory.objects
+        .prefetch_related(lines_prefetch)
+        .annotate(
+            line_total=Count('line', distinct=True),
+            active_measure_total=Count(
+                'line__measures',
+                filter=Q(line__measures__is_active=True),
+                distinct=True,
+            ),
+        )
+        .order_by('name')
+    )
+
+    line_categories = []
+    for category in line_categories_qs:
+        prefetched_lines = getattr(category, 'prefetched_lines', [])
+        line_categories.append({
+            'id': category.id,
+            'name': category.name,
+            'color': category.color,
+            'icon_class': category_icons.get(category.name, 'bi-diagram-3'),
+            'line_total': category.line_total or 0,
+            'measure_total': category.active_measure_total or 0,
+            'lines': [
+                {
+                    'id': line.id,
+                    'name': line.name,
+                    'description': line.description,
+                    'measure_count': getattr(line, 'active_measure_count', 0) or 0,
+                    'color': line.color,
+                    'icon_url': line.icon.url if line.icon else None,
+                }
+                for line in prefetched_lines
+            ],
+        })
+
+    line_category_columns = [[], []]
+    for index, category in enumerate(line_categories):
+        line_category_columns[index % 2].append(category)
+    line_category_columns = [column for column in line_category_columns if column]
+
+    context['line_categories'] = line_categories
+    context['line_category_columns'] = line_category_columns
+    context['show_responsable_field'] = _is_responsable_field_active()
+
+    return render(request, 'mainv2/staticpage/mye.html', context)
 
 def measure_list_json(request):
     """
     Devuelve un listado simple de medidas activas con los campos principales,
     usado por el módulo MyE (mye.html) para renderizar las cards dinámicamente.
+
+    Incluye información de pilares, línea, categoría y descripción corta.
     """
-    measures = Measure.active.all().values(
-        "id",
-        "name",
-        "status",
-        "description",
-        "pilares__name",
-        "action__line__name",
+    measures = (
+        Measure.active
+        .select_related('pilares', 'line__category')
+        .prefetch_related('labels')
+        .all()
     )
 
+    responsable_field_active = _is_responsable_field_active()
+
     data = []
-    for m in measures:
-        # Si el campo 'fields' existe, buscamos la autoridad de aplicación
-        measure_obj = Measure.objects.get(id=m["id"])
-        responsable = ""
-        if measure_obj.fields:
-            responsable = measure_obj.fields.get("Autoridad de aplicación", "")
+    for measure in measures:
+        fields = measure.fields or {}
+        description = fields.get('Descripción', '')
+        responsable = fields.get(RESPONSABLE_FIELD_NAME, '') if responsable_field_active else ''
+        label_names = list(measure.labels.values_list('name', flat=True))
+        pilar_name = measure.pilares.name if measure.pilares else ", ".join(label_names)
+        pilares_payload = None
+        if measure.pilares:
+            pilares_payload = {
+                "id": measure.pilares.id,
+                "name": measure.pilares.name,
+                "color": measure.pilares.color,
+            }
+        line_name = measure.line.name if measure.line else ''
+        line_category = measure.line.category.name if measure.line and measure.line.category else ''
+        line_id = measure.line.id if measure.line else None
 
         data.append({
-            "id": m["id"],
-            "name": m["name"],
-            "status": m["status"],
-            "description": m["description"],
-            "pilar": m["pilares__name"],
-            "linea": m["action__line__name"],
+            "id": measure.id,
+            "name": measure.name,
+            "status": measure.status,
+            "description": description,
+            "pilar": pilar_name,
+            "pilares": pilares_payload,
+            "linea": line_name,
+            "linea_id": line_id,
+            "linea_categoria": line_category,
             "responsable": responsable,
+            "scope": measure.scope,
+            "scope_label": measure.get_scope_display(),
+            "labels": label_names,
         })
 
     return JsonResponse({"measures": data})
 
 
+def _measure_field_sections(measure: Measure):
+    """Return ordered sections for detail view."""
+    field_values = measure.fields or {}
+    ordered_keys = list(MeasureField.active.namelist())
 
+    sections = [
+        {'name': key, 'value': field_values.get(key)}
+        for key in ordered_keys
+        if field_values.get(key)
+    ]
+
+    extra_sections = [
+        {'name': key, 'value': value}
+        for key, value in field_values.items()
+        if value and key not in ordered_keys
+    ]
+    return sections, extra_sections
+
+
+def _split_multiline(value):
+    if not value:
+        return []
+    parts = re.split(r'[\r\n;]+', value)
+    cleaned = [part.strip("•- \t") for part in parts if part.strip("•- \t")]
+    return cleaned
+
+
+PROGRESS_STYLE = {
+    Measure.Status.avanzada: {
+        'badge_class': 'bg-success text-white',
+        'dot_class': 'bg-success',
+        'text_class': 'text-success',
+        'chip_class': 'badge-status-implementation',
+    },
+    Measure.Status.inicial: {
+        'badge_class': 'bg-warning text-dark',
+        'dot_class': 'bg-warning',
+        'text_class': 'text-warning',
+        'chip_class': 'badge-status-implementation',
+    },
+    Measure.Status.prog: {
+        'badge_class': 'bg-info text-dark',
+        'dot_class': 'bg-info',
+        'text_class': 'text-info',
+        'chip_class': 'badge-status-programming',
+    },
+    Measure.Status.completada: {
+        'badge_class': 'bg-success text-white',
+        'dot_class': 'bg-success',
+        'text_class': 'text-success',
+        'chip_class': 'badge-status-completed',
+    },
+    Measure.Status.adefinir: {
+        'badge_class': 'bg-secondary',
+        'dot_class': 'bg-secondary',
+        'text_class': 'text-secondary',
+        'chip_class': 'badge-status-default',
+    },
+}
+
+
+def measure_detail_view(request, id):
+    """
+    Página de detalle de una medida activa.
+    """
+    measure = get_object_or_404(
+        Measure.active.select_related(
+            'pilares',
+            'line__category',
+        ),
+        pk=id,
+    )
+
+    sections, extra_sections = _measure_field_sections(measure)
+    field_values = measure.fields or {}
+    show_responsable_field = _is_responsable_field_active()
+    responsable_value = field_values.get(RESPONSABLE_FIELD_NAME) if show_responsable_field else None
+    labels = list(measure.labels.values_list('name', flat=True))
+    related_measures = list(
+        Measure.active
+        .filter(line=measure.line)
+        .exclude(id=measure.id)
+        .only('id', 'name', 'status')[:6]
+    )
+
+    metas = _split_multiline(field_values.get('Metas'))
+    financiamiento = _split_multiline(field_values.get('Financiamiento'))
+    instrumentos = _split_multiline(field_values.get('Instrumentos y herramientas de implementación'))
+    necesidades = _split_multiline(field_values.get('Necesidades y barreras'))
+    indicadores = _split_multiline(field_values.get('Indicadores para el monitoreo'))
+    resultados = _split_multiline(field_values.get('Resultados esperados'))
+    seguimiento_extra = _split_multiline(field_values.get('Seguimiento'))
+
+    progress_style = PROGRESS_STYLE.get(measure.status, PROGRESS_STYLE[Measure.Status.adefinir])
+
+    context = default_context(request)
+    context.update({
+        'measure': measure,
+        'status_color': Measure.MEASURE_COLOR.get(measure.status, '#262C51'),
+        'labels': labels,
+        'national_objectives': measure.national_objectives.select_related('meta_1__meta_0'),
+        'related_measures': related_measures,
+        'responsable': responsable_value,
+        'execution_period': field_values.get('Período de ejecución'),
+        'description': field_values.get('Descripción'),
+        'metas': metas,
+        'alcance_geografico': field_values.get('Alcance geográfico o poblacional'),
+        'riesgos_climaticos': field_values.get('Riesgos climáticos asociados'),
+        'reduccion_emisiones': field_values.get('Reducción estimada de emisiones al 2030 (MtCO2e)'),
+        'estimacion_gastos': field_values.get('Estimación de gastos al 2030'),
+        'financiamiento': financiamiento,
+        'instrumentos': instrumentos,
+        'necesidades': necesidades,
+        'indicadores': indicadores,
+        'analisis_genero': field_values.get('Análisis enfoque de género y diversidad'),
+        'analisis_riesgo': field_values.get('Análisis enfoque de gestión integral del riesgo'),
+        'analisis_salud': field_values.get('Análisis enfoque de salud'),
+        'analisis_transicion': field_values.get('Análisis enfoque de transición justa'),
+        'cobeneficios': field_values.get('Cobeneficios entre adaptación y mitigación'),
+        'relacion_ley': field_values.get('Relación con la Ley 27.520'),
+        'objetivo_general': field_values.get('Objetivo general'),
+        'resultados_esperados': resultados,
+        'seguimiento_extra': seguimiento_extra,
+        'field_sections': sections,
+        'extra_sections': extra_sections,
+        'progress_style': progress_style,
+        'show_responsable_field': show_responsable_field,
+    })
+
+    return render(request, 'mainv2/staticpage/mye_detail.html', context)
 
 
 app_name='measure'
 urlpatterns = [
     path('list/', measure_list, name='list'),
     path('<int:id>/pdf', one_measure_pdf, name='pdf-export'),
-    path('<int:id>/', measure_fields, name='details'),
+    path('<int:id>/data.json', measure_fields, name='detail_fields'),
+    path('<int:id>/', measure_detail_view, name='detail_view'),
     path('filter.json', measure_filter_json, name='filter'),
     path('details.json', filter_details, name='details'),
     path('filter-simple.json', measure_list_json, name='filter_simple'),

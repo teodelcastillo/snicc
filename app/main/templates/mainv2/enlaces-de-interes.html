@@ -1,3 +1,6 @@
+{% extends 'mainv2/base.html' %}
+{% load static snicc_i18n %}
+{% block content %}
 <!-- Style y mobile -->
 
 <style>
@@ -33,9 +36,6 @@
 </style>
 
 
-{% extends 'mainv2/base.html' %}
-{% load static snicc_i18n %}
-{% block content %}
 
 <!-- Links page -->
 <div class="link-new-norm-content">
@@ -114,12 +114,13 @@
                     <div class="circle-recursos">
                         <img src="{% static 'main/images/cards/mye.svg' %}" alt="...">
                     </div>
-                    <h6 class="card-title">Módulo de Monitoreo y Evaluación</h6>
+                    <h6 class="card-title">Monitoreo de Medidas Climáticas</h6>
                     <p>{% ts 'Información sobre el monitoreo de los procesos y resultados de adaptación y mitigación en el marco del PNAyMCC.' lang %}</p>
                     </div>
                 </a>
                 </div>
-
+                <!-- CIAM -->
+                 <!--
                 <div class="col-12 col-lg-6 d-flex">
                 <a class="card d-block w-100 h-100" href="https://ciam.ambiente.gob.ar/" target="_blank">
                     <div class="card-body">
@@ -130,7 +131,7 @@
                     <p>{% ts 'Plataforma que agrupa datos, estadísticas, informes de monitoreo, mapas, infografías y otros recursos relacionados con el medio ambiente.' lang %}</p>
                     </div>
                 </a>
-                </div>
+                </div>-->
                 <div class="col-12 col-lg-6 d-flex">
                 <a class="card d-block w-100 h-100" href="https://snicc.ambiente.gob.ar/main/planes/" target="_blank">
                     <div class="card-body">
