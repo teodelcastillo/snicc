@@ -1,52 +1,76 @@
 import csv
 from .models import *
 import pandas as pd
-# from io import StringIO
-# import re
 
-LABELS = {
-    'Adaptación' : [1],
-    'Mitigación' : [2],
-    'Pérdidas y daños' : [3],
-    'Adaptación y Mitigación': [1,2],
-    'Adaptación y Pérdidas y daños': [1,3],
-    'Mitigación y Pérdidas y daños': [2,3],
-    'Adaptación, Mitigación y Pérdidas y daños': [1,2,3],
-} 
+LABEL_COMBINATIONS = {
+    'Adaptación': ('Adaptación',),
+    'Mitigación': ('Mitigación',),
+    'Pérdidas y daños': ('Pérdidas y daños',),
+    'Adaptación y Mitigación': ('Adaptación', 'Mitigación'),
+    'Adaptación y Pérdidas y daños': ('Adaptación', 'Pérdidas y daños'),
+    'Mitigación y Pérdidas y daños': ('Mitigación', 'Pérdidas y daños'),
+    'Adaptación, Mitigación y Pérdidas y daños': ('Adaptación', 'Mitigación', 'Pérdidas y daños'),
+}
 
-def label_cat():    
-    Label.objects.bulk_create([
-        Label(name='Adaptación'),
-        Label(name='Mitigación'),
-        Label(name='Pérdidas y daños'),
-    ])
-    LineCategory.objects.bulk_create([
-        LineCategory(name='Enfoques transversales'),
-        LineCategory(name='Líneas instrumentales'),
-        LineCategory(name='Líneas estratégicas'),
-    ])
+LINE_CATEGORY_DEFAULTS = (
+    ('Enfoques transversales', {'color': '#2E7D32'}),
+    ('Líneas instrumentales', {'color': '#1565C0'}),
+    ('Líneas estratégicas', {'color': '#6A1B9A'}),
+)
 
-PILARES = { p.name:p for p in Pilar.objects.all() }
+
+def ensure_catalogs():
+    """Safeguard basic catalog data when fixtures have not been loaded."""
+    for label_name in {name for combo in LABEL_COMBINATIONS.values() for name in combo}:
+        Label.objects.get_or_create(name=label_name)
+
+    for name, defaults in LINE_CATEGORY_DEFAULTS:
+        LineCategory.objects.get_or_create(name=name, defaults=defaults)
 
 
 def measures(csvfile='init/MyE.csv', delete=True):
     # Código de medida,Línea/enfoque,Línea de acción,Título de medida,"Adaptación, Mitigación o Pérdidas y daños",Columna1,Etiquetas de fila,Cuenta de Código de medida
+    ensure_catalogs()
     if delete:
         Measure.objects.all().delete()
-    
+
+    pilares = {p.name: p for p in Pilar.objects.all()}
+    label_pk_map = dict(Label.objects.values_list('name', 'pk'))
+
     with open(csvfile) as f :
         reader = csv.reader(f)
         reader.__next__() # skip first row
         for row in reader:
-            line, _ = Line.objects.get_or_create(name=row[1].strip())
+            line_name = row[1].strip()
+            action_name = row[2].strip()
+            measure_name = row[3].strip()
+            label_key = row[4].strip()
+
+            try:
+                line = Line.objects.get(name=line_name)
+            except Line.DoesNotExist:
+                raise Line.DoesNotExist(f'Line "{line_name}" not found. Load fixtures or create it before running measures().')
+
             action, _ = Action.objects.get_or_create(name=row[2].strip(), line=line)
+
+            combo = LABEL_COMBINATIONS.get(label_key)
+            if not combo:
+                raise KeyError(f'Label combination "{label_key}" is not defined in LABEL_COMBINATIONS.')
+
+            try:
+                pilar = pilares[label_key]
+            except KeyError as exc:
+                raise KeyError(f'No Pilar named "{label_key}". Load fixtures/pilares before running measures().') from exc
+
             measure = Measure.objects.create(
                 action = action,
-                pilares = PILARES[row[4]],
+                pilares = pilar,
                 code = row[0],
-                name = row[3],
+                name = measure_name,
             )
-            measure.labels.add(*LABELS[row[4]])
+
+            label_ids = [label_pk_map[label] for label in combo if label in label_pk_map]
+            measure.labels.add(*label_ids)
     for line in Line.objects.all():
         if line.measure_count() == 0:
             line.delete()

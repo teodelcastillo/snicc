@@ -58,6 +58,7 @@ STATUS_COLOR = {
     'En implementación avanzada': '#65AD9D',
     'En implementación inicial': '#D21685',
     'En programación': '#F9E297',
+    'Completada': '#1B5E20',
     'A definir': '#3A3669'
 }
 STATUS_DICT = {x.label:None for x in Measure.Status}
@@ -449,10 +450,9 @@ def mye_overview(request):
     })
 
     category_icons = {
-        'Enfoques Transversales': 'bi-globe',
-        'Sectores Estratégicos': 'bi-building',
-        'Pilares Instrumentales': 'bi-gear-fill',
-        'Pilares de Gobernanza': 'bi-diagram-3',
+        'enfoques transversales': 'bi-globe',
+        'líneas estratégicas': 'bi-building',
+        'líneas instrumentales': 'bi-gear-fill',
     }
 
     lines_prefetch = Prefetch(
@@ -484,7 +484,7 @@ def mye_overview(request):
             'id': category.id,
             'name': category.name,
             'color': category.color,
-            'icon_class': category_icons.get(category.name, 'bi-diagram-3'),
+            'icon_class': category_icons.get(category.name.strip().lower(), 'bi-diagram-3'),
             'line_total': category.line_total or 0,
             'measure_total': category.active_measure_total or 0,
             'lines': [

@@ -176,7 +176,6 @@ class Measure(LongNamed):
     year = models.IntegerField(default=2024, verbose_name='meta')
     status = models.CharField(choices=Status, default=Status.adefinir, max_length=27, verbose_name='estado de implementación')
     scope = models.CharField(choices=Scope, default=Scope.adefinir, max_length=10, verbose_name='alcance')
-    add_labels = models.TextField(null=True, blank=True, verbose_name='etiquetas de fila')
     fields = models.JSONField(null=True, blank=True, verbose_name='datos internos')
     last_modified = models.DateTimeField(auto_now=True)
     national_objectives = models.ManyToManyField(Meta_2, verbose_name='metas de adaptación', blank=True)

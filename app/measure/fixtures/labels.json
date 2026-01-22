@@ -1,0 +1,6 @@
+[
+  {"model": "measure.label", "pk": 1, "fields": {"name": "Adaptación"}},
+  {"model": "measure.label", "pk": 2, "fields": {"name": "Mitigación"}},
+  {"model": "measure.label", "pk": 3, "fields": {"name": "Pérdidas y daños"}}
+]
+
