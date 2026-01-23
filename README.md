@@ -18,21 +18,6 @@ cd snicc
 Copiá `dot.env` a `.env` y configurá los puertos deseados.
 
 Levantá los contenedores.
-```bash
-docker compose up -d
-docker exec django bash
-# compilar archivos estáticos
-python manage.py collectstatic
-# aplicar migraciones en la base
-python manage.py makemigrations
-python manage.py migrate
-# cargar catálogos iniciales
-python manage.py loaddata lang perfil profile provincias
-# cargar jerarquía de medidas
-python manage.py loaddata linecategories labels lines measurefields pilares metas
-# crear un superusuario
-python manage.py createsuperuser
-exit
 ```
 
 ## Ejecutar el stack de desarrollo

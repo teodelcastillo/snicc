@@ -161,7 +161,14 @@ class Measure(LongNamed):
         verbose_name = 'medida'
 
     is_active = models.BooleanField(default=False, blank=True, verbose_name='activa')
-    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='measures', verbose_name='línea/enfoque')
+    line = models.ForeignKey(
+        Line,
+        on_delete=models.SET_NULL,
+        related_name='measures',
+        verbose_name='línea/enfoque',
+        null=True,
+        blank=True,
+    )
     action = models.ForeignKey(
         Action,
         on_delete=models.SET_NULL,
@@ -170,7 +177,7 @@ class Measure(LongNamed):
         blank=True,
         verbose_name='línea de acción'
     )
-    code = models.CharField(max_length=6, verbose_name='codigo') # e.g. "GR-10"
+    code = models.CharField(max_length=12, verbose_name='codigo') # e.g. "GR-10"
     labels = models.ManyToManyField(Label, verbose_name='pilares', blank=True)
     pilares = models.ForeignKey(Pilar, null=True, on_delete=models.SET_NULL)
     year = models.IntegerField(default=2024, verbose_name='meta')
