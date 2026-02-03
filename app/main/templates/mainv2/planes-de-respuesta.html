@@ -1,5 +1,22 @@
 {% extends 'mainv2/base.html' %}        
 {% load static snicc_i18n %}
+{% block head %}
+<style>
+.planes-normativa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0.5rem 0;
+  min-height: 2rem;
+}
+.planes-normativa-chip {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+</style>
+{% endblock %}
 {% block sniclogo %}
 <a class="container-logo offset-md-1" href="{% url 'mainv2:landing' %}">
     <img src="{% static 'main/images/logo_snic.svg'%}" class="logo-snic" alt="">
@@ -20,12 +37,14 @@
             <div class="breadcrumbs-content">
                 <ol class="breadcrumb" role="list" aria-label="Migas de pan" >
                     <li><a href="{% url 'mainv2:landing' %}">{% ts 'Home' lang %}</a></li>
+                    {% if parent %}
                     {% for p in parent.parents %}{% with pcontent=p|translate:lang %}
                     <li><a href="{% url 'mainv2:post' p.slug %}">{{pcontent.title|truncatechars:20}}</a></li>
                     {% endwith %}{% endfor %}
                     {% with pcontent=parent|translate:lang %}
                     <li><a href="{% url 'mainv2:post' parent.slug %}">{{pcontent.title|truncatechars:20}}</a></li>
                     {% endwith %}
+                    {% endif %}
                     <li class="active" aria-current="page">
                     {% ts 'Planes de respuesta' lang %}
                     </li>
@@ -39,7 +58,7 @@
             <div class="post">
                 <h1 class="post-title post-title-planes">{% ts 'Planes de respuesta' lang %}</h1>
                 <p>{% ts 'Las 23 provincias y la Ciudad Autónoma de Buenos Aires deben elaborar sus Planes de Respuesta al cambio climático de acuerdo a los contenidos establecidos por la Ley 27.520 y la Disposición 776/2025, en concordancia con el Plan Nacional de Adaptación y Mitigación.' lang %}</p>
-                <div class="col-planes">
+                <div class="col-planes" style="margin-bottom: 25px !important;">
                     <div class="planes-resp-content">
 
                         <div class="planes-content-map">
@@ -61,6 +80,7 @@
                             }
                             var valProvincias = {{status|safe}};
                             var textosProvincias = {{texts|safe}};
+                            var gidsColor262C51 = [2, 5, 8, 9, 11, 13, 14, 16, 17, 21];
 
                             const map = L.map('mapa_planes').setView([-52, -54.5], 4);
                             
@@ -88,15 +108,16 @@
                                 return prov.properties.gid === 1
                             });
 
+                            var cabaStatus = (valProvincias[1] !== undefined && valProvincias[1] !== null) ? valProvincias[1] : 1;
                             var cabaImage = L.icon({
-                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+valProvincias[1]+'.png',
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'.png',
                                 iconSize:     [108, 73],
                                 iconAnchor:   [18, 22], 
                                 popupAnchor:  [-18, 45]
                             });
 
                             var cabaImageHover = L.icon({
-                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+valProvincias[1]+'-hover.png',
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'-hover.png',
                                 iconSize:     [108, 73],
                                 iconAnchor:   [18, 22], 
                                 popupAnchor:  [-18, 45]
@@ -168,6 +189,15 @@
                                     }
                                 });
                             }
+                            function regulationsToChips(text) {
+                                if (!text || !String(text).trim()) return '';
+                                var raw = String(text).trim();
+                                var items = raw.split(/\n|\r\n|;|,/).map(function(s){ return s.trim(); }).filter(Boolean);
+                                if (items.length === 0) return '<span class="badge bg-secondary planes-normativa-chip">' + raw + '</span>';
+                                return items.map(function(item) {
+                                    return '<span class="badge bg-secondary planes-normativa-chip">' + item.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+                                }).join(' ');
+                            }
                             function showCardProvince(featureProps){
                                 document.getElementById('title_province').innerHTML = featureProps.nombre_provincia;
                                 var contentTextHtml = '';
@@ -178,8 +208,7 @@
                                 if (textosProvincias[featureProps.gid].url){
                                 contentTextHtml +=   `<p><a href="${textosProvincias[featureProps.gid].url}" target="_blank" class="btn btn-azul-claro btn-small">Descarga el plan</a></p>`;
                                 }
-                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].regulations.title}</h5>`;
-                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].regulations.text}</p>`;
+                                contentTextHtml +=   `<div class="planes-normativa-chips">${regulationsToChips(textosProvincias[featureProps.gid].regulations.text)}</div>`;
                                 contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].contact.title}</h5>`;
                                 contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].contact.text}</p>`;
 
@@ -197,16 +226,20 @@
                             
                             
                             function styleFunction(feature){
+                                var statusKey = (valProvincias[feature.properties.gid] !== undefined && valProvincias[feature.properties.gid] !== null)
+                                    ? String(valProvincias[feature.properties.gid])
+                                    : (feature.properties.edo_plan || "1");
+                                var fillColor = referenciasMapa[statusKey] || referenciasMapa["1"];
                                 return {
-                                    fillColor: referenciasMapa[valProvincias[feature.properties.gid]],
-                                    weight: feature.properties.gid == 24 ? 0.5 : feature.properties.gid == 1 ? 0.1 : 1,
+                                    fillColor: fillColor,
+                                    weight: feature.properties.gid == 24 ? 0.5 : 1,
                                     color: "#FFFFFF",
                                     stroke: "#FFFFFF",
                                     fillOpacity: 1
                                 };
                             }
-                            
-                            const argentinaLayer = L.geoJSON(argentina, {style: styleFunction, onEachFeature: onEachFeature}).addTo(map);     
+                            var provinciasSinCabaNiIslas = { type: "FeatureCollection", features: argentina.features.filter(function(f) { return f.properties.gid !== 1 && f.properties.gid !== 24; }) };
+                            const argentinaLayer = L.geoJSON(provinciasSinCabaNiIslas, {style: styleFunction, onEachFeature: onEachFeature}).addTo(map);     
                         </script>
 
                         <div class="content-planes">
@@ -235,16 +268,19 @@
                             <div class="planes-reference">
                                 <h5>Referencias del mapa</h5>
                                 <p><span style="background-color: #969696;"></span>No presentado</p>
-                                <p><span style="background-color: #262C51;"></span>En proceso de preconvalidación (análisis ANA-SsA)</p>
-                                <p><span style="background-color: #975DBA;"></span>En proceso de preconvalidación (análisis MAP-GNCC)</p>
-                                <p><span style="background-color: #4CD964;"></span>En proceso de preconvalidación </p>
+                                <p><span style="background-color: #262C51;"></span>En proceso de convalidación (análisis ANA-SsA)</p>
+                                <p><span style="background-color: #975DBA;"></span>En proceso de convalidación (análisis MAP-GNCC)</p>
+                                <p><span style="background-color: #4CD964;"></span>En proceso de convalidación </p>
                                 <p><span style="background-color: #067F1B;"></span>Convalidado</p>
                             </div>
                         </div>
 
                     </div>
+                    
                 </div>
-
+                <div>
+                    <b>{% ts 'En el mapa pueden visualizarse los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.' lang %}</b>
+                </div>
                 <div class="d-flex">
                     <div class="dropdown">
                         <button class="btn btn-azul-claro btn-small dropdown-toggle my-4" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -281,7 +317,6 @@
                     <li>{% ts 'el proceso o esquema de actualización regular del plan de respuesta al cambio climático y su sistema de monitoreo e indicadores; y ' lang %}</li>
                     <li>{% ts 'un esquema de gobernanza y participación de los diversos sectores en la definición e implementación de las medidas de mitigación y adaptación al cambio climático.' lang %}
                     </ol>
-                    <b>{% ts 'En el mapa pueden visualizarse los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.' lang %}</p>
                 </p>                    
             </div>
 
