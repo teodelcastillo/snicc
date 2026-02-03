@@ -99,7 +99,7 @@
 
                   {% if post.ordered_children %}
                   <div class="section-cards section">
-                    <div class="row row-cols-1 row-cols-md-4 cards-recursos">
+                    <div class="row row-cols-1 row-cols-md-{{ cards_cols|default:4 }} cards-recursos w-100">
                       {% for child in post.ordered_children %}{% if child.is_published %}{% with ccontent=child|translate:lang %}
                       <div class="col">
                         <a class="card" href="{% url 'mainv2:post' child.slug %}">

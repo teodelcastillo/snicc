@@ -224,10 +224,14 @@ def post(request, slug):
     context = default_context(request)
     post = Post.objects.get(slug=slug)
     html, toc = post.get_version(context['lang']).html_toc()
+    # Número de columnas para las cards: 1 card → 50% ancho (2 cols); 2–4 cards → mismo número de cols
+    cards_count = post.ordered_children().filter(status=Post.PostStatus.published).count() + post.links.count()
+    cards_cols = 2 if cards_count == 1 else min(4, max(1, cards_count))
     context.update({
         'post': post,
         'html': html,
         'toc': toc,
+        'cards_cols': cards_cols,
     })
     return render(request, 'mainv2/post.html', context)
 
