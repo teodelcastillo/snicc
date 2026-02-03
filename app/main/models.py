@@ -372,9 +372,9 @@ class Plan(models.Model, VersionedNoDate):
         
     class PlanStatus(models.IntegerChoices):
         nopres = (1, 'No presentado')
-        precon_ana = (2, 'En proceso de preconvalidación (análisis ANA-SsA)')
-        precon_map = (3, 'En proceso de preconvalidación (análisis MAP-GNCC)')
-        precon = (4, 'En proceso de preconvalidación')
+        precon_ana = (2, 'En proceso de convalidación (análisis ANA-SsA)')
+        precon_map = (3, 'En proceso de convalidación (análisis MAP-GNCC)')
+        precon = (4, 'En proceso de convalidación')
         convalidado = (5, 'Convalidado')
     
     provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE)

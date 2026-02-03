@@ -100,58 +100,64 @@
                             var islas = argentina.features.filter(prov => {
                                 return prov.properties.gid === 24
                             });
-                            const imgIslas = document.getElementById("image_islas")
-                            imgIslas.src="{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-'%}"+valProvincias[24]+".png";
-                            imgIslas.onclick = function() { showCardProvince(islas[0].properties); };
+                            const imgIslas = document.getElementById("image_islas");
+                            const islasImgContainer = imgIslas.closest('.islas-img');
+                            if (valProvincias[24] !== undefined && valProvincias[24] !== null) {
+                                imgIslas.src="{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-'%}"+valProvincias[24]+".png";
+                                imgIslas.onclick = function() { showCardProvince(islas[0].properties); };
+                            } else {
+                                if (islasImgContainer) islasImgContainer.style.display = 'none';
+                            }
 
                             var caba = argentina.features.filter(prov => {
                                 return prov.properties.gid === 1
                             });
 
-                            var cabaStatus = (valProvincias[1] !== undefined && valProvincias[1] !== null) ? valProvincias[1] : 1;
-                            var cabaImage = L.icon({
-                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'.png',
-                                iconSize:     [108, 73],
-                                iconAnchor:   [18, 22], 
-                                popupAnchor:  [-18, 45]
-                            });
-
-                            var cabaImageHover = L.icon({
-                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'-hover.png',
-                                iconSize:     [108, 73],
-                                iconAnchor:   [18, 22], 
-                                popupAnchor:  [-18, 45]
-                            });
-
-                            L.marker([-40.8, -45.2], {icon: cabaImage}).addTo(map).on('mousemove', function(e) {
-                                if(!this.getElement().classList.contains('active')) {
-                                    this.getElement().classList.add('hover');
-                                    this.openTooltip(e.latlng);
-                                    this.setIcon(cabaImageHover);
-                                } else {
+                            if (valProvincias[1] !== undefined && valProvincias[1] !== null) {
+                                var cabaStatus = valProvincias[1];
+                                var cabaImage = L.icon({
+                                    iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'.png',
+                                    iconSize:     [108, 73],
+                                    iconAnchor:   [18, 22],
+                                    popupAnchor:  [-18, 45]
+                                });
+                                var cabaImageHover = L.icon({
+                                    iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'-hover.png',
+                                    iconSize:     [108, 73],
+                                    iconAnchor:   [18, 22],
+                                    popupAnchor:  [-18, 45]
+                                });
+                                L.marker([-40.8, -45.2], {icon: cabaImage}).addTo(map).on('mousemove', function(e) {
+                                    if(!this.getElement().classList.contains('active')) {
+                                        this.getElement().classList.add('hover');
+                                        this.openTooltip(e.latlng);
+                                        this.setIcon(cabaImageHover);
+                                    } else {
+                                        this.getElement().classList.remove('hover');
+                                        this.closeTooltip();
+                                        this.setIcon(cabaImage);
+                                    }
+                                }).on('mouseout', function(e) {
                                     this.getElement().classList.remove('hover');
                                     this.closeTooltip();
                                     this.setIcon(cabaImage);
-                                }
-                            }).on('mouseout', function(e) {
-                                this.getElement().classList.remove('hover');
-                                this.closeTooltip();
-                                this.setIcon(cabaImage);
-                            }).on('click', function(e) {
-                                this.closeTooltip();
-                                if(document.querySelector('.leaflet-interactive.active')) {
-                                    const activeClass = document.querySelector('.leaflet-interactive.active');
-                                    activeClass.classList.remove('active');
-                                }
-                                this.getElement().classList.remove('hover');
-                                this.getElement().classList.add('active');
-                                showCardProvince(caba[0].properties);
-                            }).on('popupclose', function(e) {
-                                if(document.querySelector('.leaflet-interactive.active')) {
-                                    const activeClass = document.querySelector('.leaflet-interactive.active');
-                                    activeClass.classList.remove('active');
-                                }
-                            }).bindTooltip(caba[0].properties.nombre_provincia, {direction: 'left', interactive: false, className: 'caba-tooltip'}).bindPopup(caba[0].properties.nombre_provincia);
+                                }).on('click', function(e) {
+                                    L.DomEvent.stopPropagation(e);
+                                    this.closeTooltip();
+                                    if(document.querySelector('.leaflet-interactive.active')) {
+                                        const activeClass = document.querySelector('.leaflet-interactive.active');
+                                        activeClass.classList.remove('active');
+                                    }
+                                    this.getElement().classList.remove('hover');
+                                    this.getElement().classList.add('active');
+                                    showCardProvince(caba[0].properties);
+                                }).on('popupclose', function(e) {
+                                    if(document.querySelector('.leaflet-interactive.active')) {
+                                        const activeClass = document.querySelector('.leaflet-interactive.active');
+                                        activeClass.classList.remove('active');
+                                    }
+                                }).bindTooltip(caba[0].properties.nombre_provincia, {direction: 'left', interactive: false, className: 'caba-tooltip'}).bindPopup(caba[0].properties.nombre_provincia);
+                            }
                             
                             function onEachFeature(feature, layer) {
                                 layer.bindTooltip(feature.properties.nombre_provincia, {direction: 'top', interactive: false,});
@@ -198,6 +204,29 @@
                                     return '<span class="badge bg-secondary planes-normativa-chip">' + item.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
                                 }).join(' ');
                             }
+                            function linkifyOne(text) {
+                                if (!text || !String(text).trim()) return '';
+                                var raw = String(text).trim();
+                                var escaped = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                                var withUrls = escaped.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/gi, function(url) {
+                                    var href = url.indexOf('http') === 0 ? url : 'https://' + url;
+                                    return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+                                });
+                                var withEmails = withUrls.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, function(email) {
+                                    return '<a href="mailto:' + email + '">' + email + '</a>';
+                                });
+                                return withEmails;
+                            }
+                            function linkifyContact(text) {
+                                if (!text || !String(text).trim()) return '';
+                                var raw = String(text).trim();
+                                var items = raw.split(/\n|\r\n|;|\|/).map(function(s) { return s.trim(); }).filter(Boolean);
+                                if (items.length === 0) return linkifyOne(raw);
+                                if (items.length === 1) return '<p class="planes-contact-text mb-2">' + linkifyOne(items[0]) + '</p>';
+                                return items.map(function(item) {
+                                    return '<p class="planes-contact-text mb-2">' + linkifyOne(item) + '</p>';
+                                }).join('');
+                            }
                             function showCardProvince(featureProps){
                                 document.getElementById('title_province').innerHTML = featureProps.nombre_provincia;
                                 var contentTextHtml = '';
@@ -210,7 +239,7 @@
                                 }
                                 contentTextHtml +=   `<div class="planes-normativa-chips">${regulationsToChips(textosProvincias[featureProps.gid].regulations.text)}</div>`;
                                 contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].contact.title}</h5>`;
-                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].contact.text}</p>`;
+                                contentTextHtml +=   `<div class="planes-contact-list">${linkifyContact(textosProvincias[featureProps.gid].contact.text)}</div>`;
 
                                 /*
                                 contentTextHtml +=   `<ul>`;
