@@ -257,7 +257,7 @@
                             function styleFunction(feature){
                                 var statusKey = (valProvincias[feature.properties.gid] !== undefined && valProvincias[feature.properties.gid] !== null)
                                     ? String(valProvincias[feature.properties.gid])
-                                    : (feature.properties.edo_plan || "1");
+                                    : String(feature.properties.edo_plan || "1");
                                 var fillColor = referenciasMapa[statusKey] || referenciasMapa["1"];
                                 return {
                                     fillColor: fillColor,
