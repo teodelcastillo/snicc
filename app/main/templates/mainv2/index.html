@@ -6,7 +6,9 @@
 </a>
 {% endblock %}
 {% block content %}
-
+<style>
+.btn-pilares-home:hover { background: #2e6794 !important; color: #fff !important; border-color: #2e6794 !important; }
+</style>
                 <!-- Home page -->
                 <div class="home-content">
 
@@ -16,7 +18,7 @@
                             <div class="snic-homepage">SNIC</div>
                             <h1>{% ts 'Sistema Nacional de Información Climática' lang %}</h1>
                             <!-- <h2>{% ts 'Información sobre la política climática nacional que responde a la Ley 27.520/19.' lang %}</h2> -->
-                            <p>{% ts 'El Sistema Nacional de Información Climática (SNIC) es una herramienta que nos permite conocer los avances de Argentina en acción climática. La información del sistema está basada en tres pilares:<br/>● Mitigación<br/>● Adaptación<br/>● Pérdidas y daños' lang %}</p>
+                            <p>{% ts 'El Sistema Nacional de Información Climática (SNIC) es una herramienta que nos permite conocer los avances de Argentina en acción climática. La información del sistema está basada en tres pilares:</br><br/>● Mitigación<br/>● Adaptación<br/>● Pérdidas y daños' lang %}</p>
                         </div>
                         <div class="banner-home-images">
                             <div class="column-image">
@@ -54,6 +56,12 @@
                     </div>
                     </div>
 
+                    <div class="container d-flex flex-wrap justify-content-center align-items-center my-5" style="gap: 10px; margin-top: 2.5rem !important; margin-bottom: 2.5rem !important;">
+                        <a href="{% url 'mainv2:post' 'que-es-el-cambio-climatico' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts '¿Qué es el cambio climático?' lang %}</a>
+                        <a href="{% url 'mainv2:post' 'sobre-adaptacion' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre adaptación' lang %}</a>
+                        <a href="{% url 'mainv2:post' 'sobre-mitigacion' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre mitigación' lang %}</a>
+                        <a href="{% url 'mainv2:post' 'sobre-perdidas-y-danos' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre pérdidas y daños' lang %}</a>
+                    </div>
 
                     <!-- Si no conectado -->
                     {% if request.user.is_anonymous %}
