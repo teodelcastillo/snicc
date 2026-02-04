@@ -292,10 +292,10 @@
     <div class="mye-hero-footer">
   </div>
 
-  <!-- Tarjetas de información con mejor diseño y sombras -->
-  <div class="row g-4 mb-5">
+  <!-- Tarjetas de información: expandidas a lo ancho, mismo espacio cada una -->
+  <div class="row g-4 mb-5 d-flex">
     {% if show_responsable_field %}
-      <div class="col-md-4">
+      <div class="col flex-fill" style="min-width: 0;">
         <div class="card h-100 border-0 mye-section-card">
           <div class="card-body p-4">
             <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -306,7 +306,7 @@
         </div>
       </div>
     {% endif %}
-    <div class="col-md-4">
+    <div class="col flex-fill" style="min-width: 0;">
       <div class="card h-100 border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -317,7 +317,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col flex-fill" style="min-width: 0;">
       <div class="card h-100 border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -329,8 +329,10 @@
               {% for y in measure.target_years.all %}
                 <div class="mb-2">
                   <span class="fw-semibold" style="color:#262C51;">{{ y.year }}</span>
-                  {% if y.description %}
-                    <p class="text-muted small mb-0 mt-1">{{ y.description }}</p>
+                  {% if y.short_description %}
+                    <p class="text-muted small mb-0 mt-1">{{ y.short_description }}</p>
+                  {% elif y.description %}
+                    <p class="text-muted small mb-0 mt-1">{{ y.description|truncatewords:15 }}</p>
                   {% endif %}
                 </div>
               {% endfor %}
@@ -390,7 +392,16 @@
               {% for y in measure.target_years.all %}
                 <li class="d-flex gap-3 mb-3 align-items-start">
                   <span class="fw-semibold text-nowrap" style="color:#262C51; min-width: 3rem;">{{ y.year }}</span>
-                  <span class="flex-grow-1">{% if y.description %}{{ y.description }}{% else %}<span class="text-muted">Sin descripción</span>{% endif %}</span>
+                  <div class="flex-grow-1">
+                    {% if y.short_description %}
+                      <p class="fw-medium mb-1" style="color:#262C51;">{{ y.short_description }}</p>
+                    {% endif %}
+                    {% if y.description %}
+                      <p class="text-muted small mb-0">{{ y.description }}</p>
+                    {% elif not y.short_description %}
+                      <span class="text-muted">Sin descripción</span>
+                    {% endif %}
+                  </div>
                 </li>
               {% endfor %}
             </ul>
@@ -464,7 +475,7 @@
                 <ul class="list-unstyled mb-0 small">
                   {% for y in measure.target_years.all %}
                     <li class="mb-1">
-                      <span class="fw-semibold">{{ y.year }}</span>{% if y.description %}: {{ y.description|truncatewords:15 }}{% endif %}
+                      <span class="fw-semibold">{{ y.year }}</span>{% if y.short_description %}: {{ y.short_description }}{% elif y.description %}: {{ y.description|truncatewords:15 }}{% endif %}
                     </li>
                   {% endfor %}
                 </ul>

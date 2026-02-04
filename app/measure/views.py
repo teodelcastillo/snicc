@@ -48,7 +48,7 @@ def measure_fields(request, id):
     else:
         fields = {}
     years_list = [
-        {'year': y.year, 'description': y.description or ''}
+        {'year': y.year, 'short_description': y.short_description or '', 'description': y.description or ''}
         for y in m.target_years.all().order_by('year')
     ]
     return JsonResponse(dict(
@@ -566,7 +566,7 @@ def measure_list_json(request):
         line_id = measure.line.id if measure.line else None
 
         years_list = [
-            {'year': y.year, 'description': y.description or ''}
+            {'year': y.year, 'short_description': y.short_description or '', 'description': y.description or ''}
             for y in measure.target_years.all().order_by('year')
         ]
         status_card_category = (measure.status.card_category if measure.status else 'other')

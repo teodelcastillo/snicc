@@ -267,6 +267,13 @@ class MeasureYearMeta(models.Model):
         verbose_name='medida',
     )
     year = models.IntegerField(verbose_name='año meta')
+    short_description = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        verbose_name='descripción breve',
+        help_text='Resumen opcional para mostrar en tarjetas o listados (no en todas las metas).',
+    )
     description = models.TextField(
         blank=True,
         default='',

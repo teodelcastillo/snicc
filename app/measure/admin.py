@@ -56,8 +56,8 @@ class MeasureYearMetaInline(admin.TabularInline):
     extra = 1
     ordering = ['year']
     verbose_name = 'meta por año'
-    verbose_name_plural = 'metas por año (año + descripción de lo esperado)'
-    fields = ('year', 'description')
+    verbose_name_plural = 'metas por año (año + descripción breve + descripción)'
+    fields = ('year', 'short_description', 'description')
 
 
 class MeasureAdmin(admin.ModelAdmin):
