@@ -47,7 +47,10 @@ def measure_fields(request, id):
         fields = {k : m.fields[k] for k in MeasureField.active.namelist() if k in m.fields}
     else:
         fields = {}
-    years_list = list(m.target_years.values_list('year', flat=True).order_by('year'))
+    years_list = [
+        {'year': y.year, 'description': y.description or ''}
+        for y in m.target_years.all().order_by('year')
+    ]
     return JsonResponse(dict(
         fields=fields,
         years=years_list,
@@ -562,7 +565,10 @@ def measure_list_json(request):
         line_category = measure.line.category.name if measure.line and measure.line.category else ''
         line_id = measure.line.id if measure.line else None
 
-        years_list = list(measure.target_years.values_list('year', flat=True).order_by('year'))
+        years_list = [
+            {'year': y.year, 'description': y.description or ''}
+            for y in measure.target_years.all().order_by('year')
+        ]
         status_card_category = (measure.status.card_category if measure.status else 'other')
         data.append({
             "id": measure.id,

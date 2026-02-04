@@ -259,7 +259,7 @@ class Measure(LongNamed):
 
 
 class MeasureYearMeta(models.Model):
-    """Meta por año para una medida. Una medida puede tener varias metas (ej. 2023, 2024, 2030)."""
+    """Meta por año para una medida. Cada meta tiene año y descripción de lo que se espera alcanzar."""
     measure = models.ForeignKey(
         Measure,
         on_delete=models.CASCADE,
@@ -267,6 +267,12 @@ class MeasureYearMeta(models.Model):
         verbose_name='medida',
     )
     year = models.IntegerField(verbose_name='año meta')
+    description = models.TextField(
+        blank=True,
+        default='',
+        verbose_name='descripción',
+        help_text='Qué se espera alcanzar en este año.',
+    )
 
     class Meta:
         ordering = ['year']

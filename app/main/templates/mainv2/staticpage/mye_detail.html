@@ -323,8 +323,21 @@
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
             <i class="bi bi-calendar-week fs-5" style="color: #262C51;"></i> Período / Meta
           </div>
-          <p class="mb-1 fw-semibold fs-5" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
-          <small class="text-muted">Metas: {% for y in measure.target_years.all %}{{ y.year }}{% if not forloop.last %}, {% endif %}{% empty %}Sin definir{% endfor %}</small>
+          <p class="mb-2 fw-semibold fs-5" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
+          {% if measure.target_years.all %}
+            <div class="mt-2">
+              {% for y in measure.target_years.all %}
+                <div class="mb-2">
+                  <span class="fw-semibold" style="color:#262C51;">{{ y.year }}</span>
+                  {% if y.description %}
+                    <p class="text-muted small mb-0 mt-1">{{ y.description }}</p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <small class="text-muted">Sin metas definidas</small>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -684,7 +697,17 @@
             </li>
             <li class="mb-3">
               <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Metas / Años</strong>
-              <span>{% for y in measure.target_years.all %}{{ y.year }}{% if not forloop.last %}, {% endif %}{% empty %}Sin definir{% endfor %}</span>
+              {% if measure.target_years.all %}
+                <ul class="list-unstyled mb-0 small">
+                  {% for y in measure.target_years.all %}
+                    <li class="mb-1">
+                      <span class="fw-semibold">{{ y.year }}</span>{% if y.description %}: {{ y.description|truncatewords:15 }}{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span>Sin definir</span>
+              {% endif %}
             </li>
             {% if show_responsable_field and responsable %}
               <li class="mb-3">
