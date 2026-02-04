@@ -31,10 +31,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const implementationCardValue = document.getElementById("implementation_measures_value");
   const implementationPercentValue = document.getElementById("implementation_percent_value");
   const programmingCardValue = document.getElementById("programming_measures_value");
+  const completedCardValue = document.getElementById("completed_measures_value");
   const loadMoreBtn = document.getElementById("load_more_measures");
   const measuresTotalLabel = document.getElementById("measures_total");
   const showResponsableField = {{ show_responsable_field|yesno:"true,false" }};
 
+  // Colores de tipología alineados con tarjetas (badge-type #2c6694 y paleta stat cards)
   const BASE_TYPOLOGY_COLORS = {
     adaptacion: "#6157FF",
     mitigacion: "#0D6EFD",
@@ -58,12 +60,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     "A definir",
   ];
 
+  // Mismos colores que las tarjetas de medidas (badge-status-* y stat cards)
   const STATUS_COLORS = {
     "Completada": "#198754",
-    "En implementación avanzada": "#8881fe",
+    "En implementación avanzada": "#0d6efd",
     "En implementación inicial": "#0d6efd",
     "En programación": "#b88200",
-    "A definir": "#3A3669",
+    "A definir": "#495057",
   };
 
   const PAGE_SIZE = 7;
@@ -275,7 +278,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totals = data.reduce(
       (acc, measure) => {
         const status = normalizeText(measure.status || "");
-        if (status.includes("avanz") || status.includes("inicial")) {
+        if (status.includes("complet")) {
+          acc.completed += 1;
+        } else if (status.includes("avanz") || status.includes("inicial")) {
           acc.implementation += 1;
         } else if (status.includes("program")) {
           acc.programming += 1;
@@ -283,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         acc.total += 1;
         return acc;
       },
-      { total: 0, implementation: 0, programming: 0 }
+      { total: 0, implementation: 0, programming: 0, completed: 0 }
     );
 
     const implementationPercent = totals.total ? Math.round((totals.implementation / totals.total) * 100) : 0;
@@ -292,6 +297,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     implementationCardValue.textContent = totals.implementation;
     implementationPercentValue.textContent = `${implementationPercent}%`;
     programmingCardValue.textContent = totals.programming;
+    if (completedCardValue) {
+      completedCardValue.textContent = totals.completed;
+    }
   }
 
   function renderTypologyChart(pilaresStats = {}) {
@@ -636,6 +644,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     renderMeasures(filtered);
+    renderPanoramaSections(filtered);
   }
 
   // 4️⃣ Eventos
@@ -663,6 +672,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     searchInput.value = "";
     renderMeasures(measures);
+    renderPanoramaSections(measures);
   });
 
   // 5️⃣ Iniciar carga
@@ -1500,7 +1510,7 @@ function verDetalle(id) {
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
+                <h1 id="total_measures_value" class="mb-2 fw-bold" style="color:#262C51; font-size: 2.5rem;">{{ total_measures }}</h1>
                 <p class="text-muted mb-0">Acciones en monitoreo</p>
               </div>
             </div>
@@ -1516,7 +1526,7 @@ function verDetalle(id) {
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#b88200; font-size: 2.5rem;">{{ programming_count }}</h1>
+                <h1 id="programming_measures_value" class="mb-2 fw-bold" style="color:#b88200; font-size: 2.5rem;">{{ programming_count }}</h1>
                 <p class="text-muted mb-0">Medidas en programación</p>
               </div>
             </div>
@@ -1532,8 +1542,8 @@ function verDetalle(id) {
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
-                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+                <h1 id="implementation_measures_value" class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada </p>
               </div>
             </div>
           </div>
@@ -1548,7 +1558,7 @@ function verDetalle(id) {
                 </div>
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
-                <h1 class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
+                <h1 id="completed_measures_value" class="mb-2 fw-bold" style="color:#198754; font-size: 2.5rem;">{{ completed_count }}</h1>
                 <p class="text-muted mb-0">Medidas completadas.</p>
               </div>
             </div>
@@ -1632,7 +1642,7 @@ function verDetalle(id) {
       <!-- TAB: Medidas -->
       <div class="tab-pane fade" id="nav-medidas" role="tabpanel" aria-labelledby="nav-medidas-tab">
         
-        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
+        <!-- Tarjetas de estadísticas (valores actualizados por JS al filtrar; ids solo en tab Panorama) -->
         <div class="row g-4 mb-5">
           <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
@@ -1677,7 +1687,7 @@ function verDetalle(id) {
               </div>
               <div class="card-body d-flex flex-column justify-content-center">
                 <h1 class="mb-2 fw-bold" style="color:#0d6efd; font-size: 2.5rem;">{{ implementation_count }}</h1>
-                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada (<span>{{ percent_implementation }}%</span>)</p>
+                <p class="text-muted mb-0">Medidas en implementación inicial o avanzada </p>
               </div>
             </div>
           </div>
