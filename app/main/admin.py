@@ -56,6 +56,8 @@ class BookVersionInline(admin.TabularInline):
 
 class BookAdmin(admin.ModelAdmin):
     form = BookAdminForm
+    list_display = ['__str__', 'category', 'format_type', 'year', 'date']
+    list_filter = ['format_type', 'category', 'comunidad', 'capacitaciones', 'ciudadania']
     search_fields = ['versions__title', ]
 
     inlines = [
