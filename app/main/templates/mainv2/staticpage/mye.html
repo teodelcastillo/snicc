@@ -952,7 +952,7 @@ function verDetalle(id) {
     border: none;
     border-right: 1px solid #dee2e6;
     border-radius: 0;
-    color: #495057;
+    color: #262C51;
     font-weight: 600;
     font-size: 1.05rem;
     padding: 1.25rem 1.5rem;
@@ -960,7 +960,7 @@ function verDetalle(id) {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     background: transparent;
     text-align: center;
   }
@@ -970,13 +970,17 @@ function verDetalle(id) {
   }
 
   .nav-tabs .nav-link:hover {
-    background: rgba(38, 44, 81, 0.05);
-    color: #262C51;
+    background: rgba(38, 44, 81, 0.12);
+    color: #1a2038;
+  }
+
+  .nav-tabs .nav-link:hover i {
+    color: inherit;
   }
 
   .nav-tabs .nav-link.active {
-    background: #262C51;
-    color: white;
+    background: rgba(38, 44, 81, 0.08);
+    color: #262C51;
     position: relative;
   }
 
@@ -987,15 +991,16 @@ function verDetalle(id) {
     left: 0;
     right: 0;
     height: 3px;
-    background: white;
+    background: #262C51;
   }
 
   .nav-tabs .nav-link i {
     font-size: 1.35rem;
+    color: inherit;
   }
 
   .nav-tabs .nav-link.active i {
-    color: white;
+    color: inherit;
   }
 
   /* Cards mejoradas */
@@ -1437,9 +1442,8 @@ function verDetalle(id) {
         type="button"
         role="tab"
         aria-controls="nav-panorama"
-        aria-selected="true"
-        style="color:#262C51; background:none;">
-        <i class="bi bi-pie-chart-fill" style="font-size:1rem;"></i>
+        aria-selected="true">
+        <i class="bi bi-pie-chart-fill" aria-hidden="true"></i>
         Panorama General
       </button>
     </li>
@@ -1453,9 +1457,8 @@ function verDetalle(id) {
         type="button"
         role="tab"
         aria-controls="nav-medidas"
-        aria-selected="false"
-        style="color:#262C51; background:none;">
-        <i class="bi bi-bar-chart-fill" style="font-size:1rem;"></i>
+        aria-selected="false">
+        <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
         Medidas
       </button>
     </li>
@@ -1469,9 +1472,8 @@ function verDetalle(id) {
         type="button"
         role="tab"
         aria-controls="nav-marco"
-        aria-selected="false"
-        style="color:#262C51; background:none;">
-        <i class="bi bi-book-fill" style="font-size:1rem;"></i>
+        aria-selected="false">
+        <i class="bi bi-book-fill" aria-hidden="true"></i>
         Líneas y Enfoques
       </button>
     </li>
