@@ -78,7 +78,7 @@
                       <li class="dropdown-header">{% ts 'Documentación' lang %}</li>
                       {% for book in post.books.all %}{% with content=book.book|translate:lang %}
                         <li>
-                          <a class="dropdown-item" href="{{ book.book.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                          <a class="dropdown-item" href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">
                             {{ content.title }}
                           </a>
                         </li>
@@ -144,7 +144,7 @@
                       </button>
                       <ul class="dropdown-menu">
                         {% for book in post.books.all %}{% with content=book.book|translate:lang %}
-                        <li><a class="dropdown-item" href="{{ book.book.url|default:'#' }}" target="_blank">{{ content.title }}</a></li>
+                        <li><a class="dropdown-item" href="{{ book.book.get_download_url|default:'#' }}" target="_blank">{{ content.title }}</a></li>
                         {% endwith %}{% endfor %}
                       </ul>
                     </div>
@@ -204,7 +204,7 @@
                 <ul class="table-contents-list">
                   {% for book in post.books.all %}{% with content=book.book|translate:lang %}
                   <li>
-                    <a href="{{ book.book.url|default:'#' }}" target="_blank" rel="noopener noreferrer">
+                    <a href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">
                       {{ content.title }}
                     </a>
                   </li>

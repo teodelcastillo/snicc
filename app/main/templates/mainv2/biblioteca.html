@@ -174,7 +174,7 @@
                     {% endif %}
                   </div>
                   <div class="flex-grow-1" style="flex:1 1 auto; min-width:0;">
-                    <a href="{{ b.url|default:'#' }}" target="_blank" style="text-decoration:none;">
+                    <a href="{{ b.get_download_url|default:'#' }}" target="_blank" style="text-decoration:none;">
                       <h5 class="mb-1" style="color:#262C51;">{{ content.title }}</h5>
                     </a>
                     {% if b.authors.exists %}

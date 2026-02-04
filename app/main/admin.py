@@ -1,7 +1,32 @@
+from django import forms
 from django.contrib import admin
 from .models import *
 
-admin.site.site_header = 'SNIC admin'
+# Extensiones y tamaño máximo para documentos de libros (PDF, Word)
+ALLOWED_DOCUMENT_EXTENSIONS = ('.pdf', '.doc', '.docx')
+MAX_DOCUMENT_SIZE_MB = 50
+
+
+class BookAdminForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = '__all__'
+
+    def clean_document(self):
+        document = self.cleaned_data.get('document')
+        if not document:
+            return document
+        name = getattr(document, 'name', None) or ''
+        ext = '.' + name.rsplit('.', 1)[-1].lower() if '.' in name else ''
+        if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
+            raise forms.ValidationError(
+                'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).'
+            )
+        if document.size > MAX_DOCUMENT_SIZE_MB * 1024 * 1024:
+            raise forms.ValidationError(
+                f'El archivo no debe superar {MAX_DOCUMENT_SIZE_MB} MB.'
+            )
+        return document
 # admin.site.register(Language)
 
 class PostVersionInline(admin.TabularInline):
@@ -21,6 +46,7 @@ class BookVersionInline(admin.TabularInline):
     model = BookVersion
 
 class BookAdmin(admin.ModelAdmin):
+    form = BookAdminForm
     search_fields = ['versions__title', ]
 
     inlines = [

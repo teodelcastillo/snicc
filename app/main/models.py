@@ -298,8 +298,21 @@ class Book(models.Model, VersionedNoDate):
     # description = models.TextField(null=True)
     authors = models.ManyToManyField(Author, blank=True)
     image = models.FileField(upload_to='books', blank=True, null=True)
+    document = models.FileField(
+        upload_to='books/documents',
+        blank=True,
+        null=True,
+        verbose_name='Archivo (PDF o Word)',
+        help_text='PDF o Word (.doc, .docx). Opcional si se indica enlace externo.',
+    )
     # specific book categories
     comunidad = models.BooleanField(default=False, blank=True)
+
+    def get_download_url(self):
+        """URL para descargar: archivo subido si existe, sino enlace externo."""
+        if self.document:
+            return self.document.url
+        return self.url or ''
     capacitaciones = models.BooleanField(default=False, blank=True)
     ciudadania = models.BooleanField(default=False, blank=True)
     format = models.CharField(choices=BookFormat, null=True, max_length=20)
