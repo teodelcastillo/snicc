@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from main.views import tmp_redirect
+from main.views import tmp_redirect, pagedown_image_upload_view
 # dev only ! serve this with nginx
 from django.conf import settings
 from django.conf.urls.static import static
@@ -29,6 +29,8 @@ urlpatterns = [
     path('measure/', include('measure.views', namespace='measure')),
     path('user/', include('user.views', namespace='user')),
     path('editor/', include('dashboard.views', namespace='dashboard')),
+    # Subida de imágenes del editor (con límite de peso para preservar calidad)
+    path('pagedown/image-upload/', pagedown_image_upload_view, name='pagedown-image-upload'),
     path('', include('pagedown.urls')),
     path('', tmp_redirect, name='landing'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

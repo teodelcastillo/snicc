@@ -1,7 +1,16 @@
+import os
+import uuid
 from django.shortcuts import render, redirect
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
+from django.core.exceptions import PermissionDenied, ImproperlyConfigured
 from .models import *
 from django.urls import path
 from django.db.models import Q, F
+from pagedown.forms import ImageUploadForm
 
 # helper
 
@@ -25,6 +34,38 @@ def base_context(request, **kwargs):
 
 def tmp_redirect(request):
     return redirect('/main/')
+
+
+# Pagedown: subida de imágenes en contenido con límite de peso (evita pérdida de calidad)
+MAX_IMAGE_SIZE_MB = getattr(settings, 'MAX_IMAGE_SIZE_MB', 20)
+MAX_IMAGE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+PAGEDOWN_IMAGE_UPLOAD_PATH = getattr(settings, 'PAGEDOWN_IMAGE_UPLOAD_PATH', 'pagedown-uploads')
+PAGEDOWN_IMAGE_UPLOAD_UNIQUE = getattr(settings, 'PAGEDOWN_IMAGE_UPLOAD_UNIQUE', False)
+PAGEDOWN_IMAGE_UPLOAD_ENABLED = getattr(settings, 'PAGEDOWN_IMAGE_UPLOAD_ENABLED', False)
+
+
+@login_required
+@csrf_exempt
+def pagedown_image_upload_view(request):
+    """Vista de subida de imágenes para el editor markdown (con límite de tamaño)."""
+    if request.method != 'POST':
+        raise PermissionDenied()
+    if not PAGEDOWN_IMAGE_UPLOAD_ENABLED:
+        raise ImproperlyConfigured('Image upload is disabled')
+    form = ImageUploadForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return JsonResponse({'success': False, 'error': form.errors})
+    image = request.FILES['image']
+    if image.size > MAX_IMAGE_BYTES:
+        msg = f'La imagen no debe superar {MAX_IMAGE_SIZE_MB} MB (permite mantener buena calidad).'
+        return JsonResponse({'success': False, 'error': {'image': [msg]}})
+    path_args = [PAGEDOWN_IMAGE_UPLOAD_PATH, image.name]
+    if PAGEDOWN_IMAGE_UPLOAD_UNIQUE:
+        path_args.insert(1, str(uuid.uuid4()))
+    path = os.path.join(*path_args)
+    path = default_storage.save(path, image)
+    url = default_storage.url(path)
+    return JsonResponse({'success': True, 'url': url})
 
 # posts
 

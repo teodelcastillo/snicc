@@ -150,9 +150,18 @@ STATIC_ROOT = '/code/static'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Media files
-PAGEDOWN_IMAGE_UPLOAD_ENABLED=True
+PAGEDOWN_IMAGE_UPLOAD_ENABLED = True
 
 MEDIA_ROOT = '/code/media'
 MEDIA_URL = 'media/'
+
+# Límites de subida: permitir imágenes y adjuntos sin forzar pérdida de calidad
+# (Django por defecto usa 2.5 MB y rechaza o escribe a disco archivos más grandes)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 30 * 1024 * 1024   # 30 MB por archivo
+DATA_UPLOAD_MAX_MEMORY_SIZE = 35 * 1024 * 1024   # 35 MB cuerpo de la petición (form + archivos)
+
+# Límites validados en admin y pagedown (imágenes: tarjetas, contenido; adjuntos: libros)
+MAX_IMAGE_SIZE_MB = 20   # imágenes (posts, tarjetas, libros, perfil, contenido markdown)
+MAX_DOCUMENT_SIZE_MB = 50   # adjuntos PDF/Word (libros)
 
 LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL = 'landing'

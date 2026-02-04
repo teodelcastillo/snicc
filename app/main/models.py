@@ -444,8 +444,21 @@ class StaticTransVersion(models.Model):
         unique_together = ('lang', 'es')
 
 
+from django import forms
 from django.contrib import admin
+from django.conf import settings
 from .models import Post, PostVersion, Language, Profile
+
+MAX_IMAGE_SIZE_MB = getattr(settings, 'MAX_IMAGE_SIZE_MB', 20)
+MAX_IMAGE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+
+
+def _validate_image_size(file_obj):
+    if file_obj and getattr(file_obj, 'size', None) and file_obj.size > MAX_IMAGE_BYTES:
+        raise forms.ValidationError(
+            f'La imagen no debe superar {MAX_IMAGE_SIZE_MB} MB (permite mantener buena calidad).'
+        )
+
 
 # --- Posts y versiones ---
 
@@ -453,12 +466,24 @@ class PostVersionInline(admin.TabularInline):
     model = PostVersion
     extra = 1
 
+
+class PostAdminForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        _validate_image_size(image)
+        return image
+
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
+    form = PostAdminForm
     list_display = ('__str__', 'slug', 'status', 'type', 'category', 'date')
     list_filter = ('status', 'type', 'category')
     search_fields = ('slug',)
-    # prepopulated_fields = {'slug': ('content',)}  # ❌ eliminar o comentar esta línea
     inlines = [PostVersionInline]
 
 
@@ -468,6 +493,19 @@ class PostAdmin(admin.ModelAdmin):
 class LanguageAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'order')
 
+
+class ProfileAdminForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        _validate_image_size(image)
+        return image
+
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
+    form = ProfileAdminForm
     list_display = ('code', 'name', 'hidden')

@@ -1,16 +1,33 @@
 from django import forms
 from django.contrib import admin
+from django.conf import settings
 from .models import *
 
 # Extensiones y tamaño máximo para documentos de libros (PDF, Word)
 ALLOWED_DOCUMENT_EXTENSIONS = ('.pdf', '.doc', '.docx')
-MAX_DOCUMENT_SIZE_MB = 50
+MAX_DOCUMENT_SIZE_MB = getattr(settings, 'MAX_DOCUMENT_SIZE_MB', 50)
+MAX_IMAGE_SIZE_MB = getattr(settings, 'MAX_IMAGE_SIZE_MB', 20)
+MAX_IMAGE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
+MAX_DOCUMENT_BYTES = MAX_DOCUMENT_SIZE_MB * 1024 * 1024
+
+
+def validate_image_size(file_obj, field_name='imagen'):
+    if file_obj and getattr(file_obj, 'size', None) and file_obj.size > MAX_IMAGE_BYTES:
+        raise forms.ValidationError(
+            f'La {field_name} no debe superar {MAX_IMAGE_SIZE_MB} MB '
+            f'(permite mantener buena calidad).'
+        )
 
 
 class BookAdminForm(forms.ModelForm):
     class Meta:
         model = Book
         fields = '__all__'
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        validate_image_size(image, field_name='portada')
+        return image
 
     def clean_document(self):
         document = self.cleaned_data.get('document')
@@ -22,7 +39,7 @@ class BookAdminForm(forms.ModelForm):
             raise forms.ValidationError(
                 'Solo se permiten archivos PDF o Word (.pdf, .doc, .docx).'
             )
-        if document.size > MAX_DOCUMENT_SIZE_MB * 1024 * 1024:
+        if document.size > MAX_DOCUMENT_BYTES:
             raise forms.ValidationError(
                 f'El archivo no debe superar {MAX_DOCUMENT_SIZE_MB} MB.'
             )
@@ -80,7 +97,20 @@ admin.site.register(Regulation, RegAdmin)
 class ILVersionInline(admin.TabularInline):
     model = InternalLinkVersion
 
+
+class InternalLinkAdminForm(forms.ModelForm):
+    class Meta:
+        model = InternalLink
+        fields = '__all__'
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        validate_image_size(image, field_name='imagen de la tarjeta')
+        return image
+
+
 class ILAdmin(admin.ModelAdmin):
+    form = InternalLinkAdminForm
     inlines = [
         ILVersionInline
     ]
