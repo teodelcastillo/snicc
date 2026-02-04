@@ -679,15 +679,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 5️⃣ Iniciar carga
   await loadMeasures();
   renderPanoramaSections(measures);
-
-  // Si llegamos con #medidas (ej. desde detalle "Volver al módulo monitoreo"), activar tab Medidas
-  if (window.location.hash === "#medidas") {
-    const medidasTab = document.getElementById("nav-medidas-tab");
-    if (medidasTab && typeof bootstrap !== "undefined") {
-      const tab = new bootstrap.Tab(medidasTab);
-      tab.show();
-    }
-  }
 });
 
 function verDetalle(id) {
@@ -1518,6 +1509,7 @@ function verDetalle(id) {
             <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Vista General del Sistema</h2>
             <p class="text-muted mb-0">Estado de todas las medidas del plan</p>
           </div>
+          {% comment %}
           <div class="dropdown mye-quick-dropdown" data-bs-toggle="tooltip" data-bs-placement="left" title="Descargar documentos del panorama">
             <button
               class="mye-quick-trigger dropdown-toggle"
@@ -1533,6 +1525,7 @@ function verDetalle(id) {
               <li><button type="button" class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</button></li>
             </ul>
           </div>
+          {% endcomment %}
         </div>
 
         <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
@@ -1832,102 +1825,34 @@ function verDetalle(id) {
       </div>
 
       <!-- TAB: Marco Conceptual -->
-       <!--
       <div class="tab-pane fade" id="nav-marco" role="tabpanel" aria-labelledby="nav-marco-tab">
-          
-          <!-- Header con título y botón -->
-          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-            <div>
-              <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Líneas y Enfoques</h2>
-              <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
-            </div>
-
+        
+        <!-- Header con título y botón -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="fw-semibold mb-1" style="color:#262C51; font-size: 1.75rem;">Líneas y Enfoques</h2>
+            <p class="text-muted mb-0">Ejes transversales, sectores estratégicos y pilares de gobernanza que guían nuestras acciones climáticas</p>
           </div>
 
-          <!-- Grilla de Cards conceptuales -->
-          <div class="row g-4 mb-5" id="lineCategoriesAccordion">
-            {% if line_category_columns %}
-              {% for column in line_category_columns %}
-                <div class="col-lg-6 d-flex flex-column gap-4">
-                  {% for category in column %}
-                    <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
-                      <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.parentloop.first or not forloop.first %}collapsed{% endif %}"
-                              type="button"
-                              data-bs-toggle="collapse"
-                              data-bs-target="#category_lines_{{ category.id }}"
-                              aria-expanded="{% if forloop.parentloop.first and forloop.first %}true{% else %}false{% endif %}"
-                              aria-controls="category_lines_{{ category.id }}"
-                              style="background:transparent; border:0; padding:1.5rem;">
-                        <div class="d-flex align-items-center gap-3">
-                          <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-                              style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
-                            <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
-                          </div>
-                          <div>
-                            <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
-                            <p class="text-muted small mb-0">
-                              {{ category.line_total|default:0 }} línea{{ category.line_total|default:0|pluralize }} registradas ·
-                              {{ category.measure_total|default:0 }} medida{{ category.measure_total|default:0|pluralize }} activas
-                            </p>
-                          </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2 text-muted">
-                          <small>Ver detalle</small>
-                          <i class="bi bi-chevron-down transition-all"></i>
-                        </div>
-                      </button>
-                      <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.parentloop.first and forloop.first %}show{% endif %}">
-                        <div class="card-body">
-                          <div class="d-flex flex-wrap gap-3">
-                            {% for line in category.lines %}
-                              <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                  {% if line.icon_url %}
-                                    <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
-                                  {% else %}
-                                    <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
-                                      {{ line.measure_count }} med
-                                    </span>
-                                  {% endif %}
-                                  <div>
-                                    <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
-                                    <p class="text-muted small mb-0">
-                                      {% if line.measure_count %}
-                                        {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
-                                      {% else %}
-                                        Sin medidas activas
-                                      {% endif %}
-                                    </p>
-                                  </div>
-                                </div>
-                                {% if line.description %}
-                                  <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
-                                {% endif %}
-                              </div>
-                            {% empty %}
-                              <p class="text-muted mb-0">Sin líneas registradas.</p>
-                            {% endfor %}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              {% endfor %}
-            {% elif line_categories %}
+        </div>
+
+        <!-- Grilla de Cards conceptuales -->
+        <div class="row g-4 mb-5" id="lineCategoriesAccordion">
+          {% if line_category_columns %}
+            {% for column in line_category_columns %}
               <div class="col-lg-6 d-flex flex-column gap-4">
-                {% for category in line_categories %}
+                {% for category in column %}
                   <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
-                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.first %}collapsed{% endif %}"
+                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.parentloop.first or not forloop.first %}collapsed{% endif %}"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#category_lines_{{ category.id }}"
-                            aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                            aria-expanded="{% if forloop.parentloop.first and forloop.first %}true{% else %}false{% endif %}"
                             aria-controls="category_lines_{{ category.id }}"
                             style="background:transparent; border:0; padding:1.5rem;">
                       <div class="d-flex align-items-center gap-3">
                         <div class="p-2 rounded d-flex align-items-center justify-content-center" 
-                            style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                             style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
                           <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
                         </div>
                         <div>
@@ -1943,7 +1868,7 @@ function verDetalle(id) {
                         <i class="bi bi-chevron-down transition-all"></i>
                       </div>
                     </button>
-                    <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                    <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.parentloop.first and forloop.first %}show{% endif %}">
                       <div class="card-body">
                         <div class="d-flex flex-wrap gap-3">
                           {% for line in category.lines %}
@@ -1980,82 +1905,151 @@ function verDetalle(id) {
                   </div>
                 {% endfor %}
               </div>
-            {% else %}
-              <div class="col-12">
-                <div class="border rounded-3 p-4 text-center text-muted" style="border-color: rgba(38,44,81,0.2);">
-                  No se encontraron líneas o enfoques activos para mostrar.
+            {% endfor %}
+          {% elif line_categories %}
+            <div class="col-lg-6 d-flex flex-column gap-4">
+              {% for category in line_categories %}
+                <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
+                  <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.first %}collapsed{% endif %}"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#category_lines_{{ category.id }}"
+                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                          aria-controls="category_lines_{{ category.id }}"
+                          style="background:transparent; border:0; padding:1.5rem;">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="p-2 rounded d-flex align-items-center justify-content-center" 
+                           style="background-color: rgba(38,44,81,0.08); width:40px; height:40px;">
+                        <i class="bi {{ category.icon_class }}" style="font-size:1.25rem; color:#262C51;"></i>
+                      </div>
+                      <div>
+                        <span class="fw-semibold d-block" style="color:#262C51;">{{ category.name }}</span>
+                        <p class="text-muted small mb-0">
+                          {{ category.line_total|default:0 }} línea{{ category.line_total|default:0|pluralize }} registradas ·
+                          {{ category.measure_total|default:0 }} medida{{ category.measure_total|default:0|pluralize }} activas
+                        </p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                      <small>Ver detalle</small>
+                      <i class="bi bi-chevron-down transition-all"></i>
+                    </div>
+                  </button>
+                  <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                    <div class="card-body">
+                      <div class="d-flex flex-wrap gap-3">
+                        {% for line in category.lines %}
+                          <div class="flex-grow-1 border rounded-3 p-3" style="border-color: rgba(38,44,81,0.1); min-width: 220px;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                              {% if line.icon_url %}
+                                <img src="{{ line.icon_url }}" alt="Icono {{ line.name }}" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;">
+                              {% else %}
+                                <span class="badge rounded-pill" style="background-color: rgba(38,44,81,0.08); color:#262C51;">
+                                  {{ line.measure_count }} med
+                                </span>
+                              {% endif %}
+                              <div>
+                                <h6 class="fw-semibold mb-0" style="color:#262C51;">{{ line.name }}</h6>
+                                <p class="text-muted small mb-0">
+                                  {% if line.measure_count %}
+                                    {{ line.measure_count }} medida{{ line.measure_count|pluralize }} activas
+                                  {% else %}
+                                    Sin medidas activas
+                                  {% endif %}
+                                </p>
+                              </div>
+                            </div>
+                            {% if line.description %}
+                              <p class="text-muted small mb-0">{{ line.description|striptags|truncatewords:24 }}</p>
+                            {% endif %}
+                          </div>
+                        {% empty %}
+                          <p class="text-muted mb-0">Sin líneas registradas.</p>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="col-12">
+              <div class="border rounded-3 p-4 text-center text-muted" style="border-color: rgba(38,44,81,0.2);">
+                No se encontraron líneas o enfoques activos para mostrar.
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        {% comment %}
+        <!-- Descripción expandida del marco conceptual -->
+        <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
+          <div class="card-header">
+            <h5 class="fw-semibold mb-0" style="color:#262C51;">
+              <i class="bi bi-book me-2"></i>
+              Marco Conceptual del PNAyMCC
+            </h5>
+          </div>
+          <div class="card-body" style="padding: 2rem;">
+            <p class="text-muted mb-4">
+              El Plan Nacional de Adaptación y Mitigación al Cambio Climático se estructura en cuatro grandes categorías que organizan y orientan las medidas climáticas del país.
+            </p>
+            
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c5cae9, rgba(197, 202, 233, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Enfoques Transversales</h6>
+                    <p class="text-muted small mb-0">
+                      Incluyen perspectivas de género, juventud, pueblos indígenas, entre otros, que deben estar presentes en todas las acciones.
+                    </p>
+                  </div>
                 </div>
               </div>
-            {% endif %}
-          </div>
-
-          <!-- Descripción expandida del marco conceptual -->
-          <div class="card shadow-md border" style="border-color: rgba(38,44,81,0.15);">
-            <div class="card-header">
-              <h5 class="fw-semibold mb-0" style="color:#262C51;">
-                <i class="bi bi-book me-2"></i>
-                Marco Conceptual del PNAyMCC
-              </h5>
-            </div>
-            <div class="card-body" style="padding: 2rem;">
-              <p class="text-muted mb-4">
-                El Plan Nacional de Adaptación y Mitigación al Cambio Climático se estructura en cuatro grandes categorías que organizan y orientan las medidas climáticas del país.
-              </p>
               
-              <div class="row g-4">
-                <div class="col-md-6">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="section-divider" style="background: linear-gradient(to bottom, #c5cae9, rgba(197, 202, 233, 0.5));"></div>
-                    <div>
-                      <h6 class="fw-semibold mb-2" style="color:#262C51;">Enfoques Transversales</h6>
-                      <p class="text-muted small mb-0">
-                        Incluyen perspectivas de género, juventud, pueblos indígenas, entre otros, que deben estar presentes en todas las acciones.
-                      </p>
-                    </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #bbdefb, rgba(187, 222, 251, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Sectores Estratégicos</h6>
+                    <p class="text-muted small mb-0">
+                      Áreas prioritarias como energía, transporte, bosques, agua y ciudades que requieren atención específica.
+                    </p>
                   </div>
                 </div>
-                
-                <div class="col-md-6">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="section-divider" style="background: linear-gradient(to bottom, #bbdefb, rgba(187, 222, 251, 0.5));"></div>
-                    <div>
-                      <h6 class="fw-semibold mb-2" style="color:#262C51;">Sectores Estratégicos</h6>
-                      <p class="text-muted small mb-0">
-                        Áreas prioritarias como energía, transporte, bosques, agua y ciudades que requieren atención específica.
-                      </p>
-                    </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider" style="background: linear-gradient(to bottom, #c8e6c9, rgba(200, 230, 201, 0.5));"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares Instrumentales</h6>
+                    <p class="text-muted small mb-0">
+                      Herramientas como financiamiento, tecnología, y desarrollo de capacidades que facilitan la implementación.
+                    </p>
                   </div>
                 </div>
-                
-                <div class="col-md-6">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="section-divider" style="background: linear-gradient(to bottom, #c8e6c9, rgba(200, 230, 201, 0.5));"></div>
-                    <div>
-                      <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares Instrumentales</h6>
-                      <p class="text-muted small mb-0">
-                        Herramientas como financiamiento, tecnología, y desarrollo de capacidades que facilitan la implementación.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="col-md-6">
-                  <div class="d-flex align-items-start gap-3">
-                    <div class="section-divider"></div>
-                    <div>
-                      <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares de Gobernanza</h6>
-                      <p class="text-muted small mb-0">
-                        Estructuras de coordinación nacional, provincial y municipal que aseguran una gestión integrada.
-                      </p>
-                    </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="section-divider"></div>
+                  <div>
+                    <h6 class="fw-semibold mb-2" style="color:#262C51;">Pilares de Gobernanza</h6>
+                    <p class="text-muted small mb-0">
+                      Estructuras de coordinación nacional, provincial y municipal que aseguran una gestión integrada.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {% endcomment %}
       </div>
-    -->
+      
+    </div>
 
         </div>
 
