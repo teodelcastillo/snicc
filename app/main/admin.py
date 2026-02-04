@@ -42,6 +42,15 @@ class PostAdmin(admin.ModelAdmin):
 
 admin.site.register(Author)
 
+
+class BookFormatAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    ordering = ['name']
+
+
+admin.site.register(BookFormat, BookFormatAdmin)
+
+
 class BookVersionInline(admin.TabularInline):
     model = BookVersion
 

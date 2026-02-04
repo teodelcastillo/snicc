@@ -265,7 +265,21 @@ class RegulationVersion(LanguageVersion):
 
 def upload_image_path(instance, filename):
     return 'book/'+instance.id+'_'+filename
-    
+
+
+class BookFormat(models.Model):
+    """Formatos de libro gestionables desde el admin (Documento, Infografía, etc.)."""
+    class Meta:
+        verbose_name = 'formato de libro'
+        verbose_name_plural = 'formatos de libro'
+        ordering = ['name']
+
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Author(models.Model):
     class Meta:
         verbose_name = 'autor'
@@ -285,10 +299,6 @@ class Book(models.Model, VersionedNoDate):
             return self.versions.get(lang__code='es').title
         except :
             return 'Missing es version'
-
-    class BookFormat(models.TextChoices):
-        documento = 'Documento'
-        infografia = 'Infografía'
 
     year = models.IntegerField(default=2025)
     category = models.CharField(choices=CategoryExtended, max_length=50, default=CategoryExtended.ampyd)
@@ -315,7 +325,14 @@ class Book(models.Model, VersionedNoDate):
         return self.url or ''
     capacitaciones = models.BooleanField(default=False, blank=True)
     ciudadania = models.BooleanField(default=False, blank=True)
-    format = models.CharField(choices=BookFormat, null=True, max_length=20)
+    format_type = models.ForeignKey(
+        BookFormat,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='books',
+        verbose_name='formato',
+    )
 
 class BookVersion(LanguageVersion):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='versions')

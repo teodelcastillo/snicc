@@ -88,7 +88,7 @@ def library(request):
     # queryset base
     qset = Book.objects.all()
     if format:
-        qset = qset.filter(format=format)
+        qset = qset.filter(format_type__name=format)
     if bookcat:
         qset = qset.filter(**{bookcat: True})
     if search:
@@ -115,7 +115,7 @@ def library(request):
         'bookcat': bookcat,
         'pattern': search,
         'format': format,
-        'formats': {f: qset.filter(format=f).count() for f in Book.BookFormat},
+        'formats': {f.name: qset.filter(format_type=f).count() for f in BookFormat.objects.all()},
         'author': Author.objects.get(id=author) if author else None,
         'authors': Author.objects.all().annotate(
             nbb=Count('book', filter=Q(book__in=qset))
@@ -142,7 +142,7 @@ def library(request):
     format = request.GET.get('format')
     qset = Book.objects.all()
     if format: 
-        qset = qset.filter(format=format)
+        qset = qset.filter(format_type__name=format)
     if bookcat: # comunidad, capacitationes, ciudadania
         qset = qset.filter(**{bookcat:True})
     if search : 
@@ -166,7 +166,7 @@ def library(request):
         'bookcat': bookcat,
         'pattern': search,
         'format': format,
-        'formats': { f: qset.filter(format=f).count() for f in Book.BookFormat },
+        'formats': { f.name: qset.filter(format_type=f).count() for f in BookFormat.objects.all() },
         'author': Author.objects.get(id=author) if author else None,
         # 'authors': Counter(qset.values_list('authors__name', flat=True)),
         'authors': Author.objects.all().annotate(nbb=Count('book', filter=Q(book__in=qset))).exclude(nbb=0).order_by('-nbb')[:5],
