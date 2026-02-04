@@ -293,7 +293,7 @@ class Book(models.Model, VersionedNoDate):
     year = models.IntegerField(default=2025)
     category = models.CharField(choices=CategoryExtended, max_length=50, default=CategoryExtended.ampyd)
     date = models.DateTimeField(auto_now=True)
-    url = models.URLField(null=True, blank=True)
+    url = models.URLField(max_length=500, null=True, blank=True)
     # title = models.CharField(max_length=100)
     # description = models.TextField(null=True)
     authors = models.ManyToManyField(Author, blank=True)
