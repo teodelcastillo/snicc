@@ -46,8 +46,8 @@ class LineAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
 
 class ImplementationStatusAdmin(admin.ModelAdmin):
-    list_display = ('name', 'order', 'color')
-    list_editable = ('order', 'color')
+    list_display = ('name', 'order', 'color', 'card_category')
+    list_editable = ('order', 'color', 'card_category')
     ordering = ('order', 'name')
 
 

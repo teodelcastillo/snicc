@@ -137,10 +137,28 @@ class MeasureField(CacheBreaker):
         verbose_name_plural = 'detalles de medidas'
 
 class ImplementationStatus(models.Model):
-    """Estado de implementación de una medida. Gestionable desde el admin (crear, editar, eliminar)."""
+    """
+    Estado de implementación de una medida. Gestionable desde el admin.
+    card_category define cómo se contabiliza en las 3 tarjetas del MYE:
+    - implementation: suma en "En Implementación"
+    - completed: suma en "Completadas"
+    - other: solo cuenta en "Total" (gráficos y filtros siguen mostrando el estado con normalidad).
+    """
+    class CardCategory(models.TextChoices):
+        IMPLEMENTATION = ('implementation', 'En Implementación (tarjeta)')
+        COMPLETED = ('completed', 'Completadas (tarjeta)')
+        OTHER = ('other', 'Solo Total / otros')
+
     name = models.CharField(max_length=80, unique=True, verbose_name='nombre')
     order = models.PositiveSmallIntegerField(default=0, verbose_name='orden')
     color = models.CharField(max_length=9, default='#a1a1a1', verbose_name='color')
+    card_category = models.CharField(
+        max_length=20,
+        choices=CardCategory.choices,
+        default=CardCategory.OTHER,
+        verbose_name='cuenta en tarjeta',
+        help_text='Define si este estado suma en la tarjeta "En Implementación", "Completadas" o solo en Total.',
+    )
 
     class Meta:
         ordering = ['order', 'name']

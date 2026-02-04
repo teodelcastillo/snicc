@@ -422,12 +422,14 @@ def mye_overview(request):
     measures = Measure.active.select_related('pilares', 'line', 'status').all()
     total_measures = measures.count()
 
+    # Tarjetas fijas: Total, En Implementación, Completadas (según card_category del estado)
+    implementation_count = measures.filter(status__card_category='implementation').count()
+    completadas = measures.filter(status__card_category='completed').count()
+    percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
+
     count_by_status = Counter(measures.values_list('status__name', flat=True))
     avanzada = count_by_status.get('En implementación avanzada', 0)
     inicial = count_by_status.get('En implementación inicial', 0)
-    completadas = count_by_status.get('Completada', 0)
-    implementation_count = avanzada + inicial
-    percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
 
     top_pilar = (Pilar.objects
                  .annotate(num=Count('measure', filter=Q(measure__is_active=True)))
@@ -561,11 +563,13 @@ def measure_list_json(request):
         line_id = measure.line.id if measure.line else None
 
         years_list = list(measure.target_years.values_list('year', flat=True).order_by('year'))
+        status_card_category = (measure.status.card_category if measure.status else 'other')
         data.append({
             "id": measure.id,
             "code": measure.code or "",
             "name": measure.name,
             "status": measure.status.name if measure.status else None,
+            "status_card_category": status_card_category,
             "description": description,
             "years": years_list,
             "pilar": pilar_name,

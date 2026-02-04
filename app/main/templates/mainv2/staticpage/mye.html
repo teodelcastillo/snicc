@@ -270,35 +270,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updateSummaryStats(data = []) {
-    if (!totalCardValue || !implementationCardValue || !implementationPercentValue || !programmingCardValue) {
-      return;
-    }
+    if (!totalCardValue || !implementationCardValue) return;
 
     const totals = data.reduce(
       (acc, measure) => {
-        const status = normalizeText(measure.status || "");
-        if (status.includes("complet")) {
-          acc.completed += 1;
-        } else if (status.includes("avanz") || status.includes("inicial")) {
-          acc.implementation += 1;
-        } else if (status.includes("program")) {
-          acc.programming += 1;
-        }
         acc.total += 1;
+        const cat = measure.status_card_category || "other";
+        if (cat === "implementation") acc.implementation += 1;
+        else if (cat === "completed") acc.completed += 1;
         return acc;
       },
-      { total: 0, implementation: 0, programming: 0, completed: 0 }
+      { total: 0, implementation: 0, completed: 0 }
     );
-
-    const implementationPercent = totals.total ? Math.round((totals.implementation / totals.total) * 100) : 0;
 
     totalCardValue.textContent = totals.total;
     implementationCardValue.textContent = totals.implementation;
-    implementationPercentValue.textContent = `${implementationPercent}%`;
-    programmingCardValue.textContent = totals.programming;
-    if (completedCardValue) {
-      completedCardValue.textContent = totals.completed;
+    if (implementationPercentValue) {
+      const pct = totals.total ? Math.round((totals.implementation / totals.total) * 100) : 0;
+      implementationPercentValue.textContent = `${pct}%`;
     }
+    if (programmingCardValue) programmingCardValue.textContent = 0;
+    if (completedCardValue) completedCardValue.textContent = totals.completed;
   }
 
   function renderTypologyChart(pilaresStats = {}) {
