@@ -554,6 +554,7 @@ def measure_list_json(request):
 
         data.append({
             "id": measure.id,
+            "code": measure.code or "",
             "name": measure.name,
             "status": measure.status.name if measure.status else None,
             "description": description,

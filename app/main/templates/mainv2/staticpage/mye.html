@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroTipo = document.getElementById("filtro_tipo");
   const filtroLinea = document.getElementById("filtro_linea");
   const filtroNivel = document.getElementById("filtro_nivel");
-  const filtroAlcance = document.getElementById("filtro_alcance");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
   const chartTypology = document.getElementById("chart_tipo_medidas");
@@ -91,7 +90,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       measures = data.measures || data.data || [];
       populateTypeFilterOptions(measures);
       populateLineFilterOptions(measures);
-      populateScopeFilterOptions(measures);
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -595,24 +593,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadMoreBtn.disabled = isLoadingMore;
   }
 
-  // 3️⃣ Aplicar búsqueda y filtros
+  // 3️⃣ Aplicar búsqueda y filtros (todos los criterios se combinan: tipo + línea + nivel de avance)
   function applyFilters() {
     const searchTerm = normalizeText(searchInput.value);
     const tipo = filtroTipo.value;
     const linea = filtroLinea.value;
     const nivel = filtroNivel.value;
-    const alcance = filtroAlcance ? filtroAlcance.value : "";
 
     const normalizedTipo = normalizeText(tipo);
     const normalizedLinea = normalizeText(linea);
     const normalizedNivel = nivel && nivel !== "all" ? normalizeText(nivel) : "";
-    const normalizedAlcance = normalizeText(alcance);
 
     const filtered = measures.filter((m) => {
       const matchesSearch =
         !searchTerm ||
-        normalizeText(m.name).includes(searchTerm) ||
-        normalizeText(m.description).includes(searchTerm);
+        normalizeText(m.name || "").includes(searchTerm) ||
+        normalizeText(m.description || "").includes(searchTerm) ||
+        normalizeText(m.code || "").includes(searchTerm);
 
       const pillarValues = getMeasurePilares(m).map((value) => normalizeText(value));
       const matchesTipo =
@@ -628,19 +625,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const matchesNivel =
         !normalizedNivel ||
-        normalizeText(m.status).includes(normalizedNivel);
-
-      const matchesAlcance =
-        !normalizedAlcance ||
-        normalizeText(m.scope).includes(normalizedAlcance) ||
-        normalizeText(m.scope_label).includes(normalizedAlcance);
+        normalizeText(m.status || "").includes(normalizedNivel);
 
       return (
         matchesSearch &&
         matchesTipo &&
         matchesLinea &&
-        (nivel === "all" ? true : matchesNivel) &&
-        matchesAlcance
+        (nivel === "all" ? true : matchesNivel)
       );
     });
 
@@ -653,9 +644,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   filtroTipo.addEventListener("change", applyFilters);
   filtroLinea.addEventListener("change", applyFilters);
   filtroNivel.addEventListener("change", applyFilters);
-  if (filtroAlcance) {
-    filtroAlcance.addEventListener("change", applyFilters);
-  }
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener("click", () => {
       if (!isLoadingMore) {
@@ -668,12 +656,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     filtroTipo.value = "";
     filtroLinea.value = "";
     filtroNivel.value = "all";
-    if (filtroAlcance) {
-      filtroAlcance.value = "";
-    }
     searchInput.value = "";
-    renderMeasures(measures);
-    renderPanoramaSections(measures);
+    applyFilters();
   });
 
   // 5️⃣ Iniciar carga
@@ -1170,8 +1154,13 @@ function verDetalle(id) {
 
   .btn-primary-custom:hover {
     background: #1a2038;
+    color: #fff !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(38, 44, 81, 0.3);
+  }
+  .btn-primary-custom:hover i,
+  .btn-primary-custom:hover span {
+    color: inherit;
   }
 
   /* Section dividers */
@@ -1748,7 +1737,7 @@ function verDetalle(id) {
         <!-- Buscador mejorado con ícono -->
         <div class="search-wrapper">
           <i class="bi bi-search"></i>
-          <input id="search_measures" class="form-control" placeholder="Buscar medidas por título o descripción...">
+          <input id="search_measures" class="form-control" placeholder="Buscar por título, descripción o código...">
         </div>
 
         <div class="row g-4">
@@ -1785,15 +1774,9 @@ function verDetalle(id) {
                     <option value="A definir">A definir</option>
                   </select>
                 </div>
-                <div class="mb-3">
-                  <label class="fw-semibold mb-2" for="filtro_alcance" style="color:#262C51;">Nivel de alcance</label>
-                  <select id="filtro_alcance" class="form-select">
-                    <option value="">Todos</option>
-                  </select>
-                </div>
-                <button id="clear_filters" class="btn btn-primary-custom w-100">
-                  <i class="bi bi-x-circle me-1"></i>
-                  Limpiar filtros
+                <button id="clear_filters" class="btn btn-primary-custom w-100 d-flex align-items-center justify-content-center gap-2">
+                  <i class="bi bi-x-circle"></i>
+                  <span>Limpiar filtros</span>
                 </button>
               </div>
             </div>
