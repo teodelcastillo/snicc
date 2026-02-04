@@ -292,10 +292,10 @@
     <div class="mye-hero-footer">
   </div>
 
-  <!-- Tarjetas de información: expandidas a lo ancho, mismo espacio cada una -->
-  <div class="row g-4 mb-5 d-flex">
+  <!-- Tarjetas Alcance y estado / Período-Meta en una fila horizontal, 50% cada una (33% si hay Autoridad) -->
+  <div class="row g-4 mb-5">
     {% if show_responsable_field %}
-      <div class="col flex-fill" style="min-width: 0;">
+      <div class="col-12 col-md-4">
         <div class="card h-100 border-0 mye-section-card">
           <div class="card-body p-4">
             <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -306,7 +306,7 @@
         </div>
       </div>
     {% endif %}
-    <div class="col flex-fill" style="min-width: 0;">
+    <div class="col-12 {% if show_responsable_field %}col-md-4{% else %}col-md-6{% endif %}">
       <div class="card h-100 border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -317,7 +317,7 @@
         </div>
       </div>
     </div>
-    <div class="col flex-fill" style="min-width: 0;">
+    <div class="col-12 {% if show_responsable_field %}col-md-4{% else %}col-md-6{% endif %}">
       <div class="card h-100 border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
@@ -377,76 +377,72 @@
 
   <div class="border-top border-2 mb-5" style="border-color: rgba(38,44,81,0.1) !important;"></div>
 
-  <!-- Contenido General (sin tabs Implementación / Análisis / Seguimiento) -->
-  <div class="card border-0 mye-section-card mb-5">
-    <div class="card-body p-4">
-      <h5 class="tab-card-title mb-4"><i class="bi bi-info-circle me-2"></i>General</h5>
+  <!-- General: solo el titular y las tarjetas debajo -->
+  <h5 class="tab-card-title mb-4"><i class="bi bi-info-circle me-2"></i>General</h5>
 
-      {% if measure.target_years.all %}
-        <div class="card mye-section-card mb-4">
-          <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas por año</h5>
-          </div>
-          <div class="card-body px-4 pb-4">
-            <ul class="list-unstyled mb-0">
-              {% for y in measure.target_years.all %}
-                <li class="d-flex gap-3 mb-3 align-items-start">
-                  <span class="fw-semibold text-nowrap" style="color:#262C51; min-width: 3rem;">{{ y.year }}</span>
-                  <div class="flex-grow-1">
-                    {% if y.short_description %}
-                      <p class="fw-medium mb-1" style="color:#262C51;">{{ y.short_description }}</p>
-                    {% endif %}
-                    {% if y.description %}
-                      <p class="text-muted small mb-0">{{ y.description }}</p>
-                    {% elif not y.short_description %}
-                      <span class="text-muted">Sin descripción</span>
-                    {% endif %}
-                  </div>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      {% endif %}
-
-      <div class="row g-4 mb-4">
-        {% if alcance_geografico %}
-          <div class="col-md-6">
-            <div class="card mye-section-card h-100">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <p class="mb-0">{{ alcance_geografico|safe }}</p>
-              </div>
-            </div>
-          </div>
-        {% endif %}
+  {% if measure.target_years.all %}
+    <div class="card mye-section-card mb-4">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas por año</h5>
       </div>
-
-      {% if riesgos_climaticos %}
-        <div class="card mye-section-card mb-4">
-          <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
-          </div>
-          <div class="card-body px-4 pb-4">
-            {{ riesgos_climaticos|safe }}
-          </div>
-        </div>
-      {% endif %}
-
-      {% if reduccion_emisiones %}
-        <div class="card mye-section-card">
-          <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
-          </div>
-          <div class="card-body px-4 pb-4">
-            {{ reduccion_emisiones|safe }}
-          </div>
-        </div>
-      {% endif %}
+      <div class="card-body px-4 pb-4">
+        <ul class="list-unstyled mb-0">
+          {% for y in measure.target_years.all %}
+            <li class="d-flex gap-3 mb-3 align-items-start">
+              <span class="fw-semibold text-nowrap" style="color:#262C51; min-width: 3rem;">{{ y.year }}</span>
+              <div class="flex-grow-1">
+                {% if y.short_description %}
+                  <p class="fw-medium mb-1" style="color:#262C51;">{{ y.short_description }}</p>
+                {% endif %}
+                {% if y.description %}
+                  <p class="text-muted small mb-0">{{ y.description }}</p>
+                {% elif not y.short_description %}
+                  <span class="text-muted">Sin descripción</span>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
+  {% endif %}
+
+  <div class="row g-4 mb-4">
+    {% if alcance_geografico %}
+      <div class="col-md-6">
+        <div class="card mye-section-card h-100">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
+          </div>
+          <div class="card-body px-4 pb-4">
+            <p class="mb-0">{{ alcance_geografico|safe }}</p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
   </div>
+
+  {% if riesgos_climaticos %}
+    <div class="card mye-section-card mb-4">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
+      </div>
+      <div class="card-body px-4 pb-4">
+        {{ riesgos_climaticos|safe }}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if reduccion_emisiones %}
+    <div class="card mye-section-card mb-5">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
+      </div>
+      <div class="card-body px-4 pb-4">
+        {{ reduccion_emisiones|safe }}
+      </div>
+    </div>
+  {% endif %}
 
   <!-- Sección inferior con mejor espaciado -->
   <div class="row g-4">
