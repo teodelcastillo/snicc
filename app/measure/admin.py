@@ -2,21 +2,39 @@ from django.contrib import admin
 from .models import *
 
 # Register your models here.
-@admin.action(description='Establecer el estado como '+Measure.Status.adefinir)
+
+def _get_status(name):
+    return ImplementationStatus.objects.filter(name=name).first()
+
+@admin.action(description='Establecer el estado como A definir')
 def set_status_adef(model, request, qset):
-    qset.update(status=Measure.Status.adefinir)
-@admin.action(description='Establecer el estado como '+Measure.Status.prog)
+    s = _get_status('A definir')
+    if s:
+        qset.update(status=s)
+
+@admin.action(description='Establecer el estado como En programación')
 def set_status_prog(model, request, qset):
-    qset.update(status=Measure.Status.prog)
-@admin.action(description='Establecer el estado como '+Measure.Status.avanzada)
+    s = _get_status('En programación')
+    if s:
+        qset.update(status=s)
+
+@admin.action(description='Establecer el estado como En implementación avanzada')
 def set_status_avan(model, request, qset):
-    qset.update(status=Measure.Status.avanzada)
-@admin.action(description='Establecer el estado como '+Measure.Status.inicial)
+    s = _get_status('En implementación avanzada')
+    if s:
+        qset.update(status=s)
+
+@admin.action(description='Establecer el estado como En implementación inicial')
 def set_status_inic(model, request, qset):
-    qset.update(status=Measure.Status.inicial)
-@admin.action(description='Establecer el estado como '+Measure.Status.completada)
+    s = _get_status('En implementación inicial')
+    if s:
+        qset.update(status=s)
+
+@admin.action(description='Establecer el estado como Completada')
 def set_status_comp(model, request, qset):
-    qset.update(status=Measure.Status.completada)
+    s = _get_status('Completada')
+    if s:
+        qset.update(status=s)
 @admin.action(description='Activar')
 def set_active(model, request, qset):
     qset.update(is_active=True)
@@ -27,10 +45,16 @@ def set_inactive(model, request, qset):
 class LineAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
 
+class ImplementationStatusAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order', 'color')
+    list_editable = ('order', 'color')
+    ordering = ('order', 'name')
+
+
 class MeasureAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'status', 'is_active')
-    list_filter = ('is_active', 'line', 'labels')
-    search_fields = ('name','code')
+    list_filter = ('is_active', 'line', 'labels', 'status')
+    search_fields = ('name', 'code')
     actions = [set_active, set_inactive, set_status_adef, set_status_inic, set_status_avan, set_status_prog, set_status_comp]
 
     fieldsets = (
@@ -50,6 +74,7 @@ class ActionAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'has_ingei')
 
+admin.site.register(ImplementationStatus, ImplementationStatusAdmin)
 admin.site.register(Pilar)
 admin.site.register(Line, LineAdmin)
 admin.site.register(LineCategory)

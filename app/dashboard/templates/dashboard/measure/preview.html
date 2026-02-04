@@ -24,7 +24,7 @@
         {% endif %}</td></tr>
     <tr>
         <th>Estado de implementación</th>
-        <td>{{instance.status}}</td>
+        <td>{{ instance.status.name|default:'' }}</td>
     </tr>
 
     {% for key, value in instance.fields.items %}    

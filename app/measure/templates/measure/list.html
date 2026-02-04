@@ -32,7 +32,7 @@
     </div>
     <div>Estado
         <select multiple name='status' id='status'>
-            {% for status in statuses %}<option value="{{status.label}}">{{status.label}}</option>{% endfor %}
+            {% for status in statuses %}<option value="{{status.name}}">{{status.name}}</option>{% endfor %}
         </select>    
     </div>
     <input type="submit" value="filter">

@@ -108,9 +108,12 @@ def fill_measure(csvfile='init/medidas_details.csv'):
         elif measure and row[0] in DEFAULT_TEXT_FIELDS:
             fields[row[0]] = row[1]
         elif measure and row[0] == 'Estado de implementación':
-            for status in Measure.Status:
-                if row[1].lower().startswith(status.lower()):
+            from measure.models import ImplementationStatus
+            row_val = (row[1] or '').strip()
+            for status in ImplementationStatus.objects.all():
+                if row_val.lower().startswith(status.name.lower()):
                     measure.status = status
+                    break
 
     # do not forget the last one
     if measure:

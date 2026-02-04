@@ -278,7 +278,7 @@
         <span class="meta-label">Nivel de avance</span>
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <span class="mye-status-dot" style="background-color:{{ status_color }};"></span>
-          <span class="badge-chip badge-status {{ progress_style.chip_class|default:'badge-status-default' }}">{{ measure.get_status_display }}</span>
+          <span class="badge-chip badge-status {{ progress_style.chip_class|default:'badge-status-default' }}">{{ measure.status.name|default:'' }}</span>
         </div>
       </div>
     </div>
@@ -676,7 +676,7 @@
             {% endif %}
             <li class="mb-3">
               <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Nivel de avance</strong>
-              <span>{{ measure.get_status_display }}</span>
+              <span>{{ measure.status.name|default:'' }}</span>
             </li>
             <li class="mb-3">
               <strong class="text-dark d-block mb-1 text-uppercase small" style="letter-spacing: 0.05em;">Alcance</strong>
@@ -735,7 +735,7 @@
                 <li class="mb-3">
                   <a href="{% url 'measure:detail_view' item.id %}" class="text-decoration-none d-flex flex-column gap-1">
                     <span class="d-block fw-semibold" style="color:#262C51;">{{ item.name }}</span>
-                    <small class="text-muted">{{ item.get_status_display }}</small>
+                    <small class="text-muted">{{ item.status.name|default:'' }}</small>
                   </a>
                 </li>
               {% endfor %}

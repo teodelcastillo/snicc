@@ -17,8 +17,8 @@
         <tr>
             <th><label for="status">Estado de implementación</label></th>
             <td><select name="status" id="status_id">
-                {% for s in instance.Status %}
-                <option value="{{s}}" {% if s == instance.status %}selected{% endif %}>{{s}}</option>
+                {% for s in statuses %}
+                <option value="{{ s.id }}" {% if instance.status_id == s.id %}selected{% endif %}>{{ s.name }}</option>
                 {% endfor %}
             </select></td>
         </tr>        

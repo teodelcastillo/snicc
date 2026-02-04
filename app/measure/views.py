@@ -48,20 +48,20 @@ def measure_fields(request, id):
     else:
         fields = {}
     return JsonResponse(dict(
-        fields = fields,
-        year = m.year,
-        status = m.status,
-        name = m.name,
+        fields=fields,
+        year=m.year,
+        status=m.status.name if m.status else None,
+        name=m.name,
     ))
 
-STATUS_COLOR = {
-    'En implementación avanzada': '#65AD9D',
-    'En implementación inicial': '#D21685',
-    'En programación': '#F9E297',
-    'Completada': '#1B5E20',
-    'A definir': '#3A3669'
-}
-STATUS_DICT = {x.label:None for x in Measure.Status}
+def _status_color_dict():
+    return dict(
+        ImplementationStatus.objects.values_list('name', 'color')
+    )
+
+def _status_dict():
+    return {name: None for name in ImplementationStatus.objects.values_list('name', flat=True).order_by('order')}
+
 RESPONSABLE_FIELD_NAME = 'Autoridad de aplicación'
 
 
@@ -71,11 +71,11 @@ def _is_responsable_field_active():
 def stacked_bar(qset):
     """Pandas black magic."""
     pilares = list(Pilar.objects.values_list('name', flat=True))
-    statuses = list(STATUS_DICT.keys())
+    statuses = list(_status_dict().keys())
     pilstatset = set(pilares).union(statuses)
 
     vals = Counter(qset.values_list('pilares__name', 'line__name'))
-    vals.update(Counter(qset.values_list('status', 'line__name')))
+    vals.update(Counter(qset.values_list('status__name', 'line__name')))
     # make and pivot the dataframe
     if vals:
         df = pd.DataFrame(vals.values(), index=vals.keys()).unstack().droplevel(0,axis=1)
@@ -95,8 +95,8 @@ def stacked_bar(qset):
         height = 0
         arr = [ keys ]
 
-    colors = {x[0]:x[1] for x in Pilar.objects.values_list('name', 'color')}
-    colors.update(STATUS_COLOR)
+    colors = {x[0]: x[1] for x in Pilar.objects.values_list('name', 'color')}
+    colors.update(_status_color_dict())
     
     # build response
     return {
@@ -142,7 +142,7 @@ def qset_builder(request):
 
     statuses = request.GET.getlist('status')
     if statuses:
-        fil['status__in'] = statuses
+        fil['status__name__in'] = statuses
 
     lines = request.GET.getlist('line')
     if lines:
@@ -169,10 +169,10 @@ def make_status_stats(qset):
         },
         "keys": ["En programación", "En implementación inicial", "En implementación avanzada", "A definir"]
     }   """
-    d = STATUS_DICT.copy()
-    d.update(Counter(qset.values_list('status', flat=True)))
-    return{
-        'colors': STATUS_COLOR,
+    d = _status_dict().copy()
+    d.update(Counter(qset.values_list('status__name', flat=True)))
+    return {
+        'colors': _status_color_dict(),
         'data': d,
         'keys': list(d.keys()),
     }
@@ -192,10 +192,12 @@ def make_small_status_stats(qset):
     "actions"
     """
     total = qset.count()
-    d = Counter(qset.values_list('status', flat=True))
+    d = Counter(qset.values_list('status__name', flat=True))
+    status_colors = _status_color_dict()
+    status_keys = list(_status_dict().keys())
     verbose, simple = list(), dict()
     tmpsum = 0
-    for status in STATUS_DICT.keys():        
+    for status in status_keys:
         if status in d:
             v = d[status]
             tmpsum += v
@@ -203,12 +205,12 @@ def make_small_status_stats(qset):
             rad = math.radians(deg-90)
             x_text = 38 * math.cos(rad)
             y_text = -38 * math.sin(rad)
-            verbose.append({'name':status, 'value':v, 'percent':round(100*v/total, 2),'color':STATUS_COLOR.get(status,'#ffffff'),
-                        'degrees_text':deg, 'x_text':x_text, 'y_text':y_text,})
+            verbose.append({'name': status, 'value': v, 'percent': round(100*v/total, 2), 'color': status_colors.get(status, '#ffffff'),
+                            'degrees_text': deg, 'x_text': x_text, 'y_text': y_text})
             simple[status] = v if v else 0
         else:
-            verbose.append({'name': status, 'value': None, 'color':STATUS_COLOR.get(status,'#ffffff'),
-                         'degrees_text':0, 'x_text':0, 'y_text':0,})
+            verbose.append({'name': status, 'value': None, 'color': status_colors.get(status, '#ffffff'),
+                            'degrees_text': 0, 'x_text': 0, 'y_text': 0})
             simple[status] = 0
     return (verbose, simple)
 
@@ -279,7 +281,10 @@ def filter_details(request):
                     'total': measure_set.count(),
                     'stats': verbose_stats,
                     'stats_simple': simple_stats,
-                    'measures': list(measure_set.values('id', 'code', 'name', 'status')),
+                    'measures': [
+                        {'id': x['id'], 'code': x['code'], 'name': x['name'], 'status': x['status__name'] or ''}
+                        for x in measure_set.values('id', 'code', 'name', 'status__name')
+                    ],
                 })
 
     return {'actions': actionres, 'lines': lineres, 'status':make_status_stats(qset)}
@@ -296,7 +301,7 @@ def measure_list(request):
         'lines': Line.objects.all(),
         'actions': Action.objects.all(),
         'pilares': Pilar.objects.all(),
-        'statuses': Measure.Status,
+        'statuses': ImplementationStatus.objects.all().order_by('order'),
     })
 
     if request.GET:
@@ -309,13 +314,13 @@ def action_details_dict(action:Action, fil={}):
 
     def measure_det(m):
         return {
-            'code':m.code,
+            'code': m.code,
             'id': m.id,
-            'name':m.name,
-            'pilares':m.pilares.name,
+            'name': m.name,
+            'pilares': m.pilares.name,
             'autoritad': m.fields.get('Autoridad de aplicación') if m.fields else '',
             'scope': m.scope,
-            'status': m.status,
+            'status': m.status.name if m.status else '',
         }
 
     return {
@@ -383,9 +388,9 @@ def many_measures_csv(request):
     writer.writerow(['Línea o enfoque', 'Línea de acción', 'Nombre', 'Estado de implementación', 'Pilares', 'Autoridad de aplicación',])
     for m in qset.order_by('line__name', 'action__name'):
         if m.fields:
-            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, m.fields.get('Autoridad de aplicación', ''),])
+            writer.writerow([m.line, m.action, m.name, m.status.name if m.status else '', m.pilares, m.fields.get('Autoridad de aplicación', ''),])
         else:
-            writer.writerow([m.line, m.action, m.name, m.status, m.pilares, '',])
+            writer.writerow([m.line, m.action, m.name, m.status.name if m.status else '', m.pilares, '',])
     return res
 
 # recalc
@@ -406,13 +411,13 @@ def mye_overview(request):
     """
     context = default_context(request)
 
-    measures = Measure.active.select_related('pilares', 'line').all()
+    measures = Measure.active.select_related('pilares', 'line', 'status').all()
     total_measures = measures.count()
 
-    count_by_status = Counter(measures.values_list('status', flat=True))
-    avanzada = count_by_status.get(Measure.Status.avanzada, 0)
-    inicial = count_by_status.get(Measure.Status.inicial, 0)
-    completadas = count_by_status.get(Measure.Status.completada, 0)
+    count_by_status = Counter(measures.values_list('status__name', flat=True))
+    avanzada = count_by_status.get('En implementación avanzada', 0)
+    inicial = count_by_status.get('En implementación inicial', 0)
+    completadas = count_by_status.get('Completada', 0)
     implementation_count = avanzada + inicial
     percent_implementation = round((implementation_count / total_measures) * 100) if total_measures > 0 else 0
 
@@ -423,8 +428,8 @@ def mye_overview(request):
     top_pilar_name = top_pilar.name if top_pilar else ""
     top_pilar_count = top_pilar.num if top_pilar else 0
 
-    prog = count_by_status.get(Measure.Status.prog, 0)
-    indef = count_by_status.get(Measure.Status.adefinir, 0)
+    prog = count_by_status.get('En programación', 0)
+    indef = count_by_status.get('A definir', 0)
     status_candidates = [
         ("En implementación", implementation_count),
         ("En programación", prog),
@@ -522,7 +527,7 @@ def measure_list_json(request):
     """
     measures = (
         Measure.active
-        .select_related('pilares', 'line__category')
+        .select_related('pilares', 'line__category', 'status')
         .prefetch_related('labels')
         .all()
     )
@@ -550,7 +555,7 @@ def measure_list_json(request):
         data.append({
             "id": measure.id,
             "name": measure.name,
-            "status": measure.status,
+            "status": measure.status.name if measure.status else None,
             "description": description,
             "pilar": pilar_name,
             "pilares": pilares_payload,
@@ -593,38 +598,42 @@ def _split_multiline(value):
     return cleaned
 
 
-PROGRESS_STYLE = {
-    Measure.Status.avanzada: {
-        'badge_class': 'bg-success text-white',
-        'dot_class': 'bg-success',
-        'text_class': 'text-success',
-        'chip_class': 'badge-status-implementation',
-    },
-    Measure.Status.inicial: {
-        'badge_class': 'bg-warning text-dark',
-        'dot_class': 'bg-warning',
-        'text_class': 'text-warning',
-        'chip_class': 'badge-status-implementation',
-    },
-    Measure.Status.prog: {
-        'badge_class': 'bg-info text-dark',
-        'dot_class': 'bg-info',
-        'text_class': 'text-info',
-        'chip_class': 'badge-status-programming',
-    },
-    Measure.Status.completada: {
-        'badge_class': 'bg-success text-white',
-        'dot_class': 'bg-success',
-        'text_class': 'text-success',
-        'chip_class': 'badge-status-completed',
-    },
-    Measure.Status.adefinir: {
-        'badge_class': 'bg-secondary',
-        'dot_class': 'bg-secondary',
-        'text_class': 'text-secondary',
-        'chip_class': 'badge-status-default',
-    },
-}
+def _progress_style_by_name():
+    return {
+        'En implementación avanzada': {
+            'badge_class': 'bg-success text-white',
+            'dot_class': 'bg-success',
+            'text_class': 'text-success',
+            'chip_class': 'badge-status-implementation',
+        },
+        'En implementación inicial': {
+            'badge_class': 'bg-warning text-dark',
+            'dot_class': 'bg-warning',
+            'text_class': 'text-warning',
+            'chip_class': 'badge-status-implementation',
+        },
+        'En programación': {
+            'badge_class': 'bg-info text-dark',
+            'dot_class': 'bg-info',
+            'text_class': 'text-info',
+            'chip_class': 'badge-status-programming',
+        },
+        'Completada': {
+            'badge_class': 'bg-success text-white',
+            'dot_class': 'bg-success',
+            'text_class': 'text-success',
+            'chip_class': 'badge-status-completed',
+        },
+        'A definir': {
+            'badge_class': 'bg-secondary',
+            'dot_class': 'bg-secondary',
+            'text_class': 'text-secondary',
+            'chip_class': 'badge-status-default',
+        },
+    }
+
+
+PROGRESS_STYLE = _progress_style_by_name()
 
 
 def measure_detail_view(request, id):
@@ -635,6 +644,7 @@ def measure_detail_view(request, id):
         Measure.active.select_related(
             'pilares',
             'line__category',
+            'status',
         ),
         pk=id,
     )
@@ -648,6 +658,7 @@ def measure_detail_view(request, id):
         Measure.active
         .filter(line=measure.line)
         .exclude(id=measure.id)
+        .select_related('status')
         .only('id', 'name', 'status')[:6]
     )
 
@@ -659,12 +670,13 @@ def measure_detail_view(request, id):
     resultados = _split_multiline(field_values.get('Resultados esperados'))
     seguimiento_extra = _split_multiline(field_values.get('Seguimiento'))
 
-    progress_style = PROGRESS_STYLE.get(measure.status, PROGRESS_STYLE[Measure.Status.adefinir])
+    status_name = measure.status.name if measure.status else 'A definir'
+    progress_style = PROGRESS_STYLE.get(status_name, PROGRESS_STYLE['A definir'])
 
     context = default_context(request)
     context.update({
         'measure': measure,
-        'status_color': Measure.MEASURE_COLOR.get(measure.status, '#262C51'),
+        'status_color': measure.status.color if measure.status else '#262C51',
         'labels': labels,
         'national_objectives': measure.national_objectives.select_related('meta_1__meta_0'),
         'related_measures': related_measures,

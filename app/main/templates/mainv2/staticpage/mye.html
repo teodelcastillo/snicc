@@ -1843,11 +1843,11 @@ function verDetalle(id) {
               <div class="col-lg-6 d-flex flex-column gap-4">
                 {% for category in column %}
                   <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
-                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.parentloop.first or not forloop.first %}collapsed{% endif %}"
+                    <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 collapsed"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#category_lines_{{ category.id }}"
-                            aria-expanded="{% if forloop.parentloop.first and forloop.first %}true{% else %}false{% endif %}"
+                            aria-expanded="false"
                             aria-controls="category_lines_{{ category.id }}"
                             style="background:transparent; border:0; padding:1.5rem;">
                       <div class="d-flex align-items-center gap-3">
@@ -1868,7 +1868,7 @@ function verDetalle(id) {
                         <i class="bi bi-chevron-down transition-all"></i>
                       </div>
                     </button>
-                    <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.parentloop.first and forloop.first %}show{% endif %}">
+                    <div id="category_lines_{{ category.id }}" class="collapse">
                       <div class="card-body">
                         <div class="d-flex flex-wrap gap-3">
                           {% for line in category.lines %}
@@ -1910,11 +1910,11 @@ function verDetalle(id) {
             <div class="col-lg-6 d-flex flex-column gap-4">
               {% for category in line_categories %}
                 <div class="card border shadow-md" style="border-color: {{ category.color|default:'#c5cae9' }};">
-                  <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 {% if not forloop.first %}collapsed{% endif %}"
+                  <button class="card-header btn w-100 text-start d-flex align-items-center justify-content-between gap-3 collapsed"
                           type="button"
                           data-bs-toggle="collapse"
                           data-bs-target="#category_lines_{{ category.id }}"
-                          aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                          aria-expanded="false"
                           aria-controls="category_lines_{{ category.id }}"
                           style="background:transparent; border:0; padding:1.5rem;">
                     <div class="d-flex align-items-center gap-3">
@@ -1935,7 +1935,7 @@ function verDetalle(id) {
                       <i class="bi bi-chevron-down transition-all"></i>
                     </div>
                   </button>
-                  <div id="category_lines_{{ category.id }}" class="collapse {% if forloop.first %}show{% endif %}">
+                  <div id="category_lines_{{ category.id }}" class="collapse">
                     <div class="card-body">
                       <div class="d-flex flex-wrap gap-3">
                         {% for line in category.lines %}

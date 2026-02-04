@@ -7,7 +7,7 @@ from django.templatetags.l10n import localize
 from django.urls import path
 from django.utils import timezone
 from main.models import Language, Post, PostVersion, Profile, POST_PROFILE_MAX_VALUE
-from measure.models import Measure, DEFAULT_TEXT_FIELDS, Line, MeasureField
+from measure.models import Measure, DEFAULT_TEXT_FIELDS, Line, MeasureField, ImplementationStatus
 from django.db.models import F
 
 from .forms import PostForm, PostVersionForm, NewPostForm
@@ -197,15 +197,18 @@ def measure_preview(request, id:int):
 def measure_edit(request, id:int):
     instance = Measure.objects.get(id=id)
     if request.method == 'POST':
-        instance.fields = {f:request.POST.get(f) for f in DEFAULT_TEXT_FIELDS}
-        instance.status = request.POST.get('status')
+        instance.fields = {f: request.POST.get(f) for f in DEFAULT_TEXT_FIELDS}
+        status_id = request.POST.get('status')
+        if status_id:
+            instance.status_id = status_id
         instance.save()
         return redirect('dashboard:measure_preview', id=instance.id)
-    fields = {f:'' for f in DEFAULT_TEXT_FIELDS}
+    fields = {f: '' for f in DEFAULT_TEXT_FIELDS}
     if instance.fields:
         fields.update(instance.fields)
     inactive = MeasureField.objects.filter(is_active=False).values_list('name', flat=True)
-    return render(request, 'dashboard/measure/edit.html', context={'instance': instance, 'fields': fields, 'inactive':inactive})
+    statuses = ImplementationStatus.objects.all().order_by('order')
+    return render(request, 'dashboard/measure/edit.html', context={'instance': instance, 'fields': fields, 'inactive': inactive, 'statuses': statuses})
 
 # URLS
 

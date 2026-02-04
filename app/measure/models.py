@@ -136,30 +136,32 @@ class MeasureField(CacheBreaker):
         verbose_name = 'detalle de medida'
         verbose_name_plural = 'detalles de medidas'
 
-class Measure(LongNamed):
-    class Status(models.TextChoices):
-        prog = ('En programación', 'En programación')
-        inicial = ('En implementación inicial', 'En implementación inicial')
-        avanzada = ('En implementación avanzada', 'En implementación avanzada')
-        completada = ('Completada', 'Completada')
-        adefinir = ('A definir', 'A definir')
+class ImplementationStatus(models.Model):
+    """Estado de implementación de una medida. Gestionable desde el admin (crear, editar, eliminar)."""
+    name = models.CharField(max_length=80, unique=True, verbose_name='nombre')
+    order = models.PositiveSmallIntegerField(default=0, verbose_name='orden')
+    color = models.CharField(max_length=9, default='#a1a1a1', verbose_name='color')
 
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = 'estado de implementación'
+        verbose_name_plural = 'estados de implementación'
+
+    def __str__(self):
+        return self.name
+
+
+class Measure(LongNamed):
     class Scope(models.TextChoices):
         adefinir = ('A definir', 'A definir')
         regional = ('Regional', 'Regional')
         national = ('Nacional', 'Nacional')
 
-    MEASURE_COLOR = {
-        Status.prog: "#33c45a",
-        Status.inicial: "#f9ff59",
-        Status.avanzada: "#ff9159",
-        Status.completada: "#0f8b48",
-        Status.adefinir: "#a1a1a1",
-    }
-
     class Meta:
         verbose_name = 'medida'
 
+    # Override LongNamed.name for measures (255 chars)
+    name = models.CharField(max_length=255, verbose_name='nombre')
     is_active = models.BooleanField(default=False, blank=True, verbose_name='activa')
     line = models.ForeignKey(
         Line,
@@ -181,7 +183,14 @@ class Measure(LongNamed):
     labels = models.ManyToManyField(Label, verbose_name='pilares', blank=True)
     pilares = models.ForeignKey(Pilar, null=True, on_delete=models.SET_NULL)
     year = models.IntegerField(default=2024, verbose_name='meta')
-    status = models.CharField(choices=Status, default=Status.adefinir, max_length=27, verbose_name='estado de implementación')
+    status = models.ForeignKey(
+        ImplementationStatus,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='measures',
+        verbose_name='estado de implementación',
+    )
     scope = models.CharField(choices=Scope, default=Scope.adefinir, max_length=10, verbose_name='alcance')
     fields = models.JSONField(null=True, blank=True, verbose_name='datos internos')
     last_modified = models.DateTimeField(auto_now=True)
@@ -193,7 +202,7 @@ class Measure(LongNamed):
 
     @property
     def color(self):
-        return self.MEASURE_COLOR[self.status]
+        return (self.status.color if self.status else '#a1a1a1')
 
     @property
     def verbose_labels(self):
