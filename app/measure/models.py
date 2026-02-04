@@ -182,7 +182,6 @@ class Measure(LongNamed):
     code = models.CharField(max_length=12, verbose_name='codigo') # e.g. "GR-10"
     labels = models.ManyToManyField(Label, verbose_name='pilares', blank=True)
     pilares = models.ForeignKey(Pilar, null=True, on_delete=models.SET_NULL)
-    year = models.IntegerField(default=2024, verbose_name='meta')
     status = models.ForeignKey(
         ImplementationStatus,
         on_delete=models.PROTECT,
@@ -239,6 +238,28 @@ class Measure(LongNamed):
     #             pass
     #         super().save(**kwargs)
     #         self.write_pdf()
+
+
+class MeasureYearMeta(models.Model):
+    """Meta por año para una medida. Una medida puede tener varias metas (ej. 2023, 2024, 2030)."""
+    measure = models.ForeignKey(
+        Measure,
+        on_delete=models.CASCADE,
+        related_name='target_years',
+        verbose_name='medida',
+    )
+    year = models.IntegerField(verbose_name='año meta')
+
+    class Meta:
+        ordering = ['year']
+        verbose_name = 'meta por año'
+        verbose_name_plural = 'metas por año'
+        constraints = [
+            models.UniqueConstraint(fields=['measure', 'year'], name='unique_measure_year'),
+        ]
+
+    def __str__(self):
+        return f"{self.measure.code} - {self.year}"
 
 
 class ProgressReport(models.Model):

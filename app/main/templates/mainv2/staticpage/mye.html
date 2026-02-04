@@ -1517,9 +1517,9 @@ function verDetalle(id) {
           {% endcomment %}
         </div>
 
-        <!-- Tarjetas de estadísticas repetidas con mismo estilo -->
+        <!-- Tarjetas de estadísticas repetidas con mismo estilo (3 tarjetas repartidas a lo ancho) -->
         <div class="row g-4 mb-5">
-          <div class="col-md-6 col-lg-3">
+          <div class="col-md-6 col-lg-4">
             <div class="card border shadow-md stat-card-neutral h-100" style="border-color: rgba(38,44,81,0.2);">
               <div class="card-header d-flex align-items-center justify-content-between">
                 <span class="fw-semibold" style="color:#262C51;">Total de Medidas</span>
@@ -1535,6 +1535,7 @@ function verDetalle(id) {
             </div>
           </div>
 
+          {% comment %} Tarjeta "En programación" comentada por solicitud
           <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
               <div class="card-header d-flex align-items-center justify-content-between">
@@ -1550,6 +1551,7 @@ function verDetalle(id) {
               </div>
             </div>
           </div>
+          {% endcomment %}
 
           <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">
@@ -1679,6 +1681,7 @@ function verDetalle(id) {
             </div>
           </div>
 
+          {% comment %} Tarjeta "En programación" comentada por solicitud
           <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-warning h-100" style="border-color:#fce7b2;">
               <div class="card-header d-flex align-items-center justify-content-between">
@@ -1694,6 +1697,7 @@ function verDetalle(id) {
               </div>
             </div>
           </div>
+          {% endcomment %}
 
           <div class="col-md-6 col-lg-3">
             <div class="card border shadow-md stat-card-info h-100" style="border-color:#bbdefb;">

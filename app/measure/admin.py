@@ -51,14 +51,23 @@ class ImplementationStatusAdmin(admin.ModelAdmin):
     ordering = ('order', 'name')
 
 
+class MeasureYearMetaInline(admin.TabularInline):
+    model = MeasureYearMeta
+    extra = 1
+    ordering = ['year']
+    verbose_name = 'meta por año'
+    verbose_name_plural = 'metas por año (ej. 2023, 2024, 2030)'
+
+
 class MeasureAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'status', 'is_active')
     list_filter = ('is_active', 'line', 'labels', 'status')
     search_fields = ('name', 'code')
     actions = [set_active, set_inactive, set_status_adef, set_status_inic, set_status_avan, set_status_prog, set_status_comp]
+    inlines = [MeasureYearMetaInline]
 
     fieldsets = (
-        (None, {"fields": ('code', 'name', 'is_active', 'year', 'status', 'scope')}),
+        (None, {"fields": ('code', 'name', 'is_active', 'status', 'scope')}),
         ('Relaciones', {"fields": ('line', 'action', 'pilares', 'national_objectives')}),
         # ('Datos', {"fields": ('fields',)})
     )

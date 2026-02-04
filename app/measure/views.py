@@ -47,9 +47,10 @@ def measure_fields(request, id):
         fields = {k : m.fields[k] for k in MeasureField.active.namelist() if k in m.fields}
     else:
         fields = {}
+    years_list = list(m.target_years.values_list('year', flat=True).order_by('year'))
     return JsonResponse(dict(
         fields=fields,
-        year=m.year,
+        years=years_list,
         status=m.status.name if m.status else None,
         name=m.name,
     ))
@@ -121,7 +122,12 @@ def qset_builder(request):
 
     years = request.GET.getlist('year')
     if years:
-        fil['year__in'] = years
+        try:
+            years_int = [int(y) for y in years if y]
+            if years_int:
+                fil['target_years__year__in'] = years_int
+        except (ValueError, TypeError):
+            pass
 
     cat_id = request.GET.get('cat')
     if cat_id:
@@ -149,6 +155,8 @@ def qset_builder(request):
         fil['line_id__in'] = lines
 
     qset = qset.filter(**fil)
+    if years and fil.get('target_years__year__in'):
+        qset = qset.distinct()
     return qset, lineqset, fil
 
 
@@ -296,7 +304,7 @@ def measure_filter_json(request):
 def measure_list(request):
     context = base_context(request)
     context.update({
-        'years': Measure.active.values_list('year', flat=True).distinct().order_by('year'),
+        'years': MeasureYearMeta.objects.values_list('year', flat=True).distinct().order_by('year'),
         'linecat': LineCategory.objects.all(),
         'lines': Line.objects.all(),
         'actions': Action.objects.all(),
@@ -528,7 +536,7 @@ def measure_list_json(request):
     measures = (
         Measure.active
         .select_related('pilares', 'line__category', 'status')
-        .prefetch_related('labels')
+        .prefetch_related('labels', 'target_years')
         .all()
     )
 
@@ -552,12 +560,14 @@ def measure_list_json(request):
         line_category = measure.line.category.name if measure.line and measure.line.category else ''
         line_id = measure.line.id if measure.line else None
 
+        years_list = list(measure.target_years.values_list('year', flat=True).order_by('year'))
         data.append({
             "id": measure.id,
             "code": measure.code or "",
             "name": measure.name,
             "status": measure.status.name if measure.status else None,
             "description": description,
+            "years": years_list,
             "pilar": pilar_name,
             "pilares": pilares_payload,
             "linea": line_name,
@@ -642,7 +652,7 @@ def measure_detail_view(request, id):
     Página de detalle de una medida activa.
     """
     measure = get_object_or_404(
-        Measure.active.select_related(
+        Measure.active.prefetch_related('target_years').select_related(
             'pilares',
             'line__category',
             'status',
