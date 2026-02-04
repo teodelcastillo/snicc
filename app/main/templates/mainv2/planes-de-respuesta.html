@@ -2,6 +2,9 @@
 {% load static snicc_i18n %}
 {% block head %}
 <style>
+.planes-plan-text {
+  margin-bottom: 0;
+}
 .planes-normativa-chips {
   display: flex;
   flex-wrap: wrap;
@@ -204,7 +207,7 @@
                                     contentTextHtml += `<h5>${(data.authority && data.authority.title) || 'Autoridad de aplicación'}</h5>`;
                                     contentTextHtml += `<p>${(data.authority && data.authority.text) || ''}</p>`;
                                     contentTextHtml += `<h5>${(data.plan && data.plan.title) || 'Plan de respuesta'}</h5>`;
-                                    contentTextHtml += `<p>${(data.plan && data.plan.text) || ''}</p>`;
+                                    contentTextHtml += `<p class="planes-plan-text">${(data.plan && data.plan.text) || ''}</p>`;
                                     if (data.url) contentTextHtml += `<p><a href="${data.url}" target="_blank" class="btn btn-azul-claro btn-small">Descarga el plan</a></p>`;
                                     contentTextHtml += `<div class="planes-normativa-chips">${regulationsToChips(data.regulations && data.regulations.text ? data.regulations.text : '')}</div>`;
                                     contentTextHtml += `<h5>${(data.contact && data.contact.title) || 'Contacto'}</h5>`;
