@@ -65,3 +65,18 @@ admin.site.register(MeasureField, MeasureFieldAdmin)
 admin.site.register(Meta_0)
 admin.site.register(Meta_1)
 admin.site.register(Meta_2)
+
+
+class ProgressReportAdmin(admin.ModelAdmin):
+    list_display = ('year', 'display_title', 'file', 'created_at')
+    list_filter = ('year',)
+    ordering = ('-year', '-created_at')
+    search_fields = ('title',)
+
+    def display_title(self, obj):
+        return obj.display_title()
+    display_title.short_description = 'título'
+    display_title.admin_order_field = 'title'
+
+
+admin.site.register(ProgressReport, ProgressReportAdmin)

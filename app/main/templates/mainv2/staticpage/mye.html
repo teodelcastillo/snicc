@@ -1386,7 +1386,11 @@ function verDetalle(id) {
                                   Reporte de Progreso
                               </button>
                               <ul class="dropdown-menu dropdown-menu-end">
-                                  <li><div class="dropdown-item" id="download_pdf"><i class="bi bi-files"></i>Reporte de Progreso 2024 (PDF)</div></li>
+                                  {% for report in progress_reports %}
+                                  <li><a class="dropdown-item" href="{{ report.file.url }}" target="_blank" rel="noopener"><i class="bi bi-files"></i>{{ report.display_title }} (PDF)</a></li>
+                                  {% empty %}
+                                  <li><span class="dropdown-item text-muted">No hay reportes cargados.</span></li>
+                                  {% endfor %}
                               </ul>
                           </div>
                             <a class="mye-action secondary" href="/editor/measure/">
@@ -1478,7 +1482,7 @@ function verDetalle(id) {
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="/measure/export.csv"><i class="bi bi-list-check"></i>Lista completa (CSV)</a></li>
-              <li><button type="button" class="dropdown-item" onclick="document.getElementById('download_pdf').click()"><i class="bi bi-files"></i>Fichas resumidas (PDF)</button></li>
+              <li>{% if latest_progress_report %}<a class="dropdown-item" href="{{ latest_progress_report.file.url }}" target="_blank" rel="noopener"><i class="bi bi-files"></i>Fichas resumidas (PDF)</a>{% else %}<span class="dropdown-item text-muted"><i class="bi bi-files"></i>Fichas resumidas (PDF) — no disponible</span>{% endif %}</li>
               <li><button type="button" class="dropdown-item" onclick="openDetailPopup([], true)"><i class="bi bi-card-text"></i>Detalle extendido (PDF)</button></li>
             </ul>
           </div>

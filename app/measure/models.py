@@ -230,3 +230,33 @@ class Measure(LongNamed):
     #             pass
     #         super().save(**kwargs)
     #         self.write_pdf()
+
+
+class ProgressReport(models.Model):
+    """
+    Reporte de progreso del monitoreo (MYE). Carga año a año desde el admin;
+    se muestra el más reciente primero en el dropdown.
+    """
+    class Meta:
+        verbose_name = 'reporte de progreso'
+        verbose_name_plural = 'reportes de progreso'
+        ordering = ['-year', '-created_at']
+
+    year = models.IntegerField(verbose_name='año')
+    title = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='título',
+        help_text='Opcional. Ej: "Reporte de Progreso 2024". Si está vacío se usa "Reporte de Progreso {año}".',
+    )
+    file = models.FileField(
+        upload_to='measure/progress_reports',
+        verbose_name='archivo PDF',
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='fecha de carga')
+
+    def __str__(self):
+        return self.title or f'Reporte de Progreso {self.year}'
+
+    def display_title(self):
+        return self.title or f'Reporte de Progreso {self.year}'

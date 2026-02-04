@@ -508,6 +508,8 @@ def mye_overview(request):
     context['line_categories'] = line_categories
     context['line_category_columns'] = line_category_columns
     context['show_responsable_field'] = _is_responsable_field_active()
+    context['progress_reports'] = ProgressReport.objects.all().order_by('-year', '-created_at')
+    context['latest_progress_report'] = context['progress_reports'].first()
 
     return render(request, 'mainv2/staticpage/mye.html', context)
 
