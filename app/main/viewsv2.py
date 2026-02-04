@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from .models import *
 from django.urls import path
@@ -282,10 +283,30 @@ def planes(request):
         parent = Post.objects.get(slug='ley-n-27520')
     except Post.DoesNotExist:
         parent = None
+    caba_texts_gid = islas_texts_gid = None
+    for p in Plan.objects.select_related('provincia').all():
+        if p.provincia.gid is None:
+            continue
+        name = (p.provincia.name or '').lower()
+        if 'ciudad' in name and 'buenos aires' in name:
+            caba_texts_gid = p.provincia.gid
+        if 'tierra del fuego' in name or 'islas del atlántico' in name or 'islas del atlantico' in name:
+            islas_texts_gid = p.provincia.gid
+    if caba_texts_gid is None:
+        caba_texts_gid = 6
+    if islas_texts_gid is None:
+        islas_texts_gid = 24
+    # El GeoJSON usa gid=1 para CABA; en el admin CABA puede ser provincia.gid=6. Duplicamos bajo clave 1
+    # para que el front use feature.properties.gid sin lógica especial (igual que el resto de provincias).
+    if caba_texts_gid is not None and caba_texts_gid in status:
+        status[1] = status[caba_texts_gid]
+        texts['1'] = texts[str(caba_texts_gid)]
     context.update({
         'parent': parent,
         'status': status,
         'texts': texts,
+        'caba_texts_gid': caba_texts_gid,
+        'islas_texts_gid': islas_texts_gid,
     })
     return render(request, 'mainv2/planes-de-respuesta.html', context)
 

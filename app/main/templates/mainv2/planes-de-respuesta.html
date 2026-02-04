@@ -55,10 +55,10 @@
                 {% include 'mainv2/social.html' %}
             </div>
 
-            <div class="post">
+            <div class="post" >
                 <h1 class="post-title post-title-planes">{% ts 'Planes de respuesta' lang %}</h1>
                 <p>{% ts 'Las 23 provincias y la Ciudad Autónoma de Buenos Aires deben elaborar sus Planes de Respuesta al cambio climático de acuerdo a los contenidos establecidos por la Ley 27.520 y la Disposición 776/2025, en concordancia con el Plan Nacional de Adaptación y Mitigación.' lang %}</p>
-                <div class="col-planes" style="margin-bottom: 25px !important;">
+                <div class="col-planes" style="margin-bottom: 20px !important;">
                     <div class="planes-resp-content">
 
                         <div class="planes-content-map">
@@ -70,6 +70,8 @@
                         <script src="{% static 'main/json/argentina.js' %}"></script>
                         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
                         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+                        {{ status|json_script:"status-data" }}
+                        {{ texts|json_script:"texts-data" }}
                         <script type="text/javascript">
                             var referenciasMapa = {
                                 "1": "#969696",
@@ -77,10 +79,14 @@
                                 "3": "#975DBA",
                                 "4": "#4CD964",
                                 "5": "#067F1B",
+                            };
+                            var valProvincias = JSON.parse(document.getElementById('status-data').textContent);
+                            var textosProvincias = JSON.parse(document.getElementById('texts-data').textContent);
+
+                            function statusVal(geoGid, defaultNum) {
+                                var v = valProvincias[geoGid] ?? valProvincias[String(geoGid)];
+                                return (v !== undefined && v !== null) ? v : defaultNum;
                             }
-                            var valProvincias = {{status|safe}};
-                            var textosProvincias = {{texts|safe}};
-                            var gidsColor262C51 = [2, 5, 8, 9, 11, 13, 14, 16, 17, 21];
 
                             const map = L.map('mapa_planes').setView([-52, -54.5], 4);
                             
@@ -97,68 +103,28 @@
                             map.scrollWheelZoom.disable();
                             map.doubleClickZoom.disable();
 
-                            var islas = argentina.features.filter(prov => {
-                                return prov.properties.gid === 24
-                            });
+                            var islas = argentina.features.filter(prov => prov.properties.gid === 24);
                             const imgIslas = document.getElementById("image_islas");
-                            const islasImgContainer = imgIslas.closest('.islas-img');
-                            if (valProvincias[24] !== undefined && valProvincias[24] !== null) {
-                                imgIslas.src="{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-'%}"+valProvincias[24]+".png";
-                                imgIslas.onclick = function() { showCardProvince(islas[0].properties); };
-                            } else {
-                                if (islasImgContainer) islasImgContainer.style.display = 'none';
-                            }
+                            imgIslas.src = "{% static 'main/images/planes-de-respuesta/islas-del-atlantico-sur-'%}" + statusVal(24, 2) + ".png";
+                            imgIslas.onclick = function() { showCardProvince(islas[0] ? islas[0].properties : { gid: 24, nombre_provincia: 'Tierra del Fuego, Antártida e Islas del Atlántico Sur' }); };
 
-                            var caba = argentina.features.filter(prov => {
-                                return prov.properties.gid === 1
+                            var caba = argentina.features.filter(prov => prov.properties.gid === 1);
+                            var cabaStatusNum = statusVal(1, 1);
+                            var cabaImage = L.icon({
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatusNum+'.png',
+                                iconSize:     [108, 73],
+                                iconAnchor:   [18, 22], 
+                                popupAnchor:  [-18, 45]
                             });
 
-                            if (valProvincias[1] !== undefined && valProvincias[1] !== null) {
-                                var cabaStatus = valProvincias[1];
-                                var cabaImage = L.icon({
-                                    iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'.png',
-                                    iconSize:     [108, 73],
-                                    iconAnchor:   [18, 22],
-                                    popupAnchor:  [-18, 45]
-                                });
-                                var cabaImageHover = L.icon({
-                                    iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatus+'-hover.png',
-                                    iconSize:     [108, 73],
-                                    iconAnchor:   [18, 22],
-                                    popupAnchor:  [-18, 45]
-                                });
-                                L.marker([-40.8, -45.2], {icon: cabaImage}).addTo(map).on('mousemove', function(e) {
-                                    if(!this.getElement().classList.contains('active')) {
-                                        this.getElement().classList.add('hover');
-                                        this.openTooltip(e.latlng);
-                                        this.setIcon(cabaImageHover);
-                                    } else {
-                                        this.getElement().classList.remove('hover');
-                                        this.closeTooltip();
-                                        this.setIcon(cabaImage);
-                                    }
-                                }).on('mouseout', function(e) {
-                                    this.getElement().classList.remove('hover');
-                                    this.closeTooltip();
-                                    this.setIcon(cabaImage);
-                                }).on('click', function(e) {
-                                    L.DomEvent.stopPropagation(e);
-                                    this.closeTooltip();
-                                    if(document.querySelector('.leaflet-interactive.active')) {
-                                        const activeClass = document.querySelector('.leaflet-interactive.active');
-                                        activeClass.classList.remove('active');
-                                    }
-                                    this.getElement().classList.remove('hover');
-                                    this.getElement().classList.add('active');
-                                    showCardProvince(caba[0].properties);
-                                }).on('popupclose', function(e) {
-                                    if(document.querySelector('.leaflet-interactive.active')) {
-                                        const activeClass = document.querySelector('.leaflet-interactive.active');
-                                        activeClass.classList.remove('active');
-                                    }
-                                }).bindTooltip(caba[0].properties.nombre_provincia, {direction: 'left', interactive: false, className: 'caba-tooltip'}).bindPopup(caba[0].properties.nombre_provincia);
-                            }
-                            
+                            var cabaImageHover = L.icon({
+                                iconUrl: "{% static 'main/images/planes-de-respuesta/caba-'%}"+cabaStatusNum+'-hover.png',
+                                iconSize:     [108, 73],
+                                iconAnchor:   [18, 22], 
+                                popupAnchor:  [-18, 45]
+                            });
+                            var cabaNombre = (caba[0] && caba[0].properties) ? caba[0].properties.nombre_provincia : 'Ciudad Autónoma de Buenos Aires';
+
                             function onEachFeature(feature, layer) {
                                 layer.bindTooltip(feature.properties.nombre_provincia, {direction: 'top', interactive: false,});
                                 /*if(provinciaSeleccionada != "" && provinciaSeleccionada == feature.properties.nombre_provincia) {
@@ -228,47 +194,59 @@
                                 }).join('');
                             }
                             function showCardProvince(featureProps){
-                                document.getElementById('title_province').innerHTML = featureProps.nombre_provincia;
+                                var key = featureProps.gid;
+                                var data = textosProvincias[key] || textosProvincias[String(key)];
+                                document.getElementById('title_province').innerHTML = featureProps.nombre_provincia || '';
                                 var contentTextHtml = '';
-                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].authority.title}</h5>`;
-                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].authority.text}</p>`;
-                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].plan.title}</h5>`;
-                                contentTextHtml +=   `<p>${textosProvincias[featureProps.gid].plan.text}</p>`;
-                                if (textosProvincias[featureProps.gid].url){
-                                contentTextHtml +=   `<p><a href="${textosProvincias[featureProps.gid].url}" target="_blank" class="btn btn-azul-claro btn-small">Descarga el plan</a></p>`;
+                                if (!data) {
+                                    contentTextHtml = '<p class="text-muted">Aún no hay información cargada para esta jurisdicción.</p>';
+                                } else {
+                                    contentTextHtml += `<h5>${(data.authority && data.authority.title) || 'Autoridad de aplicación'}</h5>`;
+                                    contentTextHtml += `<p>${(data.authority && data.authority.text) || ''}</p>`;
+                                    contentTextHtml += `<h5>${(data.plan && data.plan.title) || 'Plan de respuesta'}</h5>`;
+                                    contentTextHtml += `<p>${(data.plan && data.plan.text) || ''}</p>`;
+                                    if (data.url) contentTextHtml += `<p><a href="${data.url}" target="_blank" class="btn btn-azul-claro btn-small">Descarga el plan</a></p>`;
+                                    contentTextHtml += `<div class="planes-normativa-chips">${regulationsToChips(data.regulations && data.regulations.text ? data.regulations.text : '')}</div>`;
+                                    contentTextHtml += `<h5>${(data.contact && data.contact.title) || 'Contacto'}</h5>`;
+                                    contentTextHtml += `<div class="planes-contact-list">${linkifyContact(data.contact && data.contact.text ? data.contact.text : '')}</div>`;
                                 }
-                                contentTextHtml +=   `<div class="planes-normativa-chips">${regulationsToChips(textosProvincias[featureProps.gid].regulations.text)}</div>`;
-                                contentTextHtml +=   `<h5>${textosProvincias[featureProps.gid].contact.title}</h5>`;
-                                contentTextHtml +=   `<div class="planes-contact-list">${linkifyContact(textosProvincias[featureProps.gid].contact.text)}</div>`;
-
-                                /*
-                                contentTextHtml +=   `<ul>`;
-                                textosProvincias[featureProps.gid].contact.text.forEach(function (contactLi) {
-                                    contentTextHtml +=   `<li>{% ts '${contactLi}</li>`;
-                                });
-                                contentTextHtml +=   `</ul>`;
-                                */
-                                document.getElementById('text-province').innerHTML= contentTextHtml;
+                                document.getElementById('text-province').innerHTML = contentTextHtml;
                                 document.getElementById('empty_province').classList.remove('show');
                                 relocateArgentina();
                             }
                             
                             
                             function styleFunction(feature){
-                                var statusKey = (valProvincias[feature.properties.gid] !== undefined && valProvincias[feature.properties.gid] !== null)
-                                    ? String(valProvincias[feature.properties.gid])
-                                    : String(feature.properties.edo_plan || "1");
+                                var v = valProvincias[feature.properties.gid] ?? valProvincias[String(feature.properties.gid)];
+                                var statusKey = (v !== undefined && v !== null) ? String(v) : '1';
                                 var fillColor = referenciasMapa[statusKey] || referenciasMapa["1"];
                                 return {
                                     fillColor: fillColor,
-                                    weight: feature.properties.gid == 24 ? 0.5 : 1,
+                                    weight: feature.properties.gid == 24 ? 0.5 : feature.properties.gid == 1 ? 0.1 : 1,
                                     color: "#FFFFFF",
                                     stroke: "#FFFFFF",
                                     fillOpacity: 1
                                 };
                             }
-                            var provinciasSinCabaNiIslas = { type: "FeatureCollection", features: argentina.features.filter(function(f) { return f.properties.gid !== 1 && f.properties.gid !== 24; }) };
-                            const argentinaLayer = L.geoJSON(provinciasSinCabaNiIslas, {style: styleFunction, onEachFeature: onEachFeature}).addTo(map);     
+
+                            const argentinaLayer = L.geoJSON(argentina, {style: styleFunction, onEachFeature: onEachFeature}).addTo(map);
+                            /* Marcador CABA encima de la capa para que reciba el click y muestre datos del admin (clave 6) */
+                            L.marker([-40.8, -45.2], {icon: cabaImage}).addTo(map)
+                                .on('mousemove', function(e) {
+                                    if (!this.getElement().classList.contains('active')) { this.getElement().classList.add('hover'); this.openTooltip(e.latlng); this.setIcon(cabaImageHover); }
+                                    else { this.getElement().classList.remove('hover'); this.closeTooltip(); this.setIcon(cabaImage); }
+                                })
+                                .on('mouseout', function(e) { this.getElement().classList.remove('hover'); this.closeTooltip(); this.setIcon(cabaImage); })
+                                .on('click', function(e) {
+                                    L.DomEvent.stopPropagation(e);
+                                    this.closeTooltip();
+                                    if (document.querySelector('.leaflet-interactive.active')) document.querySelector('.leaflet-interactive.active').classList.remove('active');
+                                    this.getElement().classList.remove('hover'); this.getElement().classList.add('active');
+                                    showCardProvince(caba[0] ? caba[0].properties : { gid: 1, nombre_provincia: cabaNombre });
+                                })
+                                .on('popupclose', function(e) { if (document.querySelector('.leaflet-interactive.active')) document.querySelector('.leaflet-interactive.active').classList.remove('active'); })
+                                .bindTooltip(cabaNombre, {direction: 'left', interactive: false, className: 'caba-tooltip'})
+                                .bindPopup(cabaNombre);
                         </script>
 
                         <div class="content-planes">
@@ -297,18 +275,17 @@
                             <div class="planes-reference">
                                 <h5>Referencias del mapa</h5>
                                 <p><span style="background-color: #969696;"></span>No presentado</p>
-                                <p><span style="background-color: #262C51;"></span>En proceso de convalidación (análisis ANA-SsA)</p>
-                                <p><span style="background-color: #975DBA;"></span>En proceso de convalidación (análisis MAP-GNCC)</p>
-                                <p><span style="background-color: #4CD964;"></span>En proceso de convalidación </p>
+                                <p><span style="background-color: #262C51;"></span>En proceso de preconvalidación (análisis ANA-SsA)</p>
+                                <p><span style="background-color: #975DBA;"></span>En proceso de preconvalidación (análisis MAP-GNCC)</p>
+                                <p><span style="background-color: #4CD964;"></span>En proceso de preconvalidación </p>
                                 <p><span style="background-color: #067F1B;"></span>Convalidado</p>
                             </div>
                         </div>
 
                     </div>
-                    
                 </div>
                 <div>
-                    <b>{% ts 'En el mapa pueden visualizarse los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.' lang %}</b>
+                    <b>En el Mapa podes visualizar los avances de los Planes de Respuestas jurisdiccionales aprobados por la Autoridad de Aplicación Nacional.</b>
                 </div>
                 <div class="d-flex">
                     <div class="dropdown">
