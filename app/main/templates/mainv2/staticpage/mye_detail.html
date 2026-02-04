@@ -375,302 +375,65 @@
 
   <div class="border-top border-2 mb-5" style="border-color: rgba(38,44,81,0.1) !important;"></div>
 
-  <!-- Tabs con mejor centrado, contraste y diseño -->
+  <!-- Contenido General (sin tabs Implementación / Análisis / Seguimiento) -->
   <div class="card border-0 mye-section-card mb-5">
     <div class="card-body p-4">
-      <ul class="nav nav-pills mb-4" id="measureDetailTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="tab-general-tab" data-bs-toggle="tab" data-bs-target="#tab-general" type="button" role="tab">
-            <i class="bi bi-info-circle"></i> General
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-implementacion-tab" data-bs-toggle="tab" data-bs-target="#tab-implementacion" type="button" role="tab">
-            <i class="bi bi-gear"></i> Implementación
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-analisis-tab" data-bs-toggle="tab" data-bs-target="#tab-analisis" type="button" role="tab">
-            <i class="bi bi-graph-up"></i> Análisis
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-seguimiento-tab" data-bs-toggle="tab" data-bs-target="#tab-seguimiento" type="button" role="tab">
-            <i class="bi bi-clipboard-check"></i> Seguimiento
-          </button>
-        </li>
-      </ul>
+      <h5 class="tab-card-title mb-4"><i class="bi bi-info-circle me-2"></i>General</h5>
 
-      <div class="tab-content mt-4" id="measureDetailTabsContent">
-        <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
-          {% if metas %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for meta in metas %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-check-circle text-success fs-5 mt-1"></i>
-                      <span class="flex-grow-1">{{ meta }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-
-          <div class="row g-4 mb-4">
-            {% if alcance_geografico %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    <p class="mb-0">{{ alcance_geografico|safe }}</p>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-            {% if estimacion_gastos %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-cash-coin me-2"></i>Estimación de gastos al 2030</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    <p class="mb-0">{{ estimacion_gastos|safe }}</p>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
+      {% if measure.target_years.all %}
+        <div class="card mye-section-card mb-4">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas por año</h5>
           </div>
-
-          {% if riesgos_climaticos %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                {{ riesgos_climaticos|safe }}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if reduccion_emisiones %}
-            <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                {{ reduccion_emisiones|safe }}
-              </div>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="tab-pane fade" id="tab-implementacion" role="tabpanel">
-          {% if financiamiento %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-currency-exchange me-2"></i>Financiamiento</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in financiamiento %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <span class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:24px;height:24px;padding:0;margin-top:2px;">
-                        <i class="bi bi-check" style="font-size: 0.875rem;"></i>
-                      </span>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-
-          {% if instrumentos %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-tools me-2"></i>Instrumentos y herramientas</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in instrumentos %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-wrench-adjustable text-primary fs-5 mt-1"></i>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-
-          {% if necesidades %}
-            <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-lightning-charge me-2"></i>Necesidades y barreras</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in necesidades %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-exclamation-circle text-warning fs-5 mt-1"></i>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="tab-pane fade" id="tab-analisis" role="tabpanel">
-          <div class="row g-4 mb-4">
-            {% if analisis_genero %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-people me-2"></i>Enfoque de género y diversidad</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    {{ analisis_genero|safe }}
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-            {% if analisis_riesgo %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-shield-check me-2"></i>Gestión integral del riesgo</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    {{ analisis_riesgo|safe }}
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-            {% if analisis_salud %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-heart-pulse me-2"></i>Enfoque de salud</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    {{ analisis_salud|safe }}
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-            {% if analisis_transicion %}
-              <div class="col-md-6">
-                <div class="card mye-section-card h-100">
-                  <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="tab-card-title mb-0"><i class="bi bi-briefcase me-2"></i>Transición justa</h5>
-                  </div>
-                  <div class="card-body px-4 pb-4">
-                    {{ analisis_transicion|safe }}
-                  </div>
-                </div>
-              </div>
-            {% endif %}
+          <div class="card-body px-4 pb-4">
+            <ul class="list-unstyled mb-0">
+              {% for y in measure.target_years.all %}
+                <li class="d-flex gap-3 mb-3 align-items-start">
+                  <span class="fw-semibold text-nowrap" style="color:#262C51; min-width: 3rem;">{{ y.year }}</span>
+                  <span class="flex-grow-1">{% if y.description %}{{ y.description }}{% else %}<span class="text-muted">Sin descripción</span>{% endif %}</span>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
-
-          {% if cobeneficios %}
-            <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-star me-2"></i>Cobeneficios entre adaptación y mitigación</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                {{ cobeneficios|safe }}
-              </div>
-            </div>
-          {% endif %}
         </div>
+      {% endif %}
 
-        <div class="tab-pane fade" id="tab-seguimiento" role="tabpanel">
-          {% if indicadores %}
-            <div class="card mye-section-card mb-4">
+      <div class="row g-4 mb-4">
+        {% if alcance_geografico %}
+          <div class="col-md-6">
+            <div class="card mye-section-card h-100">
               <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-clipboard-check me-2"></i>Indicadores para el monitoreo</h5>
+                <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
               </div>
               <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in indicadores %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-check2-square text-success fs-5 mt-1"></i>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
+                <p class="mb-0">{{ alcance_geografico|safe }}</p>
               </div>
             </div>
-          {% endif %}
-
-          {% if relacion_ley %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-balance-scale me-2"></i>Relación con la Ley 27.520</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                {{ relacion_ley|safe }}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if objetivo_general %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Objetivo general</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                {{ objetivo_general|safe }}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if resultados_esperados %}
-            <div class="card mye-section-card mb-4">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-award me-2"></i>Resultados esperados</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in resultados_esperados %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-check-circle text-primary fs-5 mt-1"></i>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-
-          {% if seguimiento_extra %}
-            <div class="card mye-section-card">
-              <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="tab-card-title mb-0"><i class="bi bi-journal-text me-2"></i>Notas de seguimiento</h5>
-              </div>
-              <div class="card-body px-4 pb-4">
-                <ul class="list-unstyled mb-0">
-                  {% for item in seguimiento_extra %}
-                    <li class="d-flex gap-3 mb-3 align-items-start">
-                      <i class="bi bi-dot fs-4 mt-1"></i>
-                      <span class="flex-grow-1">{{ item }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          {% endif %}
-        </div>
+          </div>
+        {% endif %}
       </div>
+
+      {% if riesgos_climaticos %}
+        <div class="card mye-section-card mb-4">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
+          </div>
+          <div class="card-body px-4 pb-4">
+            {{ riesgos_climaticos|safe }}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if reduccion_emisiones %}
+        <div class="card mye-section-card">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="tab-card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Reducción estimada de emisiones</h5>
+          </div>
+          <div class="card-body px-4 pb-4">
+            {{ reduccion_emisiones|safe }}
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 
@@ -731,6 +494,7 @@
     </div>
 
     <div class="col-lg-6">
+      {% comment %} Metas nacionales vinculadas - apagado por solicitud
       {% if national_objectives %}
         <div class="card mye-section-card mb-4">
           <div class="card-body p-4">
@@ -748,6 +512,7 @@
           </div>
         </div>
       {% endif %}
+      {% endcomment %}
 
       {% if related_measures %}
         <div class="card mye-section-card">
@@ -769,6 +534,7 @@
     </div>
   </div>
 
+  {% comment %} Información adicional al final - apagado por solicitud
   {% if extra_sections %}
     <div class="card mye-section-card mt-4">
       <div class="card-body p-4">
@@ -784,6 +550,7 @@
       </div>
     </div>
   {% endif %}
+  {% endcomment %}
 </div>
 {% endblock %}
 
