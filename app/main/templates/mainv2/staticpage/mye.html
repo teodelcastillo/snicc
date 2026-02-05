@@ -1378,7 +1378,7 @@ function verDetalle(id) {
 
                         <div class="mye-header__title-row">
                           <h1 id="mye-title">
-                            <span class="mye-title-text">
+                            <span class="post-title" style="color: white; display: inline-flex; align-items: center; gap: 0.5rem;">
                               Monitoreo de Medidas Climáticas
                               <button
                                   class="mye-info-trigger"
@@ -1417,6 +1417,14 @@ function verDetalle(id) {
                                   {% endfor %}
                               </ul>
                           </div>
+
+                          {% if methodology_doc %}
+                            <a class="mye-action secondary" href="{{ methodology_doc.file.url }}" target="_blank" rel="noopener">
+                                <i class="bi bi-journal-text"></i>
+                                Metodología
+                            </a>
+                          {% endif %}
+
                             <a class="mye-action secondary" href="/editor/measure/">
                                 <i class="bi bi-sliders"></i>
                                 Administrar Modulo

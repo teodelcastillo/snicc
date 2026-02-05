@@ -321,3 +321,31 @@ class ProgressReport(models.Model):
 
     def display_title(self):
         return self.title or f'Reporte de Progreso {self.year}'
+
+
+class MethodologyDocument(models.Model):
+    """
+    Documento de metodología del módulo de monitoreo (MyE),
+    para ser cargado desde el admin y mostrado como un botón
+    de descarga en el header del módulo.
+    """
+
+    class Meta:
+        verbose_name = 'documento de metodología'
+        verbose_name_plural = 'documentos de metodología'
+        ordering = ['-created_at']
+
+    title = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='título',
+        help_text='Opcional. Ej: "Metodología del módulo de monitoreo".',
+    )
+    file = models.FileField(
+        upload_to='measure/methodology',
+        verbose_name='archivo',
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='fecha de carga')
+
+    def __str__(self):
+        return self.title or 'Metodología del módulo de monitoreo'

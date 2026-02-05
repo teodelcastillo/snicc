@@ -528,6 +528,7 @@ def mye_overview(request):
     context['show_responsable_field'] = _is_responsable_field_active()
     context['progress_reports'] = ProgressReport.objects.all().order_by('-year', '-created_at')
     context['latest_progress_report'] = context['progress_reports'].first()
+    context['methodology_doc'] = MethodologyDocument.objects.order_by('-created_at').first()
 
     return render(request, 'mainv2/staticpage/mye.html', context)
 

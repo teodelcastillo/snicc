@@ -114,4 +114,11 @@ class ProgressReportAdmin(admin.ModelAdmin):
     display_title.admin_order_field = 'title'
 
 
+class MethodologyDocumentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'file', 'created_at')
+    ordering = ('-created_at',)
+    search_fields = ('title',)
+
+
 admin.site.register(ProgressReport, ProgressReportAdmin)
+admin.site.register(MethodologyDocument, MethodologyDocumentAdmin)
