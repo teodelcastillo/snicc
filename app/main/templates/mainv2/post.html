@@ -56,7 +56,7 @@
                     {% if post.links.all %}
                       <li><hr class="dropdown-divider"></li>
                       <li class="dropdown-header">{% ts 'Enlaces relacionados' lang %}</li>
-                      {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                      {% for link in post.links.all|slice:":6" %}{% with ccontent=link|translate:lang %}
                         <li>
                           {% if link.view %}
                             {% if link.viewargs %}
@@ -71,18 +71,54 @@
                           {% endif %}
                         </li>
                       {% endwith %}{% endfor %}
+                      {% if post.links.all|length > 6 %}
+                        <li class="dropdown-item-text">
+                          <button type="button" class="btn btn-link btn-sm p-0 sidebar-ver-mas" data-bs-toggle="collapse" data-bs-target="#dropdown-links-more" aria-expanded="false">
+                            {% ts 'Ver más' lang %} ({{ post.links.all|length|add:"-6" }})
+                          </button>
+                          <ul class="collapse list-unstyled mb-0 mt-1" id="dropdown-links-more">
+                            {% for link in post.links.all|slice:"6:" %}{% with ccontent=link|translate:lang %}
+                            <li>
+                              {% if link.view %}
+                                {% if link.viewargs %}
+                                  <a class="dropdown-item" href="{% url link.view link.viewargs %}">{{ ccontent.title }}</a>
+                                {% else %}
+                                  <a class="dropdown-item" href="{% url link.view %}">{{ ccontent.title }}</a>
+                                {% endif %}
+                              {% else %}
+                                <a class="dropdown-item" href="{{ link.url|default:'#' }}" target="_blank" rel="noopener noreferrer">{{ ccontent.title }}</a>
+                              {% endif %}
+                            </li>
+                            {% endwith %}{% endfor %}
+                          </ul>
+                        </li>
+                      {% endif %}
                     {% endif %}
 
                     {% if post.books.all %}
                       <li><hr class="dropdown-divider"></li>
                       <li class="dropdown-header">{% ts 'Documentación' lang %}</li>
-                      {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                      {% for book in post.books.all|slice:":6" %}{% with content=book.book|translate:lang %}
                         <li>
                           <a class="dropdown-item" href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">
                             {{ content.title }}
                           </a>
                         </li>
                       {% endwith %}{% endfor %}
+                      {% if post.books.all|length > 6 %}
+                        <li class="dropdown-item-text">
+                          <button type="button" class="btn btn-link btn-sm p-0 sidebar-ver-mas" data-bs-toggle="collapse" data-bs-target="#dropdown-books-more" aria-expanded="false">
+                            {% ts 'Ver más' lang %} ({{ post.books.all|length|add:"-6" }})
+                          </button>
+                          <ul class="collapse list-unstyled mb-0 mt-1" id="dropdown-books-more">
+                            {% for book in post.books.all|slice:"6:" %}{% with content=book.book|translate:lang %}
+                            <li>
+                              <a class="dropdown-item" href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">{{ content.title }}</a>
+                            </li>
+                            {% endwith %}{% endfor %}
+                          </ul>
+                        </li>
+                      {% endif %}
                     {% endif %}
 
                   </ul>
@@ -176,7 +212,7 @@
                   {% ts 'Enlaces relacionados' lang %}
                 </h5>
                 <ul class="table-contents-list">
-                  {% for link in post.links.all %}{% with ccontent=link|translate:lang %}
+                  {% for link in post.links.all|slice:":6" %}{% with ccontent=link|translate:lang %}
                   <li>
                     {% if link.view %}
                       {% if link.viewargs %}
@@ -190,8 +226,28 @@
                       </a>
                     {% endif %}
                   </li>
-                  {%endwith%} {% endfor %}
+                  {%endwith%}{% endfor %}
                 </ul>
+                {% if post.links.all|length > 6 %}
+                <button type="button" class="btn btn-link btn-sm p-0 sidebar-ver-mas" data-bs-toggle="collapse" data-bs-target="#sidebar-links-more" aria-expanded="false">
+                  {% ts 'Ver más' lang %} ({{ post.links.all|length|add:"-6" }})
+                </button>
+                <ul class="table-contents-list collapse" id="sidebar-links-more">
+                  {% for link in post.links.all|slice:"6:" %}{% with ccontent=link|translate:lang %}
+                  <li>
+                    {% if link.view %}
+                      {% if link.viewargs %}
+                        <a href="{% url link.view link.viewargs %}">{{ ccontent.title }}</a>
+                      {% else %}
+                        <a href="{% url link.view %}">{{ ccontent.title }}</a>
+                      {% endif %}
+                    {% else %}
+                      <a href="{{ link.url|default:'#' }}" target="_blank" rel="noopener noreferrer">{{ ccontent.title }}</a>
+                    {% endif %}
+                  </li>
+                  {%endwith%}{% endfor %}
+                </ul>
+                {% endif %}
               </div>
               {% endif %}
 
@@ -202,7 +258,7 @@
                   {% ts 'Documentación' lang %}
                 </h5>
                 <ul class="table-contents-list">
-                  {% for book in post.books.all %}{% with content=book.book|translate:lang %}
+                  {% for book in post.books.all|slice:":6" %}{% with content=book.book|translate:lang %}
                   <li>
                     <a href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">
                       {{ content.title }}
@@ -210,6 +266,18 @@
                   </li>
                   {% endwith %}{% endfor %}
                 </ul>
+                {% if post.books.all|length > 6 %}
+                <button type="button" class="btn btn-link btn-sm p-0 sidebar-ver-mas" data-bs-toggle="collapse" data-bs-target="#sidebar-books-more" aria-expanded="false">
+                  {% ts 'Ver más' lang %} ({{ post.books.all|length|add:"-6" }})
+                </button>
+                <ul class="table-contents-list collapse" id="sidebar-books-more">
+                  {% for book in post.books.all|slice:"6:" %}{% with content=book.book|translate:lang %}
+                  <li>
+                    <a href="{{ book.book.get_download_url|default:'#' }}" target="_blank" rel="noopener noreferrer">{{ content.title }}</a>
+                  </li>
+                  {% endwith %}{% endfor %}
+                </ul>
+                {% endif %}
               </div>
               {% endif %}
 
