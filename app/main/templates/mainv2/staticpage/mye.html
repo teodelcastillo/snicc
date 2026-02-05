@@ -22,8 +22,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const filtroTipo = document.getElementById("filtro_tipo");
   const filtroLinea = document.getElementById("filtro_linea");
   const filtroNivel = document.getElementById("filtro_nivel");
+  const filterChipsContainer = document.getElementById("filter_chips");
   const totalLabel = document.getElementById("measures_count");
   const btnClear = document.getElementById("clear_filters");
+  const lineIdToName = {};
   const chartTypology = document.getElementById("chart_tipo_medidas");
   const chartStatus = document.getElementById("chart_estado_general");
   const totalCardValue = document.getElementById("total_measures_value");
@@ -72,10 +74,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   let filteredMeasures = [];
   let visibleCount = 0;
   let isLoadingMore = false;
-  let chartTypologyInstance = null;
-  let chartStatusInstance = null;
-  let typologyDataForTitle = {};
-  let statusDataForTitle = {};
+  const selectedTipos = [];
+  const selectedLineas = [];
+  const selectedNiveles = [];
 
   // Loader inicial
   listContainer.innerHTML = `
@@ -92,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       measures = data.measures || data.data || [];
       populateTypeFilterOptions(measures);
       populateLineFilterOptions(measures);
+      renderFilterChips();
       renderMeasures(measures);
     } catch (err) {
       console.error("Error cargando medidas:", err);
@@ -271,28 +273,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
   }
 
-  function updateDonutTitleTypology() {
-    if (!chartTypologyInstance || !chartTypologyInstance.internal) return;
-    const hidden = (chartTypologyInstance.internal.data && chartTypologyInstance.internal.data.hiddenTargetIds) || [];
-    let total = 0;
-    for (const [id, value] of Object.entries(typologyDataForTitle)) {
-      if (hidden.indexOf(id) === -1) total += (value || 0);
-    }
-    const titleEl = document.querySelector("#chart_tipo_medidas .c3-chart-arcs-title");
-    if (titleEl) titleEl.textContent = total ? total + " medidas" : "";
-  }
-
-  function updateDonutTitleStatus() {
-    if (!chartStatusInstance || !chartStatusInstance.internal) return;
-    const hidden = (chartStatusInstance.internal.data && chartStatusInstance.internal.data.hiddenTargetIds) || [];
-    let total = 0;
-    for (const [id, value] of Object.entries(statusDataForTitle)) {
-      if (hidden.indexOf(id) === -1) total += (value || 0);
-    }
-    const titleEl = document.querySelector("#chart_estado_general .c3-chart-arcs-title");
-    if (titleEl) titleEl.textContent = total ? total + " medidas" : "";
-  }
-
   function updateSummaryStats(data = []) {
     if (!totalCardValue || !implementationCardValue) return;
 
@@ -338,11 +318,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       acc[category] = pilaresStats.colors?.[category] || "#262C51";
       return acc;
     }, {});
-    const totalMeasures = values.reduce((acc, value) => acc + (value || 0), 0);
-    typologyDataForTitle = {};
-    categories.forEach((cat, i) => { typologyDataForTitle[cat] = values[i] || 0; });
-
-    chartTypologyInstance = c3.generate({
+    c3.generate({
       bindto: "#chart_tipo_medidas",
       size: { height: 380 },
       data: {
@@ -352,16 +328,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       legend: {
         position: "right",
-        item: {
-          onclick: function (id) {
-            chartTypologyInstance.toggle(id);
-            setTimeout(updateDonutTitleTypology, 0);
-          },
-        },
       },
       donut: {
         width: 50,
-        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        title: "",
         label: {
           format: function (value) {
             return value > 0 ? value : "";
@@ -395,14 +365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       acc[label] = statusStats.colors?.[key] || "#262C51";
       return acc;
     }, {});
-    const totalMeasures = columns.reduce((acc, [, value]) => acc + (value || 0), 0);
-    statusDataForTitle = {};
-    keys.forEach((key) => {
-      const label = key || "Sin dato";
-      statusDataForTitle[label] = (statusStats.data && statusStats.data[key]) || 0;
-    });
-
-    chartStatusInstance = c3.generate({
+    c3.generate({
       bindto: "#chart_estado_general",
       size: { height: 380 },
       data: {
@@ -412,16 +375,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       legend: {
         position: "right",
-        item: {
-          onclick: function (id) {
-            chartStatusInstance.toggle(id);
-            setTimeout(updateDonutTitleStatus, 0);
-          },
-        },
       },
       donut: {
         width: 50,
-        title: totalMeasures ? `${totalMeasures} medidas` : "",
+        title: "",
         label: {
           format: function (value) {
             return value > 0 ? value : "";
@@ -446,73 +403,89 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderStatusChart(statusStats);
   }
 
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function renderFilterChips() {
+    if (!filterChipsContainer) return;
+    filterChipsContainer.innerHTML = "";
+    const chips = [];
+    selectedTipos.forEach((v) => chips.push({ group: "tipo", value: v, label: v }));
+    selectedLineas.forEach((v) => chips.push({ group: "linea", value: v, label: lineIdToName[v] || v }));
+    selectedNiveles.forEach((v) => chips.push({ group: "nivel", value: v, label: v }));
+    chips.forEach(({ group, value, label }) => {
+      const chip = document.createElement("span");
+      chip.className = "badge rounded-pill d-inline-flex align-items-center gap-1 px-2 py-1";
+      chip.style.backgroundColor = "rgba(38,44,81,0.12)";
+      chip.style.color = "#262C51";
+      chip.style.fontSize = "0.8rem";
+      chip.innerHTML = `<span>${escapeHtml(label)}</span> <button type="button" class="btn btn-link p-0 border-0 align-baseline lh-1" style="font-size:0.9em; color:#262C51;" aria-label="Quitar filtro">&times;</button>`;
+      chip.querySelector("button").addEventListener("click", (e) => {
+        e.preventDefault();
+        if (group === "tipo") selectedTipos.splice(selectedTipos.indexOf(value), 1);
+        else if (group === "linea") selectedLineas.splice(selectedLineas.indexOf(value), 1);
+        else if (group === "nivel") selectedNiveles.splice(selectedNiveles.indexOf(value), 1);
+        renderFilterChips();
+        applyFilters();
+      });
+      filterChipsContainer.appendChild(chip);
+    });
+  }
+
+  function addFilterFromSelect(group, value, label) {
+    if (!value) return;
+    if (group === "tipo" && !selectedTipos.includes(value)) selectedTipos.push(value);
+    else if (group === "linea" && !selectedLineas.includes(value)) {
+      selectedLineas.push(value);
+      if (label) lineIdToName[value] = label;
+    } else if (group === "nivel" && !selectedNiveles.includes(value)) selectedNiveles.push(value);
+    else return;
+    renderFilterChips();
+    applyFilters();
+  }
+
   function populateTypeFilterOptions(data = []) {
     if (!filtroTipo) return;
     const typeSet = new Set();
-
     data.forEach((measure) => {
       const pilares = getMeasurePilares(measure);
       if (pilares.length) {
         pilares.forEach((name) => typeSet.add(name));
         return;
       }
-
       if (Array.isArray(measure.labels) && measure.labels.length) {
         measure.labels.forEach((label) => {
           const cleaned = label?.trim();
-          if (cleaned) {
-            typeSet.add(cleaned);
-          }
+          if (cleaned) typeSet.add(cleaned);
         });
       }
     });
-
-    filtroTipo.innerHTML = '<option value="">Todas</option>';
-    Array.from(typeSet)
-      .sort((a, b) => a.localeCompare(b))
-      .forEach((label) => {
-        const option = document.createElement("option");
-        option.value = label;
-        option.textContent = label;
-        filtroTipo.appendChild(option);
-      });
+    filtroTipo.innerHTML = '<option value="">Agregar filtro...</option>';
+    Array.from(typeSet).sort((a, b) => a.localeCompare(b)).forEach((label) => {
+      const option = document.createElement("option");
+      option.value = label;
+      option.textContent = label;
+      filtroTipo.appendChild(option);
+    });
   }
 
   function populateLineFilterOptions(data = []) {
     if (!filtroLinea) return;
     const lines = Array.from(
       new Map(
-        data
-          .filter((m) => m.linea && m.linea_id)
-          .map((m) => [m.linea_id, m.linea])
+        data.filter((m) => m.linea && m.linea_id).map((m) => [m.linea_id, m.linea])
       ).entries()
     ).sort((a, b) => a[1].localeCompare(b[1]));
-
-    filtroLinea.innerHTML = '<option value="">Todas</option>';
+    filtroLinea.innerHTML = '<option value="">Agregar filtro...</option>';
     lines.forEach(([id, name]) => {
+      lineIdToName[String(id)] = name;
       const option = document.createElement("option");
       option.value = id;
       option.textContent = name;
       filtroLinea.appendChild(option);
-    });
-  }
-
-  function populateScopeFilterOptions(data = []) {
-    if (!filtroAlcance) return;
-    const scopes = Array.from(
-      new Set(
-        data
-          .map((m) => (m.scope_label || m.scope || "").trim())
-          .filter(Boolean)
-      )
-    ).sort((a, b) => a.localeCompare(b));
-
-    filtroAlcance.innerHTML = '<option value="">Todos</option>';
-    scopes.forEach((scope) => {
-      const option = document.createElement("option");
-      option.value = scope;
-      option.textContent = scope;
-      filtroAlcance.appendChild(option);
     });
   }
 
@@ -628,16 +601,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadMoreBtn.disabled = isLoadingMore;
   }
 
-  // 3️⃣ Aplicar búsqueda y filtros (todos los criterios se combinan: tipo + línea + nivel de avance)
+  // 3️⃣ Aplicar búsqueda y filtros (grupos: tipo, línea, nivel; multi-select por grupo; AND entre grupos)
   function applyFilters() {
     const searchTerm = normalizeText(searchInput.value);
-    const tipo = filtroTipo.value;
-    const linea = filtroLinea.value;
-    const nivel = filtroNivel.value;
-
-    const normalizedTipo = normalizeText(tipo);
-    const normalizedLinea = normalizeText(linea);
-    const normalizedNivel = nivel && nivel !== "all" ? normalizeText(nivel) : "";
 
     const filtered = measures.filter((m) => {
       const matchesSearch =
@@ -646,28 +612,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         normalizeText(m.description || "").includes(searchTerm) ||
         normalizeText(m.code || "").includes(searchTerm);
 
-      const pillarValues = getMeasurePilares(m).map((value) => normalizeText(value));
+      const pillarValues = getMeasurePilares(m).map((v) => normalizeText(v));
       const matchesTipo =
-        !tipo ||
-        pillarValues.some((value) => value === normalizedTipo) ||
-        (Array.isArray(m.labels) && m.labels.some((label) => normalizeText(label) === normalizedTipo)) ||
-        normalizeText(m.pilar || "").includes(normalizedTipo);
+        selectedTipos.length === 0 ||
+        selectedTipos.some((t) => pillarValues.includes(normalizeText(t))) ||
+        (Array.isArray(m.labels) && selectedTipos.some((t) => m.labels.some((l) => normalizeText(l) === normalizeText(t)))) ||
+        selectedTipos.some((t) => normalizeText(m.pilar || "").includes(normalizeText(t)));
 
       const matchesLinea =
-        !linea ||
-        (m.linea_id && String(m.linea_id) === String(linea)) ||
-        (normalizedLinea && normalizeText(m.linea).includes(normalizedLinea));
+        selectedLineas.length === 0 ||
+        (m.linea_id && selectedLineas.includes(String(m.linea_id))) ||
+        (m.linea && selectedLineas.some((lid) => String(m.linea_id) === lid));
 
       const matchesNivel =
-        !normalizedNivel ||
-        normalizeText(m.status || "").includes(normalizedNivel);
+        selectedNiveles.length === 0 ||
+        (m.status && selectedNiveles.some((n) => normalizeText(m.status) === normalizeText(n)));
 
-      return (
-        matchesSearch &&
-        matchesTipo &&
-        matchesLinea &&
-        (nivel === "all" ? true : matchesNivel)
-      );
+      return matchesSearch && matchesTipo && matchesLinea && matchesNivel;
     });
 
     renderMeasures(filtered);
@@ -676,9 +637,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 4️⃣ Eventos
   searchInput.addEventListener("input", applyFilters);
-  filtroTipo.addEventListener("change", applyFilters);
-  filtroLinea.addEventListener("change", applyFilters);
-  filtroNivel.addEventListener("change", applyFilters);
+  if (filtroTipo) {
+    filtroTipo.addEventListener("change", () => {
+      const value = filtroTipo.value;
+      if (value) {
+        addFilterFromSelect("tipo", value, value);
+        filtroTipo.value = "";
+      }
+    });
+  }
+  if (filtroLinea) {
+    filtroLinea.addEventListener("change", () => {
+      const opt = filtroLinea.options[filtroLinea.selectedIndex];
+      const value = filtroLinea.value;
+      if (value) {
+        addFilterFromSelect("linea", value, opt ? opt.textContent : value);
+        filtroLinea.value = "";
+      }
+    });
+  }
+  if (filtroNivel) {
+    filtroNivel.addEventListener("change", () => {
+      const value = filtroNivel.value;
+      if (value) {
+        addFilterFromSelect("nivel", value, value);
+        filtroNivel.value = "";
+      }
+    });
+  }
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener("click", () => {
       if (!isLoadingMore) {
@@ -688,9 +674,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   btnClear.addEventListener("click", () => {
-    filtroTipo.value = "";
-    filtroLinea.value = "";
-    filtroNivel.value = "all";
+    selectedTipos.length = 0;
+    selectedLineas.length = 0;
+    selectedNiveles.length = 0;
+    if (filtroTipo) filtroTipo.value = "";
+    if (filtroLinea) filtroLinea.value = "";
+    if (filtroNivel) filtroNivel.value = "";
+    renderFilterChips();
     searchInput.value = "";
     applyFilters();
   });
@@ -735,6 +725,27 @@ function verDetalle(id) {
   #chart_tipo_medidas .c3-chart-arcs-title,
   #chart_estado_general .c3-chart-arcs-title {
     fill: #262C51 !important;
+  }
+
+  /* Chips de filtros seleccionados: máximo 244px, texto con ellipsis */
+  .filter-chips .badge {
+    max-width: 244px;
+    overflow: hidden;
+  }
+  .filter-chips .badge > span:first-of-type {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .filter-chips .badge .btn-link {
+    flex-shrink: 0;
+    text-decoration: none;
+    padding: 0 0.1rem;
+    line-height: 1;
+  }
+  .filter-chips .badge .btn-link:hover {
+    opacity: 0.8;
   }
 
   /* Añadiendo estilos modernos con mejores espaciados y transiciones */
@@ -1807,22 +1818,23 @@ function verDetalle(id) {
                 </h6>
               </div>
               <div class="card-body">
+                <div id="filter_chips" class="filter-chips d-flex flex-wrap gap-2 mb-3" style="min-height: 0;"></div>
                 <div class="mb-3">
                   <label class="fw-semibold mb-2" for="filtro_tipo" style="color:#262C51;">Tipo de medida</label>
                   <select id="filtro_tipo" class="form-select">
-                    <option value="">Todas</option>
+                    <option value="">Agregar filtro...</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label class="fw-semibold mb-2" for="filtro_linea" style="color:#262C51;">Línea o enfoque</label>
                   <select id="filtro_linea" class="form-select">
-                    <option value="">Todas</option>
+                    <option value="">Agregar filtro...</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
                   <select id="filtro_nivel" class="form-select">
-                    <option value="all">Todos</option>
+                    <option value="">Agregar filtro...</option>
                     <option value="En implementación inicial">En implementación inicial</option>
                     <option value="En implementación avanzada">En implementación avanzada</option>
                     <option value="En programación">En programación</option>
