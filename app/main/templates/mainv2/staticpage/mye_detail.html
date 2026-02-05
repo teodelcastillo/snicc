@@ -231,6 +231,31 @@
     font-size: 1.35rem;
     margin-right: 0.5rem;
   }
+  /* Grid de secciones MYE: máximo 3 columnas; 1 o 2 items ocupan 50% cada uno */
+  .mye-detail-grid {
+    display: grid;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .mye-detail-grid .card {
+    height: 100%;
+  }
+  .mye-detail-grid--count-1 {
+    grid-template-columns: 1fr;
+    max-width: 50%;
+  }
+  .mye-detail-grid--count-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 991px) {
+    .mye-detail-grid {
+      grid-template-columns: 1fr;
+    }
+    .mye-detail-grid--count-1 {
+      max-width: none;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -292,22 +317,10 @@
     <div class="mye-hero-footer">
   </div>
 
-  <!-- Tarjetas Alcance y estado / Período-Meta en una fila horizontal, 50% cada una (33% si hay Autoridad) -->
-  <div class="row g-4 mb-5">
-    {% if show_responsable_field %}
-      <div class="col-12 col-md-4">
-        <div class="card h-100 border-0 mye-section-card">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
-              <i class="bi bi-building fs-5" style="color: #262C51;"></i> Autoridad de aplicación
-            </div>
-            <p class="mb-0 fw-semibold fs-5" style="color:#262C51;">{{ responsable|default:"Sin definir" }}</p>
-          </div>
-        </div>
-      </div>
-    {% endif %}
-    <div class="col-12 {% if show_responsable_field %}col-md-4{% else %}col-md-6{% endif %}">
-      <div class="card h-100 border-0 mye-section-card">
+  <!-- Grid: Alcance y estado; Periodo meta; Metas por año; Alcance geográfico; Riesgos climáticos (visibilidad desde admin) -->
+  <div class="mye-detail-grid mye-detail-grid--count-{{ mye_grid_section_count|default:5 }}">
+    {% if show_alcance_estado %}
+      <div class="card border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
             <i class="bi bi-geo-alt fs-5" style="color: #262C51;"></i> Alcance y estado
@@ -316,33 +329,58 @@
           <small class="text-muted">Actualizado {{ measure.last_modified|date:"d/m/Y" }}</small>
         </div>
       </div>
-    </div>
-    <div class="col-12 {% if show_responsable_field %}col-md-4{% else %}col-md-6{% endif %}">
-      <div class="card h-100 border-0 mye-section-card">
+    {% endif %}
+    {% if show_periodo_meta %}
+      <div class="card border-0 mye-section-card">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
-            <i class="bi bi-calendar-week fs-5" style="color: #262C51;"></i> Período / Meta
+            <i class="bi bi-calendar-week fs-5" style="color: #262C51;"></i> Período meta
           </div>
-          <p class="mb-2 fw-semibold fs-5" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
-          {% if measure.target_years.all %}
-            <div class="mt-2">
-              {% for y in measure.target_years.all %}
-                <div class="mb-2">
-                  <span class="fw-semibold" style="color:#262C51;">{{ y.year }}</span>
-                  {% if y.short_description %}
-                    <p class="text-muted small mb-0 mt-1">{{ y.short_description }}</p>
-                  {% elif y.description %}
-                    <p class="text-muted small mb-0 mt-1">{{ y.description|truncatewords:15 }}</p>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <small class="text-muted">Sin metas definidas</small>
-          {% endif %}
+          <p class="mb-0 fw-semibold fs-5" style="color:#262C51;">{{ execution_period|default:"Sin definir" }}</p>
         </div>
       </div>
-    </div>
+    {% endif %}
+    {% if show_metas_por_ano and measure.target_years.all %}
+      <div class="card border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-bullseye fs-5" style="color: #262C51;"></i> Metas por año
+          </div>
+          <ul class="list-unstyled mb-0">
+            {% for y in measure.target_years.all %}
+              <li class="mb-2">
+                <span class="fw-semibold" style="color:#262C51;">{{ y.year }}</span>
+                {% if y.short_description %}
+                  <p class="text-muted small mb-0 mt-1">{{ y.short_description }}</p>
+                {% elif y.description %}
+                  <p class="text-muted small mb-0 mt-1">{{ y.description|truncatewords:15 }}</p>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+    {% if show_alcance_geografico and alcance_geografico %}
+      <div class="card border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-map fs-5" style="color: #262C51;"></i> Alcance geográfico
+          </div>
+          <div class="section-content">{{ alcance_geografico|safe }}</div>
+        </div>
+      </div>
+    {% endif %}
+    {% if show_riesgos_climaticos and riesgos_climaticos %}
+      <div class="card border-0 mye-section-card">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 text-muted text-uppercase small mb-3" style="letter-spacing: 0.05em; font-weight: 600;">
+            <i class="bi bi-exclamation-triangle fs-5" style="color: #262C51;"></i> Riesgos climáticos
+          </div>
+          <div class="section-content">{{ riesgos_climaticos|safe }}</div>
+        </div>
+      </div>
+    {% endif %}
   </div>
 
   <!-- Tarjeta de pilares mejorada 
@@ -376,61 +414,6 @@
   </div>-->
 
   <div class="border-top border-2 mb-5" style="border-color: rgba(38,44,81,0.1) !important;"></div>
-
-  <!-- General: solo el titular y las tarjetas debajo -->
-
-  {% if measure.target_years.all %}
-    <div class="card mye-section-card mb-4">
-      <div class="card-header bg-transparent border-0 pt-4 px-4">
-        <h5 class="tab-card-title mb-0"><i class="bi bi-bullseye me-2"></i>Metas por año</h5>
-      </div>
-      <div class="card-body px-4 pb-4">
-        <ul class="list-unstyled mb-0">
-          {% for y in measure.target_years.all %}
-            <li class="d-flex gap-3 mb-3 align-items-start">
-              <span class="fw-semibold text-nowrap" style="color:#262C51; min-width: 3rem;">{{ y.year }}</span>
-              <div class="flex-grow-1">
-                {% if y.short_description %}
-                  <p class="fw-medium mb-1" style="color:#262C51;">{{ y.short_description }}</p>
-                {% endif %}
-                {% if y.description %}
-                  <p class="text-muted small mb-0">{{ y.description }}</p>
-                {% elif not y.short_description %}
-                  <span class="text-muted">Sin descripción</span>
-                {% endif %}
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  {% endif %}
-
-  <div class="row g-4 mb-4">
-    {% if alcance_geografico %}
-      <div class="col-md-6">
-        <div class="card mye-section-card h-100">
-          <div class="card-header bg-transparent border-0 pt-4 px-4">
-            <h5 class="tab-card-title mb-0"><i class="bi bi-geo-alt me-2"></i>Alcance geográfico</h5>
-          </div>
-          <div class="card-body px-4 pb-4">
-            <p class="mb-0">{{ alcance_geografico|safe }}</p>
-          </div>
-        </div>
-      </div>
-    {% endif %}
-  </div>
-
-  {% if riesgos_climaticos %}
-    <div class="card mye-section-card mb-4">
-      <div class="card-header bg-transparent border-0 pt-4 px-4">
-        <h5 class="tab-card-title mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Riesgos climáticos asociados</h5>
-      </div>
-      <div class="card-body px-4 pb-4">
-        {{ riesgos_climaticos|safe }}
-      </div>
-    </div>
-  {% endif %}
 
   {% if reduccion_emisiones %}
     <div class="card mye-section-card mb-5">

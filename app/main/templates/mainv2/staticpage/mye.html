@@ -72,6 +72,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let filteredMeasures = [];
   let visibleCount = 0;
   let isLoadingMore = false;
+  let chartTypologyInstance = null;
+  let chartStatusInstance = null;
+  let typologyDataForTitle = {};
+  let statusDataForTitle = {};
 
   // Loader inicial
   listContainer.innerHTML = `
@@ -267,6 +271,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
   }
 
+  function updateDonutTitleTypology() {
+    if (!chartTypologyInstance || !chartTypologyInstance.internal) return;
+    const hidden = (chartTypologyInstance.internal.data && chartTypologyInstance.internal.data.hiddenTargetIds) || [];
+    let total = 0;
+    for (const [id, value] of Object.entries(typologyDataForTitle)) {
+      if (hidden.indexOf(id) === -1) total += (value || 0);
+    }
+    const titleEl = document.querySelector("#chart_tipo_medidas .c3-chart-arcs-title");
+    if (titleEl) titleEl.textContent = total ? total + " medidas" : "";
+  }
+
+  function updateDonutTitleStatus() {
+    if (!chartStatusInstance || !chartStatusInstance.internal) return;
+    const hidden = (chartStatusInstance.internal.data && chartStatusInstance.internal.data.hiddenTargetIds) || [];
+    let total = 0;
+    for (const [id, value] of Object.entries(statusDataForTitle)) {
+      if (hidden.indexOf(id) === -1) total += (value || 0);
+    }
+    const titleEl = document.querySelector("#chart_estado_general .c3-chart-arcs-title");
+    if (titleEl) titleEl.textContent = total ? total + " medidas" : "";
+  }
+
   function updateSummaryStats(data = []) {
     if (!totalCardValue || !implementationCardValue) return;
 
@@ -313,8 +339,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       return acc;
     }, {});
     const totalMeasures = values.reduce((acc, value) => acc + (value || 0), 0);
+    typologyDataForTitle = {};
+    categories.forEach((cat, i) => { typologyDataForTitle[cat] = values[i] || 0; });
 
-    c3.generate({
+    chartTypologyInstance = c3.generate({
       bindto: "#chart_tipo_medidas",
       size: { height: 380 },
       data: {
@@ -324,6 +352,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       legend: {
         position: "right",
+        item: {
+          onclick: function (id) {
+            chartTypologyInstance.toggle(id);
+            setTimeout(updateDonutTitleTypology, 0);
+          },
+        },
       },
       donut: {
         width: 50,
@@ -362,8 +396,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       return acc;
     }, {});
     const totalMeasures = columns.reduce((acc, [, value]) => acc + (value || 0), 0);
+    statusDataForTitle = {};
+    keys.forEach((key) => {
+      const label = key || "Sin dato";
+      statusDataForTitle[label] = (statusStats.data && statusStats.data[key]) || 0;
+    });
 
-    c3.generate({
+    chartStatusInstance = c3.generate({
       bindto: "#chart_estado_general",
       size: { height: 380 },
       data: {
@@ -373,6 +412,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       legend: {
         position: "right",
+        item: {
+          onclick: function (id) {
+            chartStatusInstance.toggle(id);
+            setTimeout(updateDonutTitleStatus, 0);
+          },
+        },
       },
       donut: {
         width: 50,

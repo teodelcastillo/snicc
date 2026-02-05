@@ -70,6 +70,16 @@ class MeasureAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": ('code', 'name', 'is_active', 'status', 'scope')}),
         ('Relaciones', {"fields": ('line', 'action', 'pilares', 'national_objectives')}),
+        ('Visibilidad en ficha MYE', {
+            "fields": (
+                'show_alcance_estado',
+                'show_periodo_meta',
+                'show_metas_por_ano',
+                'show_alcance_geografico',
+                'show_riesgos_climaticos',
+            ),
+            "description": "Activar o desactivar qué bloques se muestran en el grid de la ficha de cada medida.",
+        }),
         # ('Datos', {"fields": ('fields',)})
     )
 

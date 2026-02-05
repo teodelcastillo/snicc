@@ -695,6 +695,21 @@ def measure_detail_view(request, id):
     status_name = measure.status.name if measure.status else 'A definir'
     progress_style = PROGRESS_STYLE.get(status_name, PROGRESS_STYLE['A definir'])
 
+    alcance_geografico_val = field_values.get('Alcance geográfico o poblacional')
+    riesgos_climaticos_val = field_values.get('Riesgos climáticos asociados')
+    show_alcance_estado = getattr(measure, 'show_alcance_estado', True)
+    show_periodo_meta = getattr(measure, 'show_periodo_meta', True)
+    show_metas_por_ano = getattr(measure, 'show_metas_por_ano', True)
+    show_alcance_geografico = getattr(measure, 'show_alcance_geografico', True)
+    show_riesgos_climaticos = getattr(measure, 'show_riesgos_climaticos', True)
+    mye_grid_section_count = sum([
+        show_alcance_estado,
+        show_periodo_meta,
+        show_metas_por_ano and bool(measure.target_years.all()),
+        show_alcance_geografico and bool(alcance_geografico_val),
+        show_riesgos_climaticos and bool(riesgos_climaticos_val),
+    ])
+
     context = default_context(request)
     context.update({
         'measure': measure,
@@ -706,8 +721,14 @@ def measure_detail_view(request, id):
         'execution_period': field_values.get('Período de ejecución'),
         'description': field_values.get('Descripción'),
         'metas': metas,
-        'alcance_geografico': field_values.get('Alcance geográfico o poblacional'),
-        'riesgos_climaticos': field_values.get('Riesgos climáticos asociados'),
+        'alcance_geografico': alcance_geografico_val,
+        'riesgos_climaticos': riesgos_climaticos_val,
+        'show_alcance_estado': show_alcance_estado,
+        'show_periodo_meta': show_periodo_meta,
+        'show_metas_por_ano': show_metas_por_ano,
+        'show_alcance_geografico': show_alcance_geografico,
+        'show_riesgos_climaticos': show_riesgos_climaticos,
+        'mye_grid_section_count': mye_grid_section_count,
         'reduccion_emisiones': field_values.get('Reducción estimada de emisiones al 2030 (MtCO2e)'),
         'estimacion_gastos': field_values.get('Estimación de gastos al 2030'),
         'financiamiento': financiamiento,

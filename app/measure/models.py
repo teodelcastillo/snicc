@@ -213,6 +213,33 @@ class Measure(LongNamed):
     last_modified = models.DateTimeField(auto_now=True)
     national_objectives = models.ManyToManyField(Meta_2, verbose_name='metas de adaptación', blank=True)
 
+    # Visibilidad en ficha MYE (grid de detalle): el admin puede activar/desactivar cada bloque
+    show_alcance_estado = models.BooleanField(
+        default=True,
+        verbose_name='mostrar Alcance y estado',
+        help_text='Mostrar bloque "Alcance y estado" en la ficha MYE.',
+    )
+    show_periodo_meta = models.BooleanField(
+        default=True,
+        verbose_name='mostrar Período meta',
+        help_text='Mostrar bloque "Período meta" en la ficha MYE.',
+    )
+    show_metas_por_ano = models.BooleanField(
+        default=True,
+        verbose_name='mostrar Metas por año',
+        help_text='Mostrar bloque "Metas por año" en la ficha MYE.',
+    )
+    show_alcance_geografico = models.BooleanField(
+        default=True,
+        verbose_name='mostrar Alcance geográfico',
+        help_text='Mostrar bloque "Alcance geográfico" en la ficha MYE.',
+    )
+    show_riesgos_climaticos = models.BooleanField(
+        default=True,
+        verbose_name='mostrar Riesgos climáticos',
+        help_text='Mostrar bloque "Riesgos climáticos" en la ficha MYE.',
+    )
+
     # manager
     objects = models.Manager()
     active = ActiveMeasureManager()
