@@ -312,7 +312,12 @@ def planes(request):
 
 def enlaces(request):
     page = request.GET.get('page', 1)
-    qset = ExternalLink.objects.all()
+    # Excluir enlaces que ya se muestran como tarjetas destacadas (SIMARCC, INGEI, Planes de Respuesta)
+    qset = ExternalLink.objects.exclude(
+        Q(url__icontains='simarcc.ambiente.gob.ar')
+        | Q(url__icontains='inventariogei.ambiente.gob.ar')
+        | Q(url__icontains='main/planes')
+    )
     links = Paginator(qset, 6).get_page(page)
     context = default_context(request, {
         'qset': links,
