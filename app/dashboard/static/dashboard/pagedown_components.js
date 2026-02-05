@@ -9,16 +9,20 @@
   var MODAL_ID = 'dashboard-link-button-modal';
   var MODAL_DESPLEGABLE_ID = 'dashboard-desplegable-modal';
   var MODAL_DIAGRAMA_ID = 'dashboard-diagrama-modal';
+  var MODAL_TABLA_ID = 'dashboard-tabla-modal';
   var BACKDROP_ID = 'dashboard-link-button-modal-backdrop';
   var BACKDROP_DESPLEGABLE_ID = 'dashboard-desplegable-modal-backdrop';
   var BACKDROP_DIAGRAMA_ID = 'dashboard-diagrama-modal-backdrop';
+  var BACKDROP_TABLA_ID = 'dashboard-tabla-modal-backdrop';
   var currentTextarea = null;
   var modalEl = null;
   var modalDesplegableEl = null;
   var modalDiagramaEl = null;
+  var modalTablaEl = null;
   var backdropEl = null;
   var backdropDesplegableEl = null;
   var backdropDiagramaEl = null;
+  var backdropTablaEl = null;
 
   var DIAGRAMA_COLORES = [
     { nombre: 'Púrpura oscuro', valor: '#262C51' },
@@ -875,6 +879,227 @@
     return modal;
   }
 
+  function getOrCreateTablaModal() {
+    if (modalTablaEl) return modalTablaEl;
+    var mid = MODAL_TABLA_ID;
+    var modal = document.createElement('div');
+    modal.id = mid;
+    modal.className = 'modal fade dashboard-component-modal';
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-labelledby', mid + '-title');
+
+    modal.innerHTML =
+      '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">' +
+        '<div class="modal-content">' +
+          '<div class="modal-header">' +
+            '<h5 class="modal-title" id="' + mid + '-title">Insertar tabla</h5>' +
+            '<button type="button" class="btn-close" data-dismiss aria-label="Cerrar"></button>' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<div class="mb-3">' +
+              '<label for="' + mid + '-wrapper-class" class="form-label">Clase del contenedor (opcional)</label>' +
+              '<input type="text" class="form-control" id="' + mid + '-wrapper-class" value="post-table table-responsive-xxl table-internacional" placeholder="post-table table-responsive-xxl table-internacional">' +
+            '</div>' +
+            '<div class="mb-2 d-flex justify-content-between align-items-center">' +
+              '<label class="form-label mb-0">Columnas (cabeceras)</label>' +
+              '<button type="button" class="btn btn-sm btn-outline-primary" id="' + mid + '-add-col">Añadir columna</button>' +
+            '</div>' +
+            '<div id="' + mid + '-columnas" class="mb-3"></div>' +
+            '<div class="mb-2 d-flex justify-content-between align-items-center">' +
+              '<label class="form-label mb-0">Filas</label>' +
+              '<button type="button" class="btn btn-sm btn-outline-primary" id="' + mid + '-add-fila">Añadir fila</button>' +
+            '</div>' +
+            '<div id="' + mid + '-filas" class="mb-3"></div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-secondary" data-dismiss>Cancelar</button>' +
+            '<button type="button" class="btn btn-primary btn-azul-claro" id="' + mid + '-insert">Insertar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var wrapperClassInput = modal.querySelector('#' + mid + '-wrapper-class');
+    var columnasContainer = modal.querySelector('#' + mid + '-columnas');
+    var filasContainer = modal.querySelector('#' + mid + '-filas');
+    var addColBtn = modal.querySelector('#' + mid + '-add-col');
+    var addFilaBtn = modal.querySelector('#' + mid + '-add-fila');
+    var insertBtn = modal.querySelector('#' + mid + '-insert');
+    var closeButtons = modal.querySelectorAll('[data-dismiss]');
+
+    function addColumnaRow() {
+      var row = document.createElement('div');
+      row.className = 'd-flex align-items-center gap-2 mb-2 snicc-tabla-col-row';
+      row.innerHTML =
+        '<input type="text" class="form-control form-control-sm" name="col-header" placeholder="Ej: Documento" style="min-width:120px;">' +
+        '<select class="form-select form-select-sm" name="col-type" style="max-width:140px;">' +
+          '<option value="text">Texto</option>' +
+          '<option value="refs">Referencias (refs)</option>' +
+          '<option value="link">Enlace (descarga)</option>' +
+        '</select>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" name="col-quitar">Quitar</button>';
+      row.querySelector('[name="col-quitar"]').addEventListener('click', function () { row.remove(); });
+      columnasContainer.appendChild(row);
+    }
+
+    function getColumnas() {
+      var cols = [];
+      columnasContainer.querySelectorAll('.snicc-tabla-col-row').forEach(function (r) {
+        var header = (r.querySelector('[name="col-header"]').value || '').trim();
+        var type = (r.querySelector('[name="col-type"]').value || 'text');
+        cols.push({ header: header, type: type });
+      });
+      return cols;
+    }
+
+    addColBtn.addEventListener('click', addColumnaRow);
+
+    function addFilaRow() {
+      var cols = getColumnas();
+      if (cols.length === 0) {
+        filasContainer.focus();
+        return;
+      }
+      var row = document.createElement('div');
+      row.className = 'border rounded p-2 mb-2 snicc-tabla-fila-row';
+      var cellsHtml = '';
+      cols.forEach(function (col, ci) {
+        if (col.type === 'text') {
+          cellsHtml += '<div class="mb-1"><label class="form-label small mb-0">' + escapeHtml(col.header || 'Col ' + (ci + 1)) + '</label><input type="text" class="form-control form-control-sm" name="cell-' + ci + '" data-col-type="text"></div>';
+        } else if (col.type === 'refs') {
+          cellsHtml += '<div class="mb-1"><label class="form-label small mb-0">' + escapeHtml(col.header || 'Col ' + (ci + 1)) + '</label><input type="text" class="form-control form-control-sm" name="cell-' + ci + '" data-col-type="refs" placeholder="ref1;ref2;referencia tres"></div>';
+        } else {
+          cellsHtml += '<div class="mb-1"><label class="form-label small mb-0">' + escapeHtml(col.header || 'Col ' + (ci + 1)) + '</label><input type="url" class="form-control form-control-sm mb-1" name="cell-url-' + ci + '" placeholder="URL" data-col-type="link-url"><input type="text" class="form-control form-control-sm" name="cell-text-' + ci + '" placeholder="Texto del enlace (ej: Descargá)" value="Descargá" data-col-type="link-text"></div>';
+        }
+      });
+      row.innerHTML = cellsHtml + '<button type="button" class="btn btn-sm btn-outline-danger mt-1" name="fila-quitar">Quitar fila</button>';
+      row.querySelector('[name="fila-quitar"]').addEventListener('click', function () { row.remove(); });
+      filasContainer.appendChild(row);
+    }
+
+    addFilaBtn.addEventListener('click', addFilaRow);
+
+    function closeTabla() {
+      modal.classList.remove('show');
+      modal.style.display = '';
+      if (backdropTablaEl && backdropTablaEl.parentNode) {
+        backdropTablaEl.parentNode.removeChild(backdropTablaEl);
+      }
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      if (modal._escapeHandler) {
+        document.removeEventListener('keydown', modal._escapeHandler);
+        modal._escapeHandler = null;
+      }
+      currentTextarea = null;
+    }
+
+    function doInsertTabla() {
+      var cols = getColumnas();
+      if (cols.length === 0) {
+        columnasContainer.focus();
+        return;
+      }
+      var filas = filasContainer.querySelectorAll('.snicc-tabla-fila-row');
+      if (filas.length === 0) {
+        filasContainer.focus();
+        return;
+      }
+      if (!currentTextarea) { closeTabla(); return; }
+
+      var wrapperClass = (wrapperClassInput.value || '').trim() || 'post-table table-responsive-xxl table-internacional';
+      var orderIndices = [0];
+      for (var k = 1; k < cols.length; k++) {
+        if (k % 2 === 1) orderIndices.push(k);
+        else orderIndices.unshift(k);
+      }
+      var html = '<div class="' + escapeAttr(wrapperClass) + '">\n<table class="table">\n<thead>\n<tr>\n';
+      orderIndices.forEach(function (ci) {
+        html += '<th>' + escapeHtml(cols[ci].header) + '</th>\n';
+      });
+      html += '</tr>\n</thead>\n<tbody>\n';
+
+      filas.forEach(function (filaEl) {
+        html += '<tr>\n';
+        orderIndices.forEach(function (ci) {
+          var col = cols[ci];
+          html += '<td>';
+          if (col.type === 'text') {
+            var val = (filaEl.querySelector('[name="cell-' + ci + '"]') && filaEl.querySelector('[name="cell-' + ci + '"]').value) ? filaEl.querySelector('[name="cell-' + ci + '"]').value : '';
+            html += escapeHtml(val);
+            html += '</td>\n';
+          } else if (col.type === 'refs') {
+            var val = (filaEl.querySelector('[name="cell-' + ci + '"]') && filaEl.querySelector('[name="cell-' + ci + '"]').value) ? filaEl.querySelector('[name="cell-' + ci + '"]').value : '';
+            var partes = val.split(';').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+            partes.forEach(function (refTexto) {
+              html += '<div class="ref">' + escapeHtml(refTexto) + '</div>\n';
+            });
+            html += '</td>\n';
+          } else {
+            var url = (filaEl.querySelector('[name="cell-url-' + ci + '"]') && filaEl.querySelector('[name="cell-url-' + ci + '"]').value) ? filaEl.querySelector('[name="cell-url-' + ci + '"]').value : '';
+            var linkText = (filaEl.querySelector('[name="cell-text-' + ci + '"]') && filaEl.querySelector('[name="cell-text-' + ci + '"]').value) ? filaEl.querySelector('[name="cell-text-' + ci + '"]').value : 'Descargá';
+            html += '<a href="' + escapeAttr(url) + '" target="_blank" class="btn btn-azul-claro btn-icon icon-download" download>' + escapeHtml(linkText) + '</a>';
+            html += '</td>\n';
+          }
+        });
+        html += '</tr>\n';
+      });
+
+      html += '</tbody>\n</table>\n</div>';
+      insertAtCursor(currentTextarea, html);
+
+      wrapperClassInput.value = 'post-table table-responsive-xxl table-internacional';
+      columnasContainer.innerHTML = '';
+      filasContainer.innerHTML = '';
+      closeTabla();
+    }
+
+    insertBtn.addEventListener('click', doInsertTabla);
+    closeButtons.forEach(function (btn) {
+      btn.addEventListener('click', closeTabla);
+    });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeTabla();
+    });
+
+    backdropTablaEl = document.createElement('div');
+    backdropTablaEl.id = BACKDROP_TABLA_ID;
+    backdropTablaEl.className = 'modal-backdrop fade show dashboard-component-modal-backdrop';
+    backdropTablaEl.setAttribute('aria-hidden', 'true');
+    backdropTablaEl.addEventListener('click', closeTabla);
+
+    modal._componentClose = closeTabla;
+    modalTablaEl = modal;
+    return modal;
+  }
+
+  function openTablaModal(textarea) {
+    var modal = getOrCreateTablaModal();
+    currentTextarea = textarea;
+    var mid = MODAL_TABLA_ID;
+    modal.style.display = 'block';
+    modal.offsetHeight;
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    if (!backdropTablaEl.parentNode) {
+      document.body.appendChild(backdropTablaEl);
+    }
+    var escapeHandler = function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('show')) {
+        if (modal._componentClose) modal._componentClose();
+      }
+    };
+    modal._escapeHandler = escapeHandler;
+    document.addEventListener('keydown', escapeHandler);
+  }
+
+  function createTabla(textarea) {
+    openTablaModal(textarea);
+  }
+
   function openDiagramaModal(textarea) {
     var modal = getOrCreateDiagramaModal();
     currentTextarea = textarea;
@@ -1023,15 +1248,48 @@
 
     liDesp.parentNode.insertBefore(liDiagrama, liDesp.nextSibling);
 
-    // Desplazar todos los elementos que van después en el DOM (heading, hr, spacer3, undo, redo) 75px (tres botones)
+    // Botón 4: tabla (325px)
+    var liTabla = document.createElement('li');
+    liTabla.className = 'wmd-button wmd-component-button';
+    liTabla.id = 'wmd-component-tabla-button' + (textarea.id ? '-' + textarea.id : '');
+    liTabla.title = 'Insertar tabla (columnas configurables, filas con texto, referencias o enlaces)';
+    liTabla.style.left = (ourLeft + shiftBy + shiftBy + shiftBy) + 'px';
+    liTabla.style.width = '20px';
+    liTabla.style.height = '20px';
+    liTabla.style.cursor = 'pointer';
+    liTabla.style.listStyle = 'none';
+    liTabla.style.position = 'absolute';
+    liTabla.style.display = 'inline-block';
+    liTabla.setAttribute('aria-label', 'Insertar tabla');
+
+    var spanTabla = document.createElement('span');
+    spanTabla.className = 'wmd-component-icon wmd-component-tabla';
+    spanTabla.setAttribute('role', 'img');
+    spanTabla.setAttribute('aria-hidden', 'true');
+    spanTabla.textContent = '\u22EE';
+    spanTabla.style.fontSize = '14px';
+    spanTabla.style.lineHeight = '20px';
+    spanTabla.style.display = 'inline-block';
+    spanTabla.style.width = '20px';
+    spanTabla.style.textAlign = 'center';
+    liTabla.appendChild(spanTabla);
+
+    liTabla.addEventListener('click', function (e) {
+      e.preventDefault();
+      createTabla(textarea);
+    });
+
+    liDiagrama.parentNode.insertBefore(liTabla, liDiagrama.nextSibling);
+
+    // Desplazar todos los elementos que van después en el DOM (heading, hr, spacer3, undo, redo) 100px (cuatro botones)
     var children = Array.prototype.slice.call(buttonRow.querySelectorAll('li'));
-    var lastComponentIndex = children.indexOf(liDiagrama);
+    var lastComponentIndex = children.indexOf(liTabla);
     children.forEach(function (child, index) {
       if (index <= lastComponentIndex) return;
       var left = child.style.left || (window.getComputedStyle && window.getComputedStyle(child).left) || '';
       var num = parseInt(left, 10);
       if (!isNaN(num)) {
-        child.style.left = (num + shiftBy + shiftBy + shiftBy) + 'px';
+        child.style.left = (num + shiftBy + shiftBy + shiftBy + shiftBy) + 'px';
       }
     });
   }
