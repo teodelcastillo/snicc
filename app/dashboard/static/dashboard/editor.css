@@ -121,3 +121,43 @@ main.content-staff .diff_header a{
     background-color: white;
     border: 1px solid var(--amarillo);
 }
+
+/* Componentes del editor (botón de enlace, etc.) */
+.wmd-component-button {
+    padding: 0;
+    box-sizing: border-box;
+}
+.wmd-component-button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+}
+.wmd-component-button .wmd-component-icon {
+    vertical-align: middle;
+}
+
+/* Modal de componentes del editor (botón de enlace, etc.) */
+.dashboard-component-modal {
+    z-index: 1055;
+}
+.dashboard-component-modal.show {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.dashboard-component-modal-backdrop {
+    z-index: 1050;
+}
+.dashboard-component-modal .modal-dialog {
+    max-width: 420px;
+}
+.dashboard-component-modal .form-label {
+    font-weight: 500;
+}
+.dashboard-component-modal .btn-close {
+    font-size: 0.875rem;
+}
+
+.dashboard-upload-feedback {
+    font-size: 0.875rem;
+}
+.dashboard-upload-feedback .btn-link {
+    text-decoration: none;
+}

@@ -1478,6 +1478,56 @@ ol.breadcrumb li:not(.active):after {
     text-align: center !important;
 }
 
+/* Desplegables insertados desde el editor (componente snicc-desplegable) */
+.post .post-text .snicc-desplegable {
+    border-radius: 16px;
+    overflow: hidden;
+}
+.post .post-text .snicc-desplegable .card-header,
+.post .post-text .snicc-desplegable .snicc-desplegable-header {
+    font-family: "Montserrat", sans-serif;
+}
+.post .post-text .snicc-desplegable button:not(.collapsed) .bi-chevron-down {
+    transform: rotate(180deg);
+}
+/* Icono del encabezado: sin recuadro gris, imagen ocupa 40x40 manteniendo proporción */
+.post .post-text .snicc-desplegable .snicc-desplegable-icono {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-icono img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* Imagen en el contenido: contenida en el recuadro y adaptada al espacio */
+.post .post-text .snicc-desplegable .snicc-desplegable-imagen {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-imagen img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+}
+.post .post-text .snicc-desplegable .card-body p,
+.post .post-text .snicc-desplegable .snicc-desplegable-body p {
+    margin-bottom: 0.75rem;
+}
+.post .post-text .snicc-desplegable .card-body p:last-child,
+.post .post-text .snicc-desplegable .snicc-desplegable-body p:last-child {
+    margin-bottom: 0;
+}
+
 .col-table-contents-post {
     border-left: solid 1px #ECECEC;
 }

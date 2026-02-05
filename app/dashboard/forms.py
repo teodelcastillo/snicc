@@ -15,7 +15,8 @@ class MarkdownWidget(PagedownWidget):
               'pagedown/Markdown.Sanitizer.js',
               'pagedown/Markdown.Editor.js',
               'pagedown-extra/Markdown.Extra.js',
-              'pagedown_init.js'
+              'pagedown_init.js',
+              'dashboard/pagedown_components.js',
         )
 
 class SlugSourceWidget(forms.TextInput):
