@@ -38,6 +38,15 @@
     return div.innerHTML;
   }
 
+  function escapeAttr(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
   /**
    * Obtiene la URL del endpoint de subida de imágenes (mismo que Pagedown).
    */
@@ -506,6 +515,13 @@
               '<label for="' + mid + '-titulo" class="form-label">Título del diagrama (opcional)</label>' +
               '<input type="text" class="form-control" id="' + mid + '-titulo" placeholder="Ej: Gabinete Nacional de Cambio Climático (GNCC)">' +
             '</div>' +
+            '<div class="mb-3">' +
+              '<label for="' + mid + '-tamano" class="form-label">Tamaño del diagrama</label>' +
+              '<select class="form-select" id="' + mid + '-tamano">' +
+                '<option value="estandar">Estándar</option>' +
+                '<option value="grande">Más grande</option>' +
+              '</select>' +
+            '</div>' +
             '<div class="mb-3 form-check">' +
               '<input type="checkbox" class="form-check-input" id="' + mid + '-con-centro">' +
               '<label class="form-check-label" for="' + mid + '-con-centro">Incluir círculo central</label>' +
@@ -521,6 +537,12 @@
               '<button type="button" class="btn btn-sm btn-outline-primary" id="' + mid + '-add-nodo">Añadir nodo</button>' +
             '</div>' +
             '<div id="' + mid + '-nodos" class="mb-3"></div>' +
+            '<div class="mb-3">' +
+              '<label class="form-label">Líneas conectoras (relaciones entre nodos)</label>' +
+              '<p class="small text-muted mb-1">Opcional. Indique qué nodos deben unirse con una línea.</p>' +
+              '<div id="' + mid + '-relaciones" class="mb-2"></div>' +
+              '<button type="button" class="btn btn-sm btn-outline-secondary" id="' + mid + '-add-relacion">Añadir relación</button>' +
+            '</div>' +
           '</div>' +
           '<div class="modal-footer">' +
             '<button type="button" class="btn btn-secondary" data-dismiss>Cancelar</button>' +
@@ -532,6 +554,7 @@
     document.body.appendChild(modal);
 
     var tituloInput = modal.querySelector('#' + mid + '-titulo');
+    var tamanoSelect = modal.querySelector('#' + mid + '-tamano');
     var conCentroCheck = modal.querySelector('#' + mid + '-con-centro');
     var centroCampos = modal.querySelector('#' + mid + '-centro-campos');
     var centroTexto = modal.querySelector('#' + mid + '-centro-texto');
@@ -545,29 +568,96 @@
       centroCampos.style.display = this.checked ? 'block' : 'none';
     });
 
-    var nodoIndex = 0;
+    modal._nodoIndex = 0;
     function addNodoRow() {
-      var id = nodoIndex++;
+      var id = modal._nodoIndex++;
       var colorOpts = DIAGRAMA_COLORES.map(function (c) {
         return '<option value="' + escapeHtml(c.valor) + '">' + escapeHtml(c.nombre) + '</option>';
       }).join('');
       var row = document.createElement('div');
       row.className = 'border rounded p-2 mb-2 snicc-diagrama-nodo-row';
       row.dataset.nodoId = id;
+      row.dataset.imagenUrl = '';
       row.innerHTML =
         '<div class="row align-items-start">' +
-          '<div class="col-md-4"><label class="form-label small">Texto del nodo</label><input type="text" class="form-control form-control-sm" name="nodo-texto" placeholder="Ej: CAE"></div>' +
+          '<div class="col-md-3"><label class="form-label small">Texto del nodo</label><input type="text" class="form-control form-control-sm" name="nodo-texto" placeholder="Ej: CAE"></div>' +
           '<div class="col-md-2"><label class="form-label small">Color</label><select class="form-select form-select-sm" name="nodo-color">' + colorOpts + '</select></div>' +
-          '<div class="col-md-5"><label class="form-label small">Contenido al hacer clic (tooltip/modal)</label><textarea class="form-control form-control-sm" name="nodo-contenido" rows="2" placeholder="Texto o HTML que se muestra al clickear"></textarea></div>' +
+          '<div class="col-md-2"><label class="form-label small">Imagen (opcional)</label><input type="file" class="form-control form-control-sm" name="nodo-imagen" accept="image/*"><div class="dashboard-upload-feedback small mt-1" name="nodo-imagen-feedback"></div></div>' +
+          '<div class="col-md-4"><label class="form-label small">Contenido al hacer clic (tooltip)</label><textarea class="form-control form-control-sm" name="nodo-contenido" rows="2" placeholder="Texto o HTML en el tooltip"></textarea></div>' +
           '<div class="col-md-1"><label class="form-label small">&nbsp;</label><button type="button" class="btn btn-sm btn-outline-danger d-block" name="nodo-quitar">Quitar</button></div>' +
         '</div>';
       row.querySelector('[name="nodo-quitar"]').addEventListener('click', function () {
         row.remove();
       });
+      var fileInput = row.querySelector('[name="nodo-imagen"]');
+      var feedback = row.querySelector('[name="nodo-imagen-feedback"]');
+      fileInput.addEventListener('change', function () {
+        var file = this.files && this.files[0];
+        if (!file) return;
+        feedback.innerHTML = 'Subiendo...';
+        uploadImage(file, function (url, err) {
+          if (url) {
+            row.dataset.imagenUrl = url;
+            feedback.innerHTML = 'Subido: ' + escapeHtml(file.name) + ' <button type="button" class="btn btn-link btn-sm p-0" name="nodo-imagen-quitar">Quitar</button>';
+            feedback.querySelector('[name="nodo-imagen-quitar"]').addEventListener('click', function () {
+              row.dataset.imagenUrl = '';
+              fileInput.value = '';
+              feedback.innerHTML = '';
+            });
+          } else {
+            feedback.innerHTML = '<span class="text-danger">' + escapeHtml(err || 'Error') + '</span>';
+          }
+        });
+      });
       nodosContainer.appendChild(row);
+      updateRelacionDropdowns();
     }
 
     addNodoBtn.addEventListener('click', addNodoRow);
+
+    var relacionesContainer = modal.querySelector('#' + mid + '-relaciones');
+    var addRelacionBtn = modal.querySelector('#' + mid + '-add-relacion');
+
+    var CENTRO_VALUE = 'c';
+    function getRelacionOptions() {
+      var opts = nodosContainer.querySelectorAll('.snicc-diagrama-nodo-row');
+      var options = '';
+      if (conCentroCheck && conCentroCheck.checked && centroTexto) {
+        var centroLabel = (centroTexto.value || '').trim() || 'Centro';
+        options += '<option value="' + CENTRO_VALUE + '">' + escapeHtml(centroLabel) + '</option>';
+      }
+      opts.forEach(function (o, idx) {
+        var t = (o.querySelector('[name="nodo-texto"]').value || '').trim() || 'Nodo ' + (idx + 1);
+        options += '<option value="' + idx + '">' + escapeHtml(t) + '</option>';
+      });
+      return options;
+    }
+    function updateRelacionDropdowns() {
+      var options = getRelacionOptions();
+      relacionesContainer.querySelectorAll('select[name="rel-from"], select[name="rel-to"]').forEach(function (sel) {
+        var val = sel.value;
+        sel.innerHTML = options;
+        if (val !== undefined && val !== '') sel.value = val;
+      });
+    }
+
+    function addRelacionRow() {
+      var options = getRelacionOptions();
+      var row = document.createElement('div');
+      row.className = 'd-flex align-items-center gap-2 mb-1 snicc-diagrama-relacion-row';
+      row.innerHTML =
+        '<select class="form-select form-select-sm" name="rel-from" style="max-width:140px;">' + options + '</select>' +
+        '<span class="small">→</span>' +
+        '<select class="form-select form-select-sm" name="rel-to" style="max-width:140px;">' + options + '</select>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" name="rel-quitar">Quitar</button>';
+      row.querySelector('[name="rel-quitar"]').addEventListener('click', function () { row.remove(); });
+      relacionesContainer.appendChild(row);
+    }
+
+    addRelacionBtn.addEventListener('click', addRelacionRow);
+    nodosContainer.addEventListener('change', function () { updateRelacionDropdowns(); });
+    conCentroCheck.addEventListener('change', function () { updateRelacionDropdowns(); });
+    if (centroTexto) centroTexto.addEventListener('input', function () { updateRelacionDropdowns(); });
 
     function closeDiagrama() {
       modal.classList.remove('show');
@@ -593,6 +683,7 @@
         nodos.push({
           texto: texto,
           color: row.querySelector('[name="nodo-color"]').value || DIAGRAMA_COLORES[0].valor,
+          imagenUrl: (row.dataset.imagenUrl || '').trim(),
           contenido: (row.querySelector('[name="nodo-contenido"]').value || '').trim()
         });
       });
@@ -602,71 +693,166 @@
       }
       if (!currentTextarea) { closeDiagrama(); return; }
 
+      var CENTRO_IDX = -1;
+      function parseRelacionIdx(val) {
+        if (val === CENTRO_VALUE) return CENTRO_IDX;
+        var num = parseInt(val, 10);
+        return isNaN(num) ? null : num;
+      }
+      var relaciones = [];
+      relacionesContainer.querySelectorAll('.snicc-diagrama-relacion-row').forEach(function (row) {
+        var fromSel = row.querySelector('select[name="rel-from"]');
+        var toSel = row.querySelector('select[name="rel-to"]');
+        if (fromSel && toSel) {
+          var fromIdx = parseRelacionIdx(fromSel.value);
+          var toIdx = parseRelacionIdx(toSel.value);
+          if (fromIdx !== null && toIdx !== null && fromIdx !== toIdx) {
+            relaciones.push({ from: fromIdx, to: toIdx });
+          }
+        }
+      });
+
       var titulo = (tituloInput.value || '').trim();
       var conCentro = conCentroCheck.checked;
       var centroT = conCentro ? (centroTexto.value || '').trim() : '';
       var centroC = conCentro ? (centroColor.value || DIAGRAMA_COLORES[0].valor) : '';
+      var tamanoGrande = (tamanoSelect && tamanoSelect.value === 'grande') || nodos.length > 5;
 
       var diagramId = 'snicc-diagrama-' + Date.now();
-      var wrapperW = 360;
-      var wrapperH = 360;
+      var wrapperW = tamanoGrande ? 560 : 400;
+      var wrapperH = tamanoGrande ? 560 : 400;
       var centerX = wrapperW / 2;
       var centerY = wrapperH / 2;
-      var radius = 110;
-      var nodeSize = 72;
+      var radiusBase = tamanoGrande ? 175 : 125;
+      var radiusConCentro = tamanoGrande ? 133 : 95;
+      var nodeSize = tamanoGrande ? 126 : 90;
       var nodeHalf = nodeSize / 2;
-      var centerSize = 100;
+      var centerSize = tamanoGrande ? 182 : 130;
       var centerHalf = centerSize / 2;
+
+      var nodosConRelacionCentro = {};
+      if (conCentro && centroT && relaciones.length > 0) {
+        relaciones.forEach(function (r) {
+          if (r.from === CENTRO_IDX) nodosConRelacionCentro[r.to] = true;
+          if (r.to === CENTRO_IDX) nodosConRelacionCentro[r.from] = true;
+        });
+      }
 
       var n = nodos.length;
       var startAngle = -90;
+      var outerIndices = [];
+      var innerIndices = [];
+      for (var idx = 0; idx < n; idx++) {
+        if (nodosConRelacionCentro[idx]) innerIndices.push(idx);
+        else outerIndices.push(idx);
+      }
+      var nOuter = outerIndices.length;
+      var nInner = innerIndices.length;
+      if (conCentro && centroT && nInner > 0 && nOuter > 0) {
+        radiusBase = tamanoGrande ? 210 : 170;
+      }
+      var angleByIndex = {};
+      if (nOuter > 0) {
+        outerIndices.forEach(function (idx, k) {
+          angleByIndex[idx] = startAngle + (360 / nOuter) * k;
+        });
+        innerIndices.forEach(function (idx, k) {
+          angleByIndex[idx] = startAngle + (360 / nOuter) * (k + 0.5);
+        });
+      } else {
+        for (var idx = 0; idx < n; idx++) {
+          angleByIndex[idx] = startAngle + (360 / n) * idx;
+        }
+      }
+
+      var nodeCenters = [];
+
       var html = '<div class="snicc-diagrama-circular" id="' + diagramId + '" style="max-width:100%; margin:1.5rem auto;">';
       if (titulo) {
         html += '<h3 class="snicc-diagrama-titulo" style="text-align:center; color:#262C51; font-size:1.125rem; margin-bottom:1.25rem;">' + escapeHtml(titulo) + '</h3>';
       }
       html += '<div class="snicc-diagrama-wrapper" style="position:relative; width:' + wrapperW + 'px; height:' + wrapperH + 'px; margin:0 auto;">';
 
+      nodos.forEach(function (nod, i) {
+        var angleDeg = angleByIndex[i];
+        var angleRad = (angleDeg * Math.PI) / 180;
+        var r = nodosConRelacionCentro[i] ? radiusConCentro : radiusBase;
+        nodeCenters.push({
+          x: centerX + r * Math.cos(angleRad),
+          y: centerY + r * Math.sin(angleRad)
+        });
+      });
+
+      var centerPoint = { x: centerX, y: centerY };
+      function getRelacionPoint(idx) {
+        if (idx === CENTRO_IDX) return centerPoint;
+        return nodeCenters[idx] || null;
+      }
+      function arcoSobreCirculoDiagrama(ax, ay, bx, by, radioCirculo) {
+        var angleA = Math.atan2(ay - centerY, ax - centerX) * 180 / Math.PI;
+        var angleB = Math.atan2(by - centerY, bx - centerX) * 180 / Math.PI;
+        var spanCW = ((angleB - angleA) % 360 + 360) % 360;
+        var sweep = spanCW <= 180 ? 1 : 0;
+        return 'M ' + ax + ' ' + ay + ' A ' + radioCirculo + ' ' + radioCirculo + ' 0 0 ' + sweep + ' ' + bx + ' ' + by;
+      }
+      if (relaciones.length > 0) {
+        html += '<svg class="snicc-diagrama-lineas" style="position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; z-index:1;" viewBox="0 0 ' + wrapperW + ' ' + wrapperH + '" preserveAspectRatio="none">';
+        relaciones.forEach(function (r) {
+          var a = getRelacionPoint(r.from);
+          var b = getRelacionPoint(r.to);
+          if (!a || !b) return;
+          var esConCentro = r.from === CENTRO_IDX || r.to === CENTRO_IDX;
+          if (esConCentro) {
+            /* Relación con centro: se representa por superposición de círculos, no se dibuja línea ni forma */
+          } else {
+            html += '<path d="' + arcoSobreCirculoDiagrama(a.x, a.y, b.x, b.y, radiusBase) + '" fill="none" stroke="rgba(38,44,81,0.25)" stroke-width="2"/>';
+          }
+        });
+        html += '</svg>';
+      }
+
       if (conCentro && centroT) {
         html += '<div class="snicc-diagrama-centro" style="position:absolute; left:' + (centerX - centerHalf) + 'px; top:' + (centerY - centerHalf) + 'px; width:' + centerSize + 'px; height:' + centerSize + 'px; border-radius:50%; background-color:' + escapeHtml(centroC) + '; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; padding:0.5rem; font-size:0.85rem; font-weight:600; z-index:2;">' + escapeHtml(centroT) + '</div>';
       }
 
+      var placementThreshold = tamanoGrande ? 60 : 45;
       nodos.forEach(function (nod, i) {
-        var angleDeg = startAngle + (360 / n) * i;
+        var angleDeg = angleByIndex[i];
         var angleRad = (angleDeg * Math.PI) / 180;
-        var x = centerX + radius * Math.cos(angleRad) - nodeHalf;
-        var y = centerY + radius * Math.sin(angleRad) - nodeHalf;
-        var modalId = diagramId + '-modal-' + i;
-        html += '<button type="button" class="snicc-diagrama-nodo border-0 rounded-circle text-white text-center d-flex align-items-center justify-content-center" style="position:absolute; left:' + x + 'px; top:' + y + 'px; width:' + nodeSize + 'px; height:' + nodeSize + 'px; background-color:' + escapeHtml(nod.color) + '; font-size:0.75rem; font-weight:500; z-index:3; cursor:pointer; text-decoration:none;" data-bs-toggle="modal" data-bs-target="#' + modalId + '" title="' + escapeHtml(nod.contenido ? 'Ver más' : '') + '">' + escapeHtml(nod.texto) + '</button>';
+        var r = nodosConRelacionCentro[i] ? radiusConCentro : radiusBase;
+        var cx = centerX + r * Math.cos(angleRad);
+        var cy = centerY + r * Math.sin(angleRad);
+        var x = cx - nodeHalf;
+        var y = cy - nodeHalf;
+        var placement = 'bottom';
+        if (cx < centerX - placementThreshold) placement = 'right';
+        else if (cx > centerX + placementThreshold) placement = 'left';
+        else placement = cy < centerY ? 'bottom' : 'top';
+        var contenidoHtml = nod.contenido ? (nod.contenido.indexOf('<') >= 0 ? nod.contenido : '<p class="mb-0">' + escapeHtml(nod.contenido).replace(/\n/g, '<br>') + '</p>') : '';
+        var popoverContent = contenidoHtml ? escapeAttr('<div class="snicc-diagrama-popover-body">' + contenidoHtml + '</div>') : '';
+        var innerContent = '';
+        var imgSize = tamanoGrande ? 48 : 36;
+        if (nod.imagenUrl) {
+          innerContent += '<img src="' + escapeHtml(nod.imagenUrl) + '" alt="" class="snicc-diagrama-nodo-img" style="width:' + imgSize + 'px; height:' + imgSize + 'px; object-fit:contain; flex-shrink:0;">';
+        }
+        innerContent += '<span class="snicc-diagrama-nodo-texto" style="font-size:0.75rem; line-height:1.2;">' + escapeHtml(nod.texto) + '</span>';
+        html += '<button type="button" class="snicc-diagrama-nodo border-0 rounded-circle text-white text-center d-flex flex-column align-items-center justify-content-center gap-1" style="position:absolute; left:' + x + 'px; top:' + y + 'px; width:' + nodeSize + 'px; height:' + nodeSize + 'px; background-color:' + escapeHtml(nod.color) + '; font-weight:500; z-index:3; cursor:pointer; text-decoration:none; padding:0.35rem;"' +
+          (popoverContent ? ' data-bs-toggle="popover" data-bs-html="true" data-bs-trigger="click" data-bs-content="' + popoverContent + '" data-bs-container="body" data-bs-placement="' + placement + '" data-bs-custom-class="snicc-diagrama-popover"' : '') +
+          ' title="' + escapeHtml(nod.contenido ? 'Ver más' : '') + '">' + innerContent + '</button>';
       });
-      html += '</div>';
-
-      nodos.forEach(function (nod, i) {
-        var modalId = diagramId + '-modal-' + i;
-        var contenidoHtml = nod.contenido ? (nod.contenido.indexOf('<') >= 0 ? nod.contenido : '<p class="mb-0">' + escapeHtml(nod.contenido).replace(/\n/g, '<br>') + '</p>') : '<p class="mb-0 text-muted">Sin contenido.</p>';
-        html += '<div class="modal fade snicc-diagrama-modal" id="' + modalId + '" tabindex="-1" aria-hidden="true">' +
-          '<div class="modal-dialog modal-dialog-centered modal-sm">' +
-            '<div class="modal-content" style="border-radius:16px;">' +
-              '<div class="modal-header py-2">' +
-                '<h6 class="modal-title">' + escapeHtml(nod.texto) + '</h6>' +
-                '<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Cerrar"></button>' +
-              '</div>' +
-              '<div class="modal-body py-2 snicc-diagrama-modal-body" style="font-size:1rem;">' + contenidoHtml + '</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      });
-
-      html += '</div>';
+      html += '</div></div>';
 
       insertAtCursor(currentTextarea, html);
 
       tituloInput.value = '';
+      if (tamanoSelect) tamanoSelect.value = 'estandar';
       conCentroCheck.checked = false;
       centroCampos.style.display = 'none';
       centroTexto.value = '';
       centroColor.selectedIndex = 0;
       nodosContainer.innerHTML = '';
-      nodoIndex = 0;
+      relacionesContainer.innerHTML = '';
+      modal._nodoIndex = 0;
       closeDiagrama();
     }
 
@@ -694,6 +880,10 @@
     currentTextarea = textarea;
     var mid = MODAL_DIAGRAMA_ID;
     var nodosContainer = modal.querySelector('#' + mid + '-nodos');
+    var relacionesContainer = modal.querySelector('#' + mid + '-relaciones');
+    nodosContainer.innerHTML = '';
+    if (relacionesContainer) relacionesContainer.innerHTML = '';
+    modal._nodoIndex = 0;
     if (nodosContainer.children.length === 0) {
       modal.querySelector('#' + mid + '-add-nodo').click();
       modal.querySelector('#' + mid + '-add-nodo').click();

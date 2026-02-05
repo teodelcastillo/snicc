@@ -1569,12 +1569,40 @@ ol.breadcrumb li:not(.active):after {
     transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.post .post-text .snicc-diagrama-circular .snicc-diagrama-modal .modal-content {
-    border-radius: 16px;
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-nodo-img {
+    max-width: 100%;
+    max-height: 100%;
 }
-.post .post-text .snicc-diagrama-circular .snicc-diagrama-modal-body {
-    font-size: 1.04rem;
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-nodo-texto {
+    word-break: break-word;
+    text-align: center;
+}
+/* Popover (tooltip) del diagrama: solo contenido, sin header ni título */
+.snicc-diagrama-popover .popover-header,
+.snicc-diagrama-popover .popover-title {
+    display: none !important;
+    padding: 0;
+    margin: 0;
+    height: 0;
+    overflow: hidden;
+    border: none;
+}
+.snicc-diagrama-popover .popover-body {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.popover .snicc-diagrama-popover-body {
+    font-size: 1rem;
     color: var(--negro);
+    max-width: 280px;
+}
+.popover .snicc-diagrama-popover-body p {
+    margin-bottom: 0.5rem;
+}
+.popover .snicc-diagrama-popover-body p:last-child {
+    margin-bottom: 0;
 }
 @media (max-width: 420px) {
     .post .post-text .snicc-diagrama-circular .snicc-diagrama-wrapper {

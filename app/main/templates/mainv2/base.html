@@ -301,6 +301,24 @@
     <!-- Javascript general -->
     <script src="{% static 'main/js/snic.js'%}"></script>
     <script src="{% static 'main/js/accessibility.js'%}"></script>
+    <!-- Inicializar popovers en diagramas circulares (tooltip al hacer clic, sin título, formato diálogo) -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.snicc-diagrama-nodo[data-bs-content]').forEach(function (el) {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+            var opts = {
+              html: true,
+              trigger: 'click',
+              container: 'body',
+              title: '',
+              placement: el.getAttribute('data-bs-placement') || 'auto',
+              customClass: el.getAttribute('data-bs-custom-class') || 'snicc-diagrama-popover'
+            };
+            new bootstrap.Popover(el, opts);
+          }
+        });
+      });
+    </script>
     <!-- End Javascript general-->
 
 </body>
