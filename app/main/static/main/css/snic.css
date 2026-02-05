@@ -1519,9 +1519,35 @@ ol.breadcrumb li:not(.active):after {
     display: block;
     object-fit: contain;
 }
-.post .post-text .snicc-desplegable .card-body p,
-.post .post-text .snicc-desplegable .snicc-desplegable-body p {
+/* Cuerpo del desplegable: 1 punto más chico que el resto de la página (1.125rem − 1pt ≈ 1.04rem) */
+.post .post-text .snicc-desplegable .snicc-desplegable-body,
+.post .post-text .snicc-desplegable .snicc-desplegable-body.card-body {
+    font-size: 1.04rem;
+    color: var(--negro);
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-body p,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body p {
+    font-size: 1.04rem;
     margin-bottom: 0.75rem;
+    color: var(--negro);
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-body p b,
+.post .post-text .snicc-desplegable .snicc-desplegable-body p strong,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body p b,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body p strong {
+    color: var(--azul);
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-body h2,
+.post .post-text .snicc-desplegable .snicc-desplegable-body h3,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body h2,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body h3 {
+    font-size: 1.04rem;
+    color: var(--negro);
+}
+.post .post-text .snicc-desplegable .snicc-desplegable-body h4,
+.post .post-text .snicc-desplegable .card-body.snicc-desplegable-body h4 {
+    font-size: 0.94rem;
+    color: var(--negro);
 }
 .post .post-text .snicc-desplegable .card-body p:last-child,
 .post .post-text .snicc-desplegable .snicc-desplegable-body p:last-child {
