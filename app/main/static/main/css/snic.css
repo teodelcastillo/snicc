@@ -1554,6 +1554,35 @@ ol.breadcrumb li:not(.active):after {
     margin-bottom: 0;
 }
 
+/* Diagrama circular (nodos con modal al hacer clic) */
+.post .post-text .snicc-diagrama-circular {
+    font-family: "Montserrat", sans-serif;
+}
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-titulo {
+    color: var(--azul);
+    font-weight: 600;
+}
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-nodo {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-nodo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-modal .modal-content {
+    border-radius: 16px;
+}
+.post .post-text .snicc-diagrama-circular .snicc-diagrama-modal-body {
+    font-size: 1.04rem;
+    color: var(--negro);
+}
+@media (max-width: 420px) {
+    .post .post-text .snicc-diagrama-circular .snicc-diagrama-wrapper {
+        transform: scale(0.85);
+        transform-origin: center;
+    }
+}
+
 .col-table-contents-post {
     border-left: solid 1px #ECECEC;
 }

@@ -8,13 +8,28 @@
 
   var MODAL_ID = 'dashboard-link-button-modal';
   var MODAL_DESPLEGABLE_ID = 'dashboard-desplegable-modal';
+  var MODAL_DIAGRAMA_ID = 'dashboard-diagrama-modal';
   var BACKDROP_ID = 'dashboard-link-button-modal-backdrop';
   var BACKDROP_DESPLEGABLE_ID = 'dashboard-desplegable-modal-backdrop';
+  var BACKDROP_DIAGRAMA_ID = 'dashboard-diagrama-modal-backdrop';
   var currentTextarea = null;
   var modalEl = null;
   var modalDesplegableEl = null;
+  var modalDiagramaEl = null;
   var backdropEl = null;
   var backdropDesplegableEl = null;
+  var backdropDiagramaEl = null;
+
+  var DIAGRAMA_COLORES = [
+    { nombre: 'Púrpura oscuro', valor: '#262C51' },
+    { nombre: 'Azul', valor: '#2E6695' },
+    { nombre: 'Azul medio', valor: '#5B8DB8' },
+    { nombre: 'Naranja / Amarillo', valor: '#E7BA61' },
+    { nombre: 'Gris púrpura', valor: '#4A4E69' },
+    { nombre: 'Rosa claro', valor: '#E8D5D5' },
+    { nombre: 'Lila claro', valor: '#C5CAE9' },
+    { nombre: 'Celeste claro', valor: '#B3E5FC' }
+  ];
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -463,6 +478,248 @@
   }
 
   /**
+   * Crea el modal para "Insertar diagrama circular" (una sola vez).
+   */
+  function getOrCreateDiagramaModal() {
+    if (modalDiagramaEl) return modalDiagramaEl;
+
+    var mid = MODAL_DIAGRAMA_ID;
+    var modal = document.createElement('div');
+    modal.id = mid;
+    modal.className = 'modal fade dashboard-component-modal';
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-labelledby', mid + '-title');
+
+    var colorOptions = DIAGRAMA_COLORES.map(function (c) {
+      return '<option value="' + escapeHtml(c.valor) + '">' + escapeHtml(c.nombre) + '</option>';
+    }).join('');
+
+    modal.innerHTML =
+      '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">' +
+        '<div class="modal-content">' +
+          '<div class="modal-header">' +
+            '<h5 class="modal-title" id="' + mid + '-title">Insertar diagrama circular</h5>' +
+            '<button type="button" class="btn-close" data-dismiss aria-label="Cerrar"></button>' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<div class="mb-3">' +
+              '<label for="' + mid + '-titulo" class="form-label">Título del diagrama (opcional)</label>' +
+              '<input type="text" class="form-control" id="' + mid + '-titulo" placeholder="Ej: Gabinete Nacional de Cambio Climático (GNCC)">' +
+            '</div>' +
+            '<div class="mb-3 form-check">' +
+              '<input type="checkbox" class="form-check-input" id="' + mid + '-con-centro">' +
+              '<label class="form-check-label" for="' + mid + '-con-centro">Incluir círculo central</label>' +
+            '</div>' +
+            '<div id="' + mid + '-centro-campos" class="mb-3" style="display:none;">' +
+              '<div class="row">' +
+                '<div class="col-md-8"><label class="form-label">Texto del centro</label><input type="text" class="form-control" id="' + mid + '-centro-texto" placeholder="Ej: Reunión de Ministros"></div>' +
+                '<div class="col-md-4"><label class="form-label">Color</label><select class="form-select" id="' + mid + '-centro-color">' + colorOptions + '</select></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="mb-2 d-flex justify-content-between align-items-center">' +
+              '<label class="form-label mb-0">Nodos (círculos)</label>' +
+              '<button type="button" class="btn btn-sm btn-outline-primary" id="' + mid + '-add-nodo">Añadir nodo</button>' +
+            '</div>' +
+            '<div id="' + mid + '-nodos" class="mb-3"></div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-secondary" data-dismiss>Cancelar</button>' +
+            '<button type="button" class="btn btn-primary btn-azul-claro" id="' + mid + '-insert">Insertar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var tituloInput = modal.querySelector('#' + mid + '-titulo');
+    var conCentroCheck = modal.querySelector('#' + mid + '-con-centro');
+    var centroCampos = modal.querySelector('#' + mid + '-centro-campos');
+    var centroTexto = modal.querySelector('#' + mid + '-centro-texto');
+    var centroColor = modal.querySelector('#' + mid + '-centro-color');
+    var nodosContainer = modal.querySelector('#' + mid + '-nodos');
+    var addNodoBtn = modal.querySelector('#' + mid + '-add-nodo');
+    var insertBtn = modal.querySelector('#' + mid + '-insert');
+    var closeButtons = modal.querySelectorAll('[data-dismiss]');
+
+    conCentroCheck.addEventListener('change', function () {
+      centroCampos.style.display = this.checked ? 'block' : 'none';
+    });
+
+    var nodoIndex = 0;
+    function addNodoRow() {
+      var id = nodoIndex++;
+      var colorOpts = DIAGRAMA_COLORES.map(function (c) {
+        return '<option value="' + escapeHtml(c.valor) + '">' + escapeHtml(c.nombre) + '</option>';
+      }).join('');
+      var row = document.createElement('div');
+      row.className = 'border rounded p-2 mb-2 snicc-diagrama-nodo-row';
+      row.dataset.nodoId = id;
+      row.innerHTML =
+        '<div class="row align-items-start">' +
+          '<div class="col-md-4"><label class="form-label small">Texto del nodo</label><input type="text" class="form-control form-control-sm" name="nodo-texto" placeholder="Ej: CAE"></div>' +
+          '<div class="col-md-2"><label class="form-label small">Color</label><select class="form-select form-select-sm" name="nodo-color">' + colorOpts + '</select></div>' +
+          '<div class="col-md-5"><label class="form-label small">Contenido al hacer clic (tooltip/modal)</label><textarea class="form-control form-control-sm" name="nodo-contenido" rows="2" placeholder="Texto o HTML que se muestra al clickear"></textarea></div>' +
+          '<div class="col-md-1"><label class="form-label small">&nbsp;</label><button type="button" class="btn btn-sm btn-outline-danger d-block" name="nodo-quitar">Quitar</button></div>' +
+        '</div>';
+      row.querySelector('[name="nodo-quitar"]').addEventListener('click', function () {
+        row.remove();
+      });
+      nodosContainer.appendChild(row);
+    }
+
+    addNodoBtn.addEventListener('click', addNodoRow);
+
+    function closeDiagrama() {
+      modal.classList.remove('show');
+      modal.style.display = '';
+      if (backdropDiagramaEl && backdropDiagramaEl.parentNode) {
+        backdropDiagramaEl.parentNode.removeChild(backdropDiagramaEl);
+      }
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      if (modal._escapeHandler) {
+        document.removeEventListener('keydown', modal._escapeHandler);
+        modal._escapeHandler = null;
+      }
+      currentTextarea = null;
+    }
+
+    function doInsertDiagrama() {
+      var nodos = [];
+      nodosContainer.querySelectorAll('.snicc-diagrama-nodo-row').forEach(function (row) {
+        var texto = (row.querySelector('[name="nodo-texto"]').value || '').trim();
+        if (!texto) return;
+        nodos.push({
+          texto: texto,
+          color: row.querySelector('[name="nodo-color"]').value || DIAGRAMA_COLORES[0].valor,
+          contenido: (row.querySelector('[name="nodo-contenido"]').value || '').trim()
+        });
+      });
+      if (nodos.length === 0) {
+        nodosContainer.focus();
+        return;
+      }
+      if (!currentTextarea) { closeDiagrama(); return; }
+
+      var titulo = (tituloInput.value || '').trim();
+      var conCentro = conCentroCheck.checked;
+      var centroT = conCentro ? (centroTexto.value || '').trim() : '';
+      var centroC = conCentro ? (centroColor.value || DIAGRAMA_COLORES[0].valor) : '';
+
+      var diagramId = 'snicc-diagrama-' + Date.now();
+      var wrapperW = 360;
+      var wrapperH = 360;
+      var centerX = wrapperW / 2;
+      var centerY = wrapperH / 2;
+      var radius = 110;
+      var nodeSize = 72;
+      var nodeHalf = nodeSize / 2;
+      var centerSize = 100;
+      var centerHalf = centerSize / 2;
+
+      var n = nodos.length;
+      var startAngle = -90;
+      var html = '<div class="snicc-diagrama-circular" id="' + diagramId + '" style="max-width:100%; margin:1.5rem auto;">';
+      if (titulo) {
+        html += '<h3 class="snicc-diagrama-titulo" style="text-align:center; color:#262C51; font-size:1.125rem; margin-bottom:1.25rem;">' + escapeHtml(titulo) + '</h3>';
+      }
+      html += '<div class="snicc-diagrama-wrapper" style="position:relative; width:' + wrapperW + 'px; height:' + wrapperH + 'px; margin:0 auto;">';
+
+      if (conCentro && centroT) {
+        html += '<div class="snicc-diagrama-centro" style="position:absolute; left:' + (centerX - centerHalf) + 'px; top:' + (centerY - centerHalf) + 'px; width:' + centerSize + 'px; height:' + centerSize + 'px; border-radius:50%; background-color:' + escapeHtml(centroC) + '; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; padding:0.5rem; font-size:0.85rem; font-weight:600; z-index:2;">' + escapeHtml(centroT) + '</div>';
+      }
+
+      nodos.forEach(function (nod, i) {
+        var angleDeg = startAngle + (360 / n) * i;
+        var angleRad = (angleDeg * Math.PI) / 180;
+        var x = centerX + radius * Math.cos(angleRad) - nodeHalf;
+        var y = centerY + radius * Math.sin(angleRad) - nodeHalf;
+        var modalId = diagramId + '-modal-' + i;
+        html += '<button type="button" class="snicc-diagrama-nodo border-0 rounded-circle text-white text-center d-flex align-items-center justify-content-center" style="position:absolute; left:' + x + 'px; top:' + y + 'px; width:' + nodeSize + 'px; height:' + nodeSize + 'px; background-color:' + escapeHtml(nod.color) + '; font-size:0.75rem; font-weight:500; z-index:3; cursor:pointer; text-decoration:none;" data-bs-toggle="modal" data-bs-target="#' + modalId + '" title="' + escapeHtml(nod.contenido ? 'Ver más' : '') + '">' + escapeHtml(nod.texto) + '</button>';
+      });
+      html += '</div>';
+
+      nodos.forEach(function (nod, i) {
+        var modalId = diagramId + '-modal-' + i;
+        var contenidoHtml = nod.contenido ? (nod.contenido.indexOf('<') >= 0 ? nod.contenido : '<p class="mb-0">' + escapeHtml(nod.contenido).replace(/\n/g, '<br>') + '</p>') : '<p class="mb-0 text-muted">Sin contenido.</p>';
+        html += '<div class="modal fade snicc-diagrama-modal" id="' + modalId + '" tabindex="-1" aria-hidden="true">' +
+          '<div class="modal-dialog modal-dialog-centered modal-sm">' +
+            '<div class="modal-content" style="border-radius:16px;">' +
+              '<div class="modal-header py-2">' +
+                '<h6 class="modal-title">' + escapeHtml(nod.texto) + '</h6>' +
+                '<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Cerrar"></button>' +
+              '</div>' +
+              '<div class="modal-body py-2 snicc-diagrama-modal-body" style="font-size:1rem;">' + contenidoHtml + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+
+      html += '</div>';
+
+      insertAtCursor(currentTextarea, html);
+
+      tituloInput.value = '';
+      conCentroCheck.checked = false;
+      centroCampos.style.display = 'none';
+      centroTexto.value = '';
+      centroColor.selectedIndex = 0;
+      nodosContainer.innerHTML = '';
+      nodoIndex = 0;
+      closeDiagrama();
+    }
+
+    insertBtn.addEventListener('click', doInsertDiagrama);
+    closeButtons.forEach(function (btn) {
+      btn.addEventListener('click', closeDiagrama);
+    });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeDiagrama();
+    });
+
+    backdropDiagramaEl = document.createElement('div');
+    backdropDiagramaEl.id = BACKDROP_DIAGRAMA_ID;
+    backdropDiagramaEl.className = 'modal-backdrop fade show dashboard-component-modal-backdrop';
+    backdropDiagramaEl.setAttribute('aria-hidden', 'true');
+    backdropDiagramaEl.addEventListener('click', closeDiagrama);
+
+    modal._componentClose = closeDiagrama;
+    modalDiagramaEl = modal;
+    return modal;
+  }
+
+  function openDiagramaModal(textarea) {
+    var modal = getOrCreateDiagramaModal();
+    currentTextarea = textarea;
+    var mid = MODAL_DIAGRAMA_ID;
+    var nodosContainer = modal.querySelector('#' + mid + '-nodos');
+    if (nodosContainer.children.length === 0) {
+      modal.querySelector('#' + mid + '-add-nodo').click();
+      modal.querySelector('#' + mid + '-add-nodo').click();
+    }
+    modal.style.display = 'block';
+    modal.offsetHeight;
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    if (!backdropDiagramaEl.parentNode) {
+      document.body.appendChild(backdropDiagramaEl);
+    }
+    var escapeHandler = function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('show')) {
+        if (modal._componentClose) modal._componentClose();
+      }
+    };
+    modal._escapeHandler = escapeHandler;
+    document.addEventListener('keydown', escapeHandler);
+  }
+
+  function createDiagrama(textarea) {
+    openDiagramaModal(textarea);
+  }
+
+  /**
    * Añade los botones de componentes a la barra: inserta después del botón ulist y desplaza los siguientes.
    */
   function addComponentButtonsToWrapper(wrapper) {
@@ -543,15 +800,48 @@
 
     li.parentNode.insertBefore(liDesp, li.nextSibling);
 
-    // Desplazar todos los elementos que van después en el DOM (heading, hr, spacer3, undo, redo) 50px (dos botones)
+    // Botón 3: diagrama circular (300px)
+    var liDiagrama = document.createElement('li');
+    liDiagrama.className = 'wmd-button wmd-component-button';
+    liDiagrama.id = 'wmd-component-diagrama-button' + (textarea.id ? '-' + textarea.id : '');
+    liDiagrama.title = 'Insertar diagrama circular (nodos con tooltip/modal al hacer clic)';
+    liDiagrama.style.left = (ourLeft + shiftBy + shiftBy) + 'px';
+    liDiagrama.style.width = '20px';
+    liDiagrama.style.height = '20px';
+    liDiagrama.style.cursor = 'pointer';
+    liDiagrama.style.listStyle = 'none';
+    liDiagrama.style.position = 'absolute';
+    liDiagrama.style.display = 'inline-block';
+    liDiagrama.setAttribute('aria-label', 'Insertar diagrama circular');
+
+    var spanDiagrama = document.createElement('span');
+    spanDiagrama.className = 'wmd-component-icon wmd-component-diagrama';
+    spanDiagrama.setAttribute('role', 'img');
+    spanDiagrama.setAttribute('aria-hidden', 'true');
+    spanDiagrama.textContent = '\u25CB';
+    spanDiagrama.style.fontSize = '14px';
+    spanDiagrama.style.lineHeight = '20px';
+    spanDiagrama.style.display = 'inline-block';
+    spanDiagrama.style.width = '20px';
+    spanDiagrama.style.textAlign = 'center';
+    liDiagrama.appendChild(spanDiagrama);
+
+    liDiagrama.addEventListener('click', function (e) {
+      e.preventDefault();
+      createDiagrama(textarea);
+    });
+
+    liDesp.parentNode.insertBefore(liDiagrama, liDesp.nextSibling);
+
+    // Desplazar todos los elementos que van después en el DOM (heading, hr, spacer3, undo, redo) 75px (tres botones)
     var children = Array.prototype.slice.call(buttonRow.querySelectorAll('li'));
-    var lastComponentIndex = children.indexOf(liDesp);
+    var lastComponentIndex = children.indexOf(liDiagrama);
     children.forEach(function (child, index) {
       if (index <= lastComponentIndex) return;
       var left = child.style.left || (window.getComputedStyle && window.getComputedStyle(child).left) || '';
       var num = parseInt(left, 10);
       if (!isNaN(num)) {
-        child.style.left = (num + shiftBy + shiftBy) + 'px';
+        child.style.left = (num + shiftBy + shiftBy + shiftBy) + 'px';
       }
     });
   }
