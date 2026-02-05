@@ -838,7 +838,7 @@
         innerContent += '<span class="snicc-diagrama-nodo-texto" style="font-size:0.75rem; line-height:1.2;">' + escapeHtml(nod.texto) + '</span>';
         html += '<button type="button" class="snicc-diagrama-nodo border-0 rounded-circle text-white text-center d-flex flex-column align-items-center justify-content-center gap-1" style="position:absolute; left:' + x + 'px; top:' + y + 'px; width:' + nodeSize + 'px; height:' + nodeSize + 'px; background-color:' + escapeHtml(nod.color) + '; font-weight:500; z-index:3; cursor:pointer; text-decoration:none; padding:0.35rem;"' +
           (popoverContent ? ' data-bs-toggle="popover" data-bs-html="true" data-bs-trigger="click" data-bs-content="' + popoverContent + '" data-bs-container="body" data-bs-placement="' + placement + '" data-bs-custom-class="snicc-diagrama-popover"' : '') +
-          ' title="' + escapeHtml(nod.contenido ? 'Ver más' : '') + '">' + innerContent + '</button>';
+          '>' + innerContent + '</button>';
       });
       html += '</div></div>';
 
