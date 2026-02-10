@@ -4,7 +4,7 @@ from django import forms
 from user.models import User
 from main.models import Provincia, Profile, Language
 from main.viewsv2 import default_context
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.db import IntegrityError
 from .countries import COUNTRIES
 from .email import Email
@@ -19,34 +19,64 @@ class BaseForm(forms.Form):
     gender = forms.CharField()
     phone = forms.CharField(required=False)
 
+
 class RegisterForm(BaseForm):
-    email = forms.EmailField()  
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    password_confirm = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            self.add_error("password_confirm", "Las contraseñas no coinciden.")
+
+        return cleaned_data
+
 
 class ProfileForm(BaseForm):
     profile = forms.CharField()
     # lang = forms.CharField()
 
+
 # Auth
 
 class LoginEmail(forms.Form):
+    """
+    Formulario de inicio de sesión clásico.
+
+    Nota: el nombre histórico `LoginEmail` se conserva para compatibilidad,
+    pero ahora requiere también contraseña.
+    """
+
     email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
+
 
 def snicc_login(request):
     error = None
     if request.method == 'POST':
         form = LoginEmail(request.POST)
         if form.is_valid():
-            try:
-                user = User.objects.get(email=form.cleaned_data['email'])
-                Email(user).send_code()
-                return redirect('user:code', 'login', user.id)
-            except User.DoesNotExist:
-                error = 'Unknown user'
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            # Autenticación clásica por email + contraseña
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('mainv2:landing')
+            else:
+                error = 'Credenciales inválidas'
         else:
-            error = 'Invalid email'
+            error = 'Datos de inicio de sesión inválidos'
+    else:
+        form = LoginEmail()
 
     context = default_context(request, {
-        'error' : error
+        'error': error,
+        'form': form,
     })
 
     return render(request, 'user/inicia-sesion.html', context)
@@ -54,12 +84,24 @@ def snicc_login(request):
 
 def validate_code(request, case, id):
     """
+    Legacy: flujo de validación por código de verificación.
+
     case : register|login 
     id : user id
+
+    Actualmente el flujo principal de autenticación usa email + contraseña.
+    Esta vista se mantiene para que un equipo técnico futuro pueda reactivar
+    el login/registro por código reestableciendo las llamadas desde `register`
+    y `snicc_login`.
     """
     error = False
     if request.method == 'POST':
-        digits = request.POST['firstdigit'] + request.POST['seconddigit'] + request.POST['thirddigit'] + request.POST['fourthdigit'] 
+        digits = (
+            request.POST['firstdigit']
+            + request.POST['seconddigit']
+            + request.POST['thirddigit']
+            + request.POST['fourthdigit']
+        )
         user = User.objects.get(id=id)
         if user.check_code(digits):
             login(request, user)
@@ -69,10 +111,13 @@ def validate_code(request, case, id):
                 return redirect('user:register-profile')
         else:
             error = True
-    context = default_context(request, {
-        'case': case,
-        'error': error,
-        })
+    context = default_context(
+        request,
+        {
+            'case': case,
+            'error': error,
+        },
+    )
     return render(request, 'user/codigo.html', context)
 
 def profile(request):
@@ -118,22 +163,30 @@ def register(request):
                     province = Provincia.objects.get(gid=form.cleaned_data['province'])
                 except Provincia.DoesNotExist:
                     province = None
-                user = User.objects.create(
-                    username = form.cleaned_data['email'],
-                    email = form.cleaned_data['email'],
-                    phone = form.cleaned_data['phone'],
-                    first_name = form.cleaned_data['name'],
-                    last_name = form.cleaned_data['lastname'],
-                    gender = form.cleaned_data['gender'],
-                    country = form.cleaned_data['country'],
-                    province = province,
-                    city = form.cleaned_data['city'],
-                    lang = context['lang'],
+                # Crear usuario con contraseña clásica
+                user = User.objects.create_user(
+                    username=form.cleaned_data['email'],
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password'],
+                    phone=form.cleaned_data['phone'],
+                    first_name=form.cleaned_data['name'],
+                    last_name=form.cleaned_data['lastname'],
+                    gender=form.cleaned_data['gender'],
+                    country=form.cleaned_data['country'],
+                    province=province,
+                    city=form.cleaned_data['city'],
+                    lang=context['lang'],
                 )
-                # validate email
-                Email(user).send_code()
-                return redirect('user:code', 'register', user.id)
-        except IntegrityError :
+                # Legacy: flujo de verificación por email.
+                # Se deja comentado para posible reutilización futura.
+                #
+                # Email(user).send_code()
+                # return redirect('user:code', 'register', user.id)
+
+                # Autenticar automáticamente después del registro
+                login(request, user)
+                return redirect('user:register-profile')
+        except IntegrityError:
             form.add_error('email', 'A user with this name already exists.')
     else:
         form = RegisterForm()
