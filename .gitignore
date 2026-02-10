@@ -8,3 +8,4 @@ app/static/
 data/
 simarcc/
 db.sqlite3
+app/snicc/settings.py
