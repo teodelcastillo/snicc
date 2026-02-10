@@ -197,21 +197,27 @@ def news(request):
     return render(request, 'mainv2/novedades.html', context)
 
 def regulations(request):
-    page = request.GET.get('page', 1)
+    try:
+        page = int(request.GET.get('page', 1))
+    except (TypeError, ValueError):
+        page = 1
     search = request.GET.get('pattern')
     regfilter = request.GET.get('filter')
     if search:
-        qset = Regulation.objects.filter(Q(name__icontains=search)|Q(description__icontains=search))
+        qset = Regulation.objects.filter(
+            Q(versions__name__icontains=search) | Q(versions__description__icontains=search)
+        ).distinct()
     elif regfilter:
         qset = Regulation.objects.filter(linktype__iexact=regfilter)
-    else: 
-        qset =Regulation.objects.all()
+    else:
+        qset = Regulation.objects.all()
 
     qset = qset.order_by('-date')
     pages = Paginator(qset, 6)
     context = default_context(request, {
-        'pages' : pages,
+        'pages': pages,
         'regfilter': regfilter,
+        'pattern': search,
         'regs': pages.page(page),
         'total': {
             lt.lower(): Regulation.objects.filter(linktype=lt).count()

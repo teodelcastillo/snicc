@@ -72,7 +72,7 @@
 
                             <form class="main-form search-form" role="search" action="." method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8"><div>
                                 <div class="input-group">
-                                    <input placeholder="{% ts 'Buscá por ley, decreto, resolución o palabra clave' lang %}" class="input-search form-control" id="pattern" name="pattern" value="" size="20" maxlength="255">
+                                    <input placeholder="{% ts 'Buscá por ley, decreto, resolución o palabra clave' lang %}" class="input-search form-control" id="pattern" name="pattern" value="{{ pattern|default:'' }}" size="20" maxlength="255">
                                     <span class="input-group-btn">
                                     <button class="bg-white btn-search-reset btn btn-primary form-submit" aria-labelledby="edit-keys" aria-label="Buscar" type="submit" id="edit-submit" name="op" value="buscar">
                                         <img src="{% static 'main/images/iconos/search.svg'%}" alt=""></i><span class="sr-only">Buscá por ley, decreto, resolución o palabra clave</span>
