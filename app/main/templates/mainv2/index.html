@@ -57,10 +57,10 @@
                     </div>
 
                     <div class="container d-flex flex-wrap justify-content-center align-items-center my-5" style="gap: 10px; margin-top: 2.5rem !important; margin-bottom: 2.5rem !important;">
-                        <a href="{% url 'mainv2:post' 'que-es-el-cambio-climatico' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts '¿Qué es el cambio climático?' lang %}</a>
-                        <a href="{% url 'mainv2:post' 'sobre-adaptacion' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre adaptación' lang %}</a>
-                        <a href="{% url 'mainv2:post' 'sobre-mitigacion' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre mitigación' lang %}</a>
-                        <a href="{% url 'mainv2:post' 'sobre-perdidas-y-danos' %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Sobre pérdidas y daños' lang %}</a>
+                        {% if post_que %}<a href="{% url 'mainv2:post' post_que.slug %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts '¿Qué es el cambio climático?' lang %}</a>{% endif %}
+                        {% if post_adapt %}<a href="{% url 'mainv2:post' post_adapt.slug %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Adaptación' lang %}</a>{% endif %}
+                        {% if post_mit %}<a href="{% url 'mainv2:post' post_mit.slug %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Mitigación' lang %}</a>{% endif %}
+                        {% if post_pyda %}<a href="{% url 'mainv2:post' post_pyda.slug %}" class="btn btn-pilares-home rounded-pill px-3 py-2" style="font-size: 0.9rem; border: 1.5px solid #2e6794; color: #2e6794; background: transparent;">{% ts 'Pérdidas y daños' lang %}</a>{% endif %}
                     </div>
 
                     <!-- Si no conectado -->
