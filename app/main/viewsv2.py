@@ -48,10 +48,19 @@ def gc_staticpage(request, path):
 
 # dynamic pages
 
+# IDs de los posts pilares del home (enlaces por ID para que no se rompan si cambia el slug)
+LANDING_PILLAR_POST_IDS = (16, 12, 31, 13)  # que-es-el-cambio-climatico, sobre-adaptacion, sobre-mitigacion, sobre-perdidas-y-danos
+
+
 def landing(request):
-    news = Post.objects.filter(status=Post.PostStatus.published, type=Post.PostType.news).order_by('-date')[:3]    
+    news = Post.objects.filter(status=Post.PostStatus.published, type=Post.PostType.news).order_by('-date')[:3]
+    pillar_posts = {p.pk: p for p in Post.objects.filter(pk__in=LANDING_PILLAR_POST_IDS)}
     context = default_context(request, {
         'news': news,
+        'post_que': pillar_posts.get(16),
+        'post_adapt': pillar_posts.get(12),
+        'post_mit': pillar_posts.get(31),
+        'post_pyda': pillar_posts.get(13),
     })
     return render(request, 'mainv2/index.html', context)
 
