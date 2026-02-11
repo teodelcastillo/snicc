@@ -127,7 +127,13 @@
                     <div class="row">
                         <div class="col-auto">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="terms_subscription" required>
+                                <input
+                                  class="form-check-input"
+                                  type="checkbox"
+                                  id="terms_subscription"
+                                  name="terms_subscription"
+                                  required
+                                >
                                 <label class="form-check-label" for="terms_subscription">
                                     {% ts 'Acepto los' lang %} 
                                     <a href="{% url 'mainv2:post' 'terminos-y-condiciones' %}" target="_blank">{% ts 'Términos y condiciones' lang %}</a> 
@@ -139,7 +145,13 @@
                     <div class="row">
                         <div class="col-auto">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="news_subscription">
+                                <input
+                                  class="form-check-input"
+                                  type="checkbox"
+                                  id="news_subscription"
+                                  name="news_subscription"
+                                  value="1"
+                                >
                                 <label class="form-check-label" for="news_subscription">
                                     {% ts 'Deseo suscribirme a recibir novedades referidas al Sistema de Información Climatico' lang %}
                                 </label>

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from django import forms
 from user.models import User
-from main.models import Provincia, Profile, Language
+from main.models import Provincia, Profile, Language, NewsletterSubscription
 from main.viewsv2 import default_context
 from django.contrib.auth import login, authenticate
 from django.db import IntegrityError
@@ -177,6 +177,12 @@ def register(request):
                     city=form.cleaned_data['city'],
                     lang=context['lang'],
                 )
+
+                # Si la persona acepta recibir novedades, registrar su correo en NewsletterSubscription
+                if request.POST.get('news_subscription'):
+                    NewsletterSubscription.objects.get_or_create(
+                        email=form.cleaned_data['email']
+                    )
                 # Legacy: flujo de verificación por email.
                 # Se deja comentado para posible reutilización futura.
                 #
