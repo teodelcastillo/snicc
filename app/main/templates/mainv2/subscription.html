@@ -22,16 +22,23 @@
 <!-- Modal de éxito de suscripción (componente ligado al bloque de suscripción) -->
 <div class="modal fade" id="subscriptionSuccessModal" tabindex="-1" aria-labelledby="subscriptionSuccessModalLabel" aria-hidden="true" style="z-index: 2000;">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="subscriptionSuccessModalLabel">{% ts 'Suscripción realizada con éxito' lang %}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 18px 45px rgba(0,0,0,0.25); overflow: hidden;">
+      <div class="modal-header" style="background-color: #2e6695; color: #ffffff; padding: 0.9rem 1.5rem; border-bottom: none;">
+        <h5 class="modal-title" id="subscriptionSuccessModalLabel" style="color: #ffffff;">{% ts 'Suscripción realizada con éxito' lang %}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
       </div>
-      <div class="modal-body">
-        <p>{% ts 'Tu correo fue registrado correctamente para recibir novedades.' lang %}</p>
+      <div class="modal-body" style="padding: 1.1rem 1.6rem; font-size: 0.95rem; line-height: 1.5;">
+        <p class="mb-0">{% ts 'Tu correo fue registrado correctamente para recibir novedades.' lang %}</p>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% ts 'Aceptar' lang %}</button>
+      <div class="modal-footer" style="padding: 0.75rem 1.6rem; border-top: none; justify-content: flex-end;">
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          style="background-color: #2e6695; border-color: #2e6695; padding: 0.4rem 1.25rem; border-radius: 999px; font-weight: 600;"
+        >
+          {% ts 'Aceptar' lang %}
+        </button>
       </div>
     </div>
   </div>
@@ -40,16 +47,23 @@
 <!-- Modal para suscripciones ya registradas -->
 <div class="modal fade" id="subscriptionAlreadyModal" tabindex="-1" aria-labelledby="subscriptionAlreadyModalLabel" aria-hidden="true" style="z-index: 2000;">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="subscriptionAlreadyModalLabel">{% ts 'Ya estás suscripto' lang %}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
+    <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 18px 45px rgba(0,0,0,0.25); overflow: hidden;">
+      <div class="modal-header" style="background-color: #2e6695; color: #ffffff; padding: 0.9rem 1.5rem; border-bottom: none;">
+        <h5 class="modal-title" id="subscriptionAlreadyModalLabel" style="color: #ffffff;">{% ts 'Ya estás suscripto' lang %}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
       </div>
-      <div class="modal-body">
-        <p>{% ts 'Este correo ya se encuentra registrado para recibir novedades.' lang %}</p>
+      <div class="modal-body" style="padding: 1.1rem 1.6rem; font-size: 0.95rem; line-height: 1.5;">
+        <p class="mb-0">{% ts 'Este correo ya se encuentra registrado para recibir novedades.' lang %}</p>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% ts 'Aceptar' lang %}</button>
+      <div class="modal-footer" style="padding: 0.75rem 1.6rem; border-top: none; justify-content: flex-end;">
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          style="background-color: #2e6695; border-color: #2e6695; padding: 0.4rem 1.25rem; border-radius: 999px; font-weight: 600;"
+        >
+          {% ts 'Aceptar' lang %}
+        </button>
       </div>
     </div>
   </div>
