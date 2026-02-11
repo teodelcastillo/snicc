@@ -158,3 +158,11 @@ class STAdmin(admin.ModelAdmin):
     ]
 
 admin.site.register(StaticTrans, STAdmin)
+
+
+class NewsletterSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['email']
+    search_fields = ['email']
+
+
+admin.site.register(NewsletterSubscription, NewsletterSubscriptionAdmin)

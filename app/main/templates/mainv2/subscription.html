@@ -5,15 +5,102 @@
             <div class="row row-suscribite"><h3>{% ts 'Suscribite a Nuestras Novedades' lang %}</h3></div>
             <div class="row"><p class="p-black">{% ts 'Recibí novedades, eventos especiales, tutoriales, guías y material adicional.' lang %}</p></div>
             <div class="row">
-                <form class="newsletter-form" role="search" action="subscription.html" method="get" id="apachesolr-search-custom-page-search-form" accept-charset="UTF-8">
+                <form class="newsletter-form" role="form" action="{% url 'mainv2:subscription' %}" method="post" id="newsletter-subscription-form" accept-charset="UTF-8">
+                    {% csrf_token %}
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="E-mail">
+                        <input type="email" name="email" class="form-control" placeholder="E-mail" required>
                         <button class="input-group-text" type="submit">
                             <i class="bi bi-envelope"></i><span>{% ts 'Suscribirme' lang %}</span>
                         </button>
-                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de éxito de suscripción (componente ligado al bloque de suscripción) -->
+<div class="modal fade" id="subscriptionSuccessModal" tabindex="-1" aria-labelledby="subscriptionSuccessModalLabel" aria-hidden="true" style="z-index: 2000;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="subscriptionSuccessModalLabel">{% ts 'Suscripción realizada con éxito' lang %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{% ts 'Tu correo fue registrado correctamente para recibir novedades.' lang %}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% ts 'Aceptar' lang %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para suscripciones ya registradas -->
+<div class="modal fade" id="subscriptionAlreadyModal" tabindex="-1" aria-labelledby="subscriptionAlreadyModalLabel" aria-hidden="true" style="z-index: 2000;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="subscriptionAlreadyModalLabel">{% ts 'Ya estás suscripto' lang %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% ts 'Cerrar' lang %}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{% ts 'Este correo ya se encuentra registrado para recibir novedades.' lang %}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{% ts 'Aceptar' lang %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      var form = document.getElementById('newsletter-subscription-form');
+      if (!form) {
+        return;
+      }
+      var nativeSubmit = HTMLFormElement.prototype.submit;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var status = data && data.status;
+            var modalId = null;
+            if (status === 'new') {
+              modalId = 'subscriptionSuccessModal';
+            } else if (status === 'existing') {
+              modalId = 'subscriptionAlreadyModal';
+            }
+            if (modalId && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              var modalEl = document.getElementById(modalId);
+              if (modalEl) {
+                // Mover el modal al <body> para evitar que un contenedor padre afecte su posición
+                if (modalEl.parentElement && modalEl.parentElement !== document.body) {
+                  document.body.appendChild(modalEl);
+                }
+                var modal = new bootstrap.Modal(modalEl);
+                modal.show();
+              }
+            }
+          })
+          .catch(function () {
+            // Fallback: si algo falla, usar el submit nativo (recarga estándar)
+            nativeSubmit.call(form);
+          });
+      });
+    } catch (e) {
+      // Ignorar errores de JS; en el peor caso, se usa el submit normal del navegador
+    }
+  });
+</script>

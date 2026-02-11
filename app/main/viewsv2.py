@@ -1,9 +1,10 @@
 import json
 from django.shortcuts import render, redirect
 from .models import *
-from django.urls import path
+from django.urls import path, reverse
 from django.db.models import Q, F, Count
 from django.core.paginator import Paginator, EmptyPage
+from django.http import JsonResponse
 from .util import scrape
 
 def get_lang_profile(request):
@@ -343,6 +344,28 @@ def enlaces(request):
     })
     return render(request, 'mainv2/enlaces-de-interes.html', context)
 
+
+def newsletter_subscribe(request):
+    if request.method != 'POST':
+        return redirect('mainv2:landing')
+
+    email = (request.POST.get('email') or '').strip()
+    status = None
+    if email:
+        _, created = NewsletterSubscription.objects.get_or_create(email=email)
+        status = 'new' if created else 'existing'
+
+    # Respuesta para peticiones AJAX: evitar recarga y manejar el modal desde el front
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': status or 'invalid'})
+
+    # Fallback: recargar la página origen con indicador en la URL
+    redirect_url = request.META.get('HTTP_REFERER') or reverse('mainv2:landing')
+    if status:
+        separator = '&' if '?' in redirect_url else '?'
+        redirect_url = f'{redirect_url}{separator}newsletter={status}'
+    return redirect(redirect_url)
+
 # admin stuff
 
 def admin_scrape(request):
@@ -366,6 +389,7 @@ urlpatterns = [
     path('staticpage/<str:path>', staticpage, name='staticpage'),
     path('planes/', planes, name='planes'),
     path('enlaces/', enlaces, name='enlaces'),
+    path('subscription/', newsletter_subscribe, name='subscription'),
     path('scrape', admin_scrape, name='admin_scrape'),
     path('', landing, name='landing'),
 ]

@@ -394,6 +394,18 @@ class ExternalLinkVersion(LanguageVersion):
     class Meta:
         unique_together = ('lang', 'link')
 
+
+class NewsletterSubscription(models.Model):
+    email = models.EmailField(unique=True)
+
+    class Meta:
+        verbose_name = 'suscripción a novedades'
+        verbose_name_plural = 'suscripciones a novedades'
+
+    def __str__(self) -> str:
+        return self.email
+
+
 # Planes
 
 class Plan(models.Model, VersionedNoDate):
