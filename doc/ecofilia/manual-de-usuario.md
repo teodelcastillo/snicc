@@ -356,10 +356,16 @@ Al seleccionar una medida, se accede a su ficha completa con toda la informació
 - **Estado de implementación** actual.
 - **Pilar** al que pertenece (Adaptación, Mitigación, Pérdidas y Daños).
 - **Línea estratégica** y **línea de acción** correspondientes.
-- **Alcance geográfico** (Nacional / Regional / A definir).
+- **Alcance geográfico** (Nacional / Regional / A definir). La tarjeta **"Alcance y estado"** muestra únicamente el valor del alcance (por ejemplo, Nacional), sin leyenda de fecha de actualización.
 - **Campos descriptivos** dinámicos con información detallada de la medida.
 - **Metas anuales**: objetivos establecidos para cada año.
 - **Objetivos nacionales** asociados a la medida.
+
+**Dónde se muestran las metas por año:**
+- **Tarjeta "Metas por año"** (en la zona superior de la ficha): se muestra únicamente la **descripción breve** de cada meta anual. Si no hay descripción breve, solo se ve el año.
+- **Información general → Metas / Años** (en la sección inferior): se muestra la **descripción** completa de cada meta anual.
+
+**Salto de línea con punto y coma:** tanto en la descripción breve como en la descripción de las metas por año, si se escribe el carácter **punto y coma (`;`)** en el texto, en la ficha pública se mostrará como **un salto de línea** (cada `;` equivale a un nuevo renglón). Esto permite formatear listas o ítems sin usar el editor HTML. Ejemplo: *"Meta 1; Meta 2; Meta 3"* se verá en tres líneas.
 
 ### 6.3 Exportación de medidas
 
@@ -742,7 +748,11 @@ Desde el panel de administración se gestionan los recursos de la biblioteca:
 
 **Metas anuales:**
 - Dentro de la ficha de una medida, en la sección **"Measure Year Metas"**, se pueden agregar metas por año.
-- Cada meta tiene: año, descripción breve y descripción detallada.
+- Cada meta tiene: **año**, **descripción breve** y **descripción** (detallada).
+- En la ficha pública de la medida:
+  - La **tarjeta "Metas por año"** muestra solo la **descripción breve**.
+  - La sección **Información general → Metas / Años** muestra la **descripción**.
+- En ambos campos, el carácter **punto y coma (`;`)** se interpreta como **salto de línea**: el texto se verá en varios renglones según dónde se coloquen los `;`.
 
 ### 9.12 Gestión de líneas estratégicas y acciones
 

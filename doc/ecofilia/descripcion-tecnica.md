@@ -149,7 +149,7 @@ Módulo central que gestiona el contenido del portal: publicaciones (noticias y 
 | `views.py` | Vistas legacy (v1) — ver sección de módulos obsoletos |
 | `urls.py` / `urlsv2.py` | Rutas activas y legacy |
 | `util.py` | Utilidades de scraping de traducciones |
-| `templatetags/snicc_i18n.py` | Tags de template para traducciones |
+| `templatetags/snicc_i18n.py` | Tags de template: traducciones (`ts`, `translate`) y filtro `semicolon_to_br` (punto y coma → salto de línea en metas por año) |
 | `admin.py` | Configuración del panel de administración Django |
 
 **Rutas activas (v2, prefijo `/main/`):**
@@ -186,6 +186,11 @@ Módulo dedicado a la gestión, visualización y exportación de medidas climát
 - Informes de progreso (ProgressReport) y documentos metodológicos.
 - Módulo MYE (Monitoreo y Evaluación).
 - Flags de visibilidad por medida para controlar la UI.
+
+**Ficha de detalle de medida (metas por año):**
+- La **tarjeta "Metas por año"** renderiza solo el campo **descripción breve** de cada meta anual.
+- La sección **Información general → Metas / Años** renderiza el campo **descripción** de cada meta anual.
+- En ambos textos se aplica el filtro de template `semicolon_to_br` (en `main/templatetags/snicc_i18n.py`): el carácter `;` se convierte en salto de línea (`<br>`); el resto del texto se escapa para evitar XSS.
 
 **Archivos clave:**
 | Archivo | Descripción |

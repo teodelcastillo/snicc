@@ -1,5 +1,6 @@
 {% extends 'mainv2/base.html' %}
 {% load static %}
+{% load snicc_i18n %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'main/css/mye.css' %}">
@@ -350,9 +351,7 @@
               <li class="mb-2">
                 <span class="fw-semibold" style="color:#262C51;">{{ y.year }}</span>
                 {% if y.short_description %}
-                  <p class="text-muted small mb-0 mt-1">{{ y.short_description }}</p>
-                {% elif y.description %}
-                  <p class="text-muted small mb-0 mt-1">{{ y.description|truncatewords:15 }}</p>
+                  <p class="text-muted small mb-0 mt-1">{{ y.short_description|semicolon_to_br }}</p>
                 {% endif %}
               </li>
             {% endfor %}
@@ -451,8 +450,9 @@
               {% if measure.target_years.all %}
                 <ul class="list-unstyled mb-0 small">
                   {% for y in measure.target_years.all %}
-                    <li class="mb-1">
-                      <span class="fw-semibold">{{ y.year }}</span>{% if y.short_description %}: {{ y.short_description }}{% elif y.description %}: {{ y.description|truncatewords:15 }}{% endif %}
+                    <li class="mb-2">
+                      <span class="fw-semibold d-block">{{ y.year }}</span>
+                      {% if y.description %}<span class="d-block mt-1">{{ y.description|semicolon_to_br }}</span>{% endif %}
                     </li>
                   {% endfor %}
                 </ul>
