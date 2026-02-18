@@ -1,3 +1,6 @@
+import logging
+import os
+
 from django.db.models import Count, Q, Prefetch
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
@@ -13,6 +16,8 @@ import math
 from pypdf import PdfWriter
 import csv
 from django.contrib.admin.views.decorators import staff_member_required
+
+logger = logging.getLogger(__name__)
 
 # cache
 
@@ -373,9 +378,30 @@ def line_details(request):
 
 def one_measure_pdf(request, id):
     m = Measure.active.get(id=id)
-    # just copy the file
-    with open(m.pdffile, 'rb') as f:
-        return HttpResponse(f.read(), content_type="application/pdf")
+    pdf_path = m.pdffile
+
+    if not os.path.exists(pdf_path):
+        logger.info("PDF no encontrado para medida %s (id=%s), generando on-demand.", m.name, id)
+        try:
+            m.write_pdf()
+        except Exception as e:
+            logger.exception("Error generando PDF on-demand para medida id=%s: %s", id, e)
+            return HttpResponse(
+                f"No se pudo generar la ficha PDF de la medida. Error técnico: {e!s}",
+                status=503,
+                content_type="text/plain; charset=utf-8",
+            )
+
+    try:
+        with open(pdf_path, "rb") as f:
+            return HttpResponse(f.read(), content_type="application/pdf")
+    except OSError as e:
+        logger.exception("Error leyendo PDF para medida id=%s: %s", id, e)
+        return HttpResponse(
+            "No se pudo acceder al archivo PDF de la medida.",
+            status=500,
+            content_type="text/plain; charset=utf-8",
+        )
 
 def many_measures_pdf(request):
     qset = qset_builder(request)[0]
@@ -408,8 +434,27 @@ def many_measures_csv(request):
 
 @staff_member_required
 def measure_pdf_recalc(request):
+    ok, fail = 0, 0
+    errors = []
     for m in Measure.active.all():
-        m.write_pdf()
+        try:
+            m.write_pdf()
+            ok += 1
+        except Exception as e:
+            fail += 1
+            errors.append((m.id, m.name or "(sin nombre)", str(e)))
+            logger.warning("Recalc PDF falló para medida id=%s (%s): %s", m.id, m.name, e)
+
+    logger.info("Recalc PDF: %d correctos, %d fallidos", ok, fail)
+    if errors:
+        from django.contrib import messages
+        for mid, mname, err in errors[:10]:
+            messages.warning(request, f"Medida {mid} ({mname}): {err}")
+        if len(errors) > 10:
+            messages.warning(request, f"... y {len(errors) - 10} errores más (ver logs).")
+    if ok:
+        from django.contrib import messages
+        messages.success(request, f"PDFs regenerados: {ok} correctos, {fail} fallidos.")
 
     return redirect('admin:index')
 

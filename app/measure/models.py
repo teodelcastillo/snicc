@@ -264,7 +264,11 @@ class Measure(LongNamed):
         if self.fields:
             for k in MeasureField.active.namelist():
                 if k in self.fields:
-                    fields.append((k,self.fields[k]))
+                    fields.append((k, self.fields[k]))
+
+        pdf_dir = os.path.dirname(self.pdffile)
+        if pdf_dir:
+            os.makedirs(pdf_dir, exist_ok=True)
 
         with open(self.pdffile, 'wb') as pdffile:
             pdfhelpers.render_pdf(

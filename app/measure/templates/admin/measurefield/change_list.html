@@ -2,9 +2,10 @@
 {% load i18n admin_urls %}
 
 {% block result_list %}
-<div>
-    Después de sus modificaciones, reinicie el cálculo de las hojas de medidas : 
-    <a class="button" href="{% url 'measure:recalc' %}">Ejecutar</a>
+<div class="module">
+    <h3>Fichas PDF de medidas</h3>
+    <p>Los PDF se regeneran automáticamente al guardar cada medida. Si realizó cambios masivos o importaciones, ejecute el recálculo para asegurar que todas las fichas estén actualizadas:</p>
+    <p><a class="button" href="{% url 'measure:recalc' %}">Regenerar todas las fichas PDF</a></p>
 </div>
 {{ block.super }}
 {% endblock %}
