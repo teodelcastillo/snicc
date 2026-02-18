@@ -590,7 +590,11 @@ def measure_list_json(request):
             "labels": label_names,
         })
 
-    return JsonResponse({"measures": data})
+    status_config = [
+        {"name": s.name, "order": s.order, "color": s.color}
+        for s in ImplementationStatus.objects.order_by('order', 'name')
+    ]
+    return JsonResponse({"measures": data, "status_config": status_config})
 
 
 def _measure_field_sections(measure: Measure):

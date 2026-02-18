@@ -44,6 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     mitigacion: "#8fd99a",
     perdidas: "#e0d088",
   };
+  // Paleta pastel para el gráfico de estado de avance (#8fd99a reservado solo para Completada)
+  const STATUS_PASTEL_COLORS = ["#8fc9e8", "#e0d088", "#b8b9c0", "#e8b8d8", "#b8d8e8", "#d8e8b8", "#e8d8b8"];
   const TYPOLOGY_TYPES = [
     { key: "solo_adaptacion", label: "Adaptación", base: "adaptacion", shade: 0 },
     { key: "solo_mitigacion", label: "Mitigación", base: "mitigacion", shade: 0 },
@@ -52,25 +54,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     { key: "adaptacion_perdidas", label: "Adaptación + Pérdidas y Daños", base: "perdidas", shade: 0.25 },
   ];
 
-  const STATUS_ORDER = [
-    "Completada",
-    "En implementación avanzada",
-    "En implementación inicial",
-    "En programación",
-    "A definir",
-  ];
-
-  // Mismos tonos con más contraste que el resto de gráficos
-  const STATUS_COLORS = {
-    "Completada": "#8fd99a",
-    "En implementación avanzada": "#8fc9e8",
-    "En implementación inicial": "#8fc9e8",
-    "En programación": "#e0d088",
-    "A definir": "#b8b9c0",
-  };
-
   const PAGE_SIZE = 7;
   let measures = [];
+  let statusConfig = [];
   let filteredMeasures = [];
   let visibleCount = 0;
   let isLoadingMore = false;
@@ -91,8 +77,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("/measure/filter-simple.json");
       const data = await res.json();
       measures = data.measures || data.data || [];
+      statusConfig = data.status_config || [];
       populateTypeFilterOptions(measures);
       populateLineFilterOptions(measures);
+      populateNivelFilterOptions();
       renderFilterChips();
       renderMeasures(measures);
     } catch (err) {
@@ -254,23 +242,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function buildStatusStats(data = []) {
-    const stats = {};
-    STATUS_ORDER.forEach((status) => {
-      stats[status] = 0;
+    const countByStatus = {};
+    data.forEach((measure) => {
+      const status = measure.status || "Sin dato";
+      countByStatus[status] = (countByStatus[status] || 0) + 1;
     });
 
-    data.forEach((measure) => {
-      const status = measure.status || "";
-      if (stats.hasOwnProperty(status)) {
-        stats[status] += 1;
+    const statusOrder = statusConfig.reduce((acc, s) => acc.set(s.name, s), new Map());
+    const keys = statusConfig
+      .map((s) => s.name)
+      .filter((name) => (countByStatus[name] || 0) > 0);
+    const unknownStatuses = Object.keys(countByStatus).filter((k) => !statusOrder.has(k));
+    keys.push(...unknownStatuses);
+
+    const stats = {};
+    const colors = {};
+    const completadaColor = "#8fd99a";
+    keys.forEach((key, idx) => {
+      stats[key] = countByStatus[key] || 0;
+      if (normalizeText(key).includes("completad")) {
+        colors[key] = completadaColor;
+      } else {
+        colors[key] = STATUS_PASTEL_COLORS[idx % STATUS_PASTEL_COLORS.length];
       }
     });
 
-    return {
-      keys: STATUS_ORDER,
-      data: stats,
-      colors: STATUS_COLORS,
-    };
+    return { keys, data: stats, colors };
   }
 
   function updateSummaryStats(data = []) {
@@ -486,6 +483,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       option.value = id;
       option.textContent = name;
       filtroLinea.appendChild(option);
+    });
+  }
+
+  function populateNivelFilterOptions() {
+    if (!filtroNivel) return;
+    filtroNivel.innerHTML = '<option value="">Agregar filtro...</option>';
+    statusConfig.forEach((s) => {
+      const option = document.createElement("option");
+      option.value = s.name;
+      option.textContent = s.name;
+      filtroNivel.appendChild(option);
     });
   }
 
@@ -1679,7 +1687,7 @@ function verDetalle(id) {
               </div>
               <div class="card-footer bg-light border-top">
                 <p class="text-muted small mb-0 text-center">
-                  Cada segmento circular corresponde a un estado de avance de la medida (En programación, en implementación inicial, en implementación avanzada, completada).
+                  Cada segmento circular corresponde a un estado de avance de la medida definido en el administrador.
                 </p>
               </div>
             </div>
@@ -1835,11 +1843,6 @@ function verDetalle(id) {
                   <label class="fw-semibold mb-2" for="filtro_nivel" style="color:#262C51;">Nivel de avance</label>
                   <select id="filtro_nivel" class="form-select">
                     <option value="">Agregar filtro...</option>
-                    <option value="En implementación inicial">En implementación inicial</option>
-                    <option value="En implementación avanzada">En implementación avanzada</option>
-                    <option value="En programación">En programación</option>
-                    <option value="Completada">Completada</option>
-                    <option value="A definir">A definir</option>
                   </select>
                 </div>
                 <button id="clear_filters" class="btn btn-primary-custom w-100 d-flex align-items-center justify-content-center gap-2">
