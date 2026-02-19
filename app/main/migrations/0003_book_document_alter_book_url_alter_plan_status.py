@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='plan',
             name='status',
-            field=models.IntegerField(choices=[(1, 'No presentado'), (2, 'En proceso de convalidación (análisis ANA-SsA)'), (3, 'En proceso de convalidación (análisis MAP-GNCC)'), (4, 'En proceso de convalidación'), (5, 'Convalidado')], default=1),
+            field=models.IntegerField(choices=[(1, 'No presentado'), (2, 'En proceso de preconvalidación (análisis ANA-SsA)'), (3, 'En proceso de preconvalidación (análisis MAP-GNCC)'), (4, 'En proceso de convalidación'), (5, 'Convalidado')], default=1),
         ),
     ]
