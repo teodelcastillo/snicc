@@ -1,0 +1,27 @@
+[
+  {
+    "model": "measure.linecategory",
+    "pk": 1,
+    "fields": {
+      "name": "Enfoques transversales",
+      "color": "#2E7D32"
+    }
+  },
+  {
+    "model": "measure.linecategory",
+    "pk": 2,
+    "fields": {
+      "name": "Líneas instrumentales",
+      "color": "#1565C0"
+    }
+  },
+  {
+    "model": "measure.linecategory",
+    "pk": 3,
+    "fields": {
+      "name": "Líneas estratégicas",
+      "color": "#6A1B9A"
+    }
+  }
+]
+

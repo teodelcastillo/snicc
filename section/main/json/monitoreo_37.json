@@ -1,0 +1,12 @@
+{
+      "titulo" : "Deforestación evitada",
+      "valores4" : ["Espinal", -20, 1, 12, -7, -36],
+      "valores3" : ["Selva Paranaense", 10, 10, 10, 7, 9],
+      "valores2" : ["Selva Tucumano-Boliviana", 7, 10, 11, 9, 10],
+      "valores1" : ["Parque Chaqueño", 153, 185, 180, 186, 201],
+      "anio" : ["x", 2014, 2015, 2016, 2017, 2018],     
+      "descripcion" : ["Diferencia entre las hectáreas deforestadas en un año y el nivel de referencia (promedio de la deforestación 2002-2013).", "<br><br>Fuente: Dirección Nacional de Bosques, SAyDS.","<br><br>Se eligió el período considerado para mantener la coherencia con el NREF (Nivel de Referencia de Emisiones Forestales disponible <a href='https://redd.unfccc.int/files/2019_nref_argentina_resubmission_oct_final.pdf' target='_blank'  style='color:#1b602a;'>aqui</a>)"],
+      "min" : -50,
+      "max" : 230,
+      "unidad" : "miles de hectáreas"
+}

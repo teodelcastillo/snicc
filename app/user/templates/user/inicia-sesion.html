@@ -1,0 +1,41 @@
+{% extends 'mainv2/base.html' %}        
+{% load static snicc_i18n %}
+{% block content %}
+
+<!-- Login page -->
+<div class="account-content">
+    
+    <div class="post-row-mobile row">
+        <div class="login-content">
+
+            <h1 class="post-title">{% ts 'Inicia sesión' lang %}</h1>
+
+            <form class="form-login" action="." method="POST">
+                {% csrf_token %}
+                <div class="input-single-btn mb-3">
+                    <input type="email" class="form-control" placeholder="{% ts 'E-mail' lang %}" id="email" required name="email" value="{{form.email.value|default:''}}">
+                </div>
+                <div class="input-single-btn mb-3">
+                    <input type="password" class="form-control" placeholder="{% ts 'Contraseña' lang %}" id="password" required name="password">
+                </div>
+
+                {% if error %}
+                <div class="is-invalid mb-4"></div>
+                <div class="invalid-feedback d-block">{{error}}</div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-login" id="button_login">{% ts 'Ingresar' lang %}</button>
+                <div class="register-text">
+                    <p>{% ts '¿No tenés cuenta?' lang %}<a href="{% url 'user:register' %}">{% ts 'Registrate' lang %}</a></p>
+                </div>
+            </form>
+
+        </div>
+        
+        
+    </div>
+
+
+</div>
+
+{% endblock %}                

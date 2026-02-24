@@ -1,0 +1,8 @@
+{
+      "titulo" : "Capacidad instalada de todas las centrales hidroeléctricas de la red",
+      "valores" : ["Capacidad instalada", 10578, 10640, 10704, 10748, 10770, 10792],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Capacidad instalada de todas las centrales hidroeléctricas de la red.","<br><br>Fuente: Compañía Administradora del Mercado Mayorista Eléctrico (CAMMESA).", "<br><br>Meta PNAyMCC: Al 2030,  se incorporan al menos 2.000 MW de potencia de aprovechamientos hidroeléctricos mayores a 50 MW a la matriz eléctrica."],
+      "min" : 9965,
+      "unidad" : "MW"
+}

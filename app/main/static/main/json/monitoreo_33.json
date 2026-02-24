@@ -1,0 +1,8 @@
+{
+      "titulo" : "Kilómetros de la red en uso",
+      "valores" : ["Cantidad de kilómetros de la red en uso", 55.8, 66.5, 94.5, 97.8, 123.9, 123.9],
+      "anio" : ["x", 2015, 2016, 2017, 2018, 2019, 2020],
+      "descripcion" : ["Cantidad de kilómetros de la red de Buses de Tránsito Rápido en uso.", "<br><br>Fuente: Gobierno de CABA y Gobierno de la Nación.","<br><br>El Plan Nacional de Adaptación y Mitigación al Cambio Climático define una meta para este indicador como parte de la medida MS-06: <i>'Al 2030, las 80 zonas urbanas más pobladas del país cuentan con un Plan de Movilidad Urbana Sostenible diseñado, aprobado y en etapa de implementación'"],
+      "unidad" : "km",
+      "cantDecimales": 1
+}

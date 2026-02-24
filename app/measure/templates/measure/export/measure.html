@@ -1,0 +1,29 @@
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main/css/snicc.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/editor.css' %}">
+    <style>
+        body{ font-size:x-small; }
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; }
+        th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <img src="{% static 'main/images/logo_argentina-azul.svg' %}" alt="Argentina.gob.ar" style="width:200px">
+<h2>{{ instance.name|default:instance.code|default:"Medida" }}</h2>
+<table>
+<tr>
+<th>Estado de implementación</th>
+<td>{{ instance.status.name|default:"—" }}</td>
+</tr>
+{% for key, value in fields %}
+<tr><th>{{ key|default:"—" }}</th><td>{{ value|default:"—" }}</td></tr>
+{% empty %}
+<tr><th colspan="2">Sin datos adicionales</th></tr>
+{% endfor %}
+</table>
+</body>
+</html>
